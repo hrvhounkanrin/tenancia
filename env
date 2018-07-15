@@ -1,0 +1,8 @@
+DJANGO_SETTINGS_MODULE=chronos_data_models.settings.development
+DATABASE_ENGINE=django.db.backends.mysql
+DATABASE_NAME=chronos
+DATABASE_USER=tdarex
+DATABASE_PASSWORD=tdarex
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DEBUG=False
