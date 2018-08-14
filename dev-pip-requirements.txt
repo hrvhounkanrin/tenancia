@@ -8,3 +8,5 @@ django-rest-auth[with_social]
 model_utils
 psycopg2
 django-reset-migrations
+django-rest-registration
+drf-tracking

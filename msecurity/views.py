@@ -1,13 +1,16 @@
+import logging
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
-from .serializers import (LoginSerializer, RegistrationSerializer, UserSerializer, JWTSerializer)
+from .serializers import (LoginSerializer, RegistrationSerializer, UserSerializer)
 from .renderers import UserJSONRenderer
 from rest_framework_jwt.views import ObtainJSONWebToken
 
+#logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 class RegistrationAPIView(APIView):
     # Allow any user (authenticated or not) to hit this endpoint.
     permission_classes = (AllowAny,)
@@ -26,7 +29,7 @@ class RegistrationAPIView(APIView):
 
 class LoginAPIView(APIView):
     permission_classes = (AllowAny,)
-    #renderer_classes = (UserJSONRenderer,)
+    renderer_classes = (UserJSONRenderer,)
     serializer_class = LoginSerializer
 
     def post(self, request):
@@ -64,6 +67,3 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class ObtainJWTView(ObtainJSONWebToken):
-    serializer_class = JWTSerializer
-    

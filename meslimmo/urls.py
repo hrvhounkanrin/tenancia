@@ -14,10 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+#from django.urls import  path
 from django.contrib.auth import views
 app_name = 'meslimmo'
 
 
+
+
+
 urlpatterns = [
+    #path('api/v1/', include(api_urlpatterns)),
     url(r'^api/v1/auth/', include('msecurity.urls')),
+    url(r'^api/v1/', include('mcore.urls')),
 ]

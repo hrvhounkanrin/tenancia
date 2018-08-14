@@ -41,13 +41,15 @@ INSTALLED_APPS = [
     'reset_migrations',
     'django_extensions',
     'rest_framework',
+    'msecurity',
     'rest_framework.authtoken',
     'rest_auth',
     'allauth',
     'allauth.account',
-    'rest_auth.registration',
-    'msecurity',
+    #'rest_registration',
+   
     'mcore',
+    
 ]
 
 MIDDLEWARE = [
@@ -136,7 +138,7 @@ SITE_ID = 1
 
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-EMAIL_BACKEND = 'msecurity.config.mail_config.EMAIL_BACKEND'
+#EMAIL_BACKEND = 'msecurity.config.mail_config.EMAIL_BACKEND'
 
 AUTH_USER_MODEL = 'msecurity.User'
 
