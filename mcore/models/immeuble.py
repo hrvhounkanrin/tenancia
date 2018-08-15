@@ -15,4 +15,4 @@ class Immeuble(BaseModel):
     """Numéro d'identification donné par la mairie ou les autorités locales"""
     ref_immeuble=models.CharField(max_length=50,null=True)
     def __str__(self):
-        return '%s %s' % (self.intitule, self.proprietaire.profile.prenom)
+        return '%s %s' % (self.intitule, self.proprietaire.user.last_name)

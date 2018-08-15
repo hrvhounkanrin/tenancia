@@ -1,1 +1,7 @@
 from .banqueSerializer import BanqueSerializer
+from .proprietaireSerializer import ProprietaireSerializer
+from .immeubleSerializer import ImmeubleSerializer
+from .appartementSerializer import AppartementSerializer
+from .contratSerializer import ContratSerializer
+from .factureSerializer import FactureSerializer
+from .reglementSerializer import ReglementSerializer

@@ -17,7 +17,7 @@ class Contrat(BaseModel):
     periodicite=models.IntegerField()
     montant_bail=models.IntegerField()
     statut=models.IntegerField(choices=STATUTS, default=STATUTS.proposition)
-    caution=models.IntegerField()
+    caution_loyer=models.IntegerField()
     caution_eau=models.IntegerField()
     caution_electricite=models.IntegerField()
     observation=models.CharField(max_length=256, null=True)
