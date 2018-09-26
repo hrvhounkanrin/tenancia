@@ -8,7 +8,6 @@ from django.db import models
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from serviceprovider.models import ServiceProvider
 from django.utils.http import urlquote
 
 
