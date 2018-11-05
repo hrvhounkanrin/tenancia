@@ -1,0 +1,14 @@
+djangorestframework
+markdown
+django-filter
+django-rest-auth
+djangorestframework-jwt
+django-extensions==2.0.7
+django-rest-auth[with_social]
+model_utils
+psycopg2
+django-reset-migrations
+django-rest-registration
+drf-tracking
+social-auth-core
+social-auth-app-django
