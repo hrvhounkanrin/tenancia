@@ -12,3 +12,4 @@ django-rest-registration
 drf-tracking
 social-auth-core
 social-auth-app-django
+django-countries-plus

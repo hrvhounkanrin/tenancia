@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'mauth',
     'rest_framework.authtoken',
     'rest_auth',
+    'countries_plus'
     #'allauth',
     #'allauth.account',
     #'rest_registration',

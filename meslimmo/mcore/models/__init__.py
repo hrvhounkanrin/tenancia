@@ -8,6 +8,9 @@ from .reglement import Reglement
 from .societe import Societe
 from .banque import Banque
 from .baseModel import BaseModel
+from .composantAppartement import ComposantAppartement
+from .structureAppartement import StructureAppartement
+from .societeUsers import SocieteUsers
 
 
 

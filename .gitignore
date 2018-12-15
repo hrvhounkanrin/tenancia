@@ -103,22 +103,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 dev_meslimmo/
-=======
-/dev_meslimmo/
-.idea/
-.vscode/
->>>>>>> Stashed changes
-=======
-/dev_meslimmo/
-.idea/
-.vscode/
->>>>>>> Stashed changes
-=======
-/dev_meslimmo/
-.idea/
-.vscode/
->>>>>>> Stashed changes
