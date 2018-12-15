@@ -1,7 +1,6 @@
 from django.db import models
-from model_utils import Choices
 from .baseModel import BaseModel
-
+from .appartement import Appartement
 class Contrat(BaseModel):
     ANNULE = 'ANNULE'
     PROPOSITION = 'PROPOSITION'

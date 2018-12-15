@@ -1,5 +1,4 @@
 from django.db import models
-from model_utils import Choices
 from .baseModel import BaseModel
 from django.conf import settings
 

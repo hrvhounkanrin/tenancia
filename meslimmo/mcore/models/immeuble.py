@@ -12,9 +12,9 @@ class Immeuble(BaseModel):
     jour_valeur_facture=models.IntegerField(default=5)    
     ville=models.CharField(max_length=128,null=True)
     quartier=models.CharField(max_length=128,null=True)
-    pays = models.ForeignKey(Country, null=False)
-    longitude=models.DecimalFied(max_digits=20, decimal_places=12)
-    latitude=models.DecimalFied(max_digits=20, decimal_places=12)
+    pays = models.ForeignKey(Country, null=True, on_delete=models.SET_NULL)
+    longitude=models.DecimalField(max_digits=20, decimal_places=12)
+    latitude=models.DecimalField(max_digits=20, decimal_places=12)
     """Numéro d'identification donné par la mairie ou les autorités locales"""
     ref_immeuble=models.CharField(max_length=50,null=True)
     def __str__(self):

@@ -1,5 +1,4 @@
 from django.db import models
-from model_utils import Choices
 
 class BaseModel(models.Model):
     time_created = models.DateTimeField(auto_now_add=True)

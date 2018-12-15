@@ -2,11 +2,10 @@ from django.db import models
 from .baseModel import BaseModel
 
 class Reglement(BaseModel):
-     STATUT_REGLEMENT = (
+    STATUT_REGLEMENT = (
         (0, 'ANNULE'),
         (1, 'REGLE'),
     )
-    
     """reference de reglement générée automatiquement"""
     reference=models.CharField(max_length=50, null=False)
     date_reglement=models.DateField()

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'mauth',
+    'mcore',
     'rest_framework.authtoken',
     'rest_auth',
     'countries_plus'
