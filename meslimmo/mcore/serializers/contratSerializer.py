@@ -7,6 +7,18 @@ class  ContratSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Contrat
-        fields=('reference_bail', 'date_signature', 'date_effet', 'duree', 
-                'periodicite', 'montant_bail', 'statut', 'caution_loyer', 'caution_eau', 
-                'caution_electricite', 'observation', 'client', 'appartement')
+        fields=(
+            'reference_bail', 
+            'date_signature',
+            'date_effet',
+            'duree', 
+            'periodicite',
+            'montant_bail',
+            'statut',
+            'caution_loyer',
+            'caution_eau', 
+            'caution_electricite',
+            'observation',
+            'client', 
+            'appartement',
+            'tacite_reconduction')

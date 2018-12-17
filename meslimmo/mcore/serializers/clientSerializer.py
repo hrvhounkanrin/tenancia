@@ -6,4 +6,8 @@ class  ClientSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
     class Meta:
         model=Client
-        fields=('user', 'ice', 'ice_number', 'ice_relation')
+        fields=(
+            'user',
+            'ice',
+            'ice_number',
+            'ice_relation')

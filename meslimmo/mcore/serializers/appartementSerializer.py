@@ -7,5 +7,10 @@ class  AppartementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Appartement
-        fields=('intitule', 'nb_sejour', 'nb_chambre', 'nb_salle_a_manger', 
-        'nb_cuisine', 'nb_douche', 'autre_description', 'immeuble')
+        fields=(
+            'intitule',
+            'level', 
+            'autre_description', 
+            'immeuble'
+            'structure',
+            'statut')
