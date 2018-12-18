@@ -1,5 +1,0 @@
-djangorestframework
-markdown
-django-rest-auth
-djangorestframework-jwt
-psycopg2
