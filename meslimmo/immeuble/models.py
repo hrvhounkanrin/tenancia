@@ -2,7 +2,7 @@ from django.db import models
 from countries_plus.models import Country
 
 
-class Immeuble():
+class Immeuble(models.Model):
     intitule = models.CharField(max_length=50)
     description = models.CharField(max_length=512, null=True, )
     adresse = models.CharField(max_length=512, null=True, )

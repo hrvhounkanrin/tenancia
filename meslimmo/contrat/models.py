@@ -1,7 +1,7 @@
 from django.db import models
 
 #pip install jsfieldsignature
-class Contrat():
+class Contrat(models.Model):
     ANNULE = 'ANNULE'
     PROPOSITION = 'PROPOSITION'
     EN_COURS = 'EN COURS'

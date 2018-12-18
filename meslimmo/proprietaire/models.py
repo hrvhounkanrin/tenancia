@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from countries_plus.models import Country
 #
-class Proprietaire():
+class Proprietaire(models.Model):
     mode_paiement = models.CharField(max_length=50, null=False)
     numcompte = models.CharField(max_length=50, null=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True,)

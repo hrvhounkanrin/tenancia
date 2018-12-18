@@ -1,6 +1,6 @@
 from django.db import models
 
-class Reglement():
+class Reglement(models.Model):
     STATUT_REGLEMENT = (
         (0, 'ANNULE'),
         (1, 'REGLE'),

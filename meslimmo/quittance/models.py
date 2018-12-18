@@ -1,6 +1,6 @@
 from django.db import models
 
-class Quittance():
+class Quittance(models.Model):
     ANNULLEE='ANNULLEE'
     EN_ATTENTE_REGLEMENT='EN ATTENTE DE REGLEMENT'
     REGLEE='REGLEE'

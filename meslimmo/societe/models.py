@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 
-class Societe():
+class Societe(models.Model):
     raison_social = models.CharField(max_length=150, null=False)
     num_telephone = models.CharField(max_length=50, null=False)
     adresse = models.CharField(max_length=150, null=True)
@@ -17,7 +17,7 @@ class Societe():
 Cette classe contient la liste des utilisateur d'une agence immobilière
 May be on peut gérer ça par les groupes de django, je vais regarder après
 """
-class SocieteUsers():
+class SocieteUsers(models.Model):
     societe = models.ForeignKey('Societe', related_name='societe_users', on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='societe_users', on_delete=models.SET_NULL,null=True)
 

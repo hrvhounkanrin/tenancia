@@ -2,10 +2,10 @@ from django.contrib import admin
 
 # Register your models here
 
-# from meslimmo.banque.models import  Banque
-#
-# class BanqueAdmin(admin.ModelAdmin):
-#     fields =('codebanque', 'libbanque', 'pays')
-#
-#
-# admin.site.register(Banque, BanqueAdmin)
+from  . models import  Banque
+
+class BanqueAdmin(admin.ModelAdmin):
+    list_display =('codebanque', 'libbanque', 'pays')
+
+
+admin.site.register(Banque, BanqueAdmin)

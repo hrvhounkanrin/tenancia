@@ -5,13 +5,15 @@ Cette classe sert à gérer une liste dynamiques
 des différentes pièces possibles d'un appartement
 """
 
+#All the models must inherit the base  models.Model class
 
-class ComposantAppartement ():
+
+class ComposantAppartement(models.Model):
     libelle = models.CharField(max_length=50)
     utilite = models.CharField(max_length=256)
 
 
-class Appartement():
+class Appartement(models.Model):
     LIBRE = "LIBRE"
     RESERVE = "RESERVE"
     OCCUPE = "OCCUPE"
@@ -40,8 +42,9 @@ class Appartement():
 """
 Cette classe contient la liste des pièces d'un appartement
 """
-class StructureAppartement():
+class StructureAppartement(models.Model):
     appartement= models.ForeignKey('Appartement', related_name='structure_appartement', on_delete=models.SET_NULL, null=True)
     composant=models.ForeignKey('ComposantAppartement', related_name='structure_appartement', on_delete=models.SET_NULL,null=True)
     nbre=models.IntegerField(default=1)
     description=models.CharField(max_length=256)
+
