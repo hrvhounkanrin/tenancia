@@ -28,7 +28,7 @@ class Contrat(models.Model):
     caution_electricite=models.IntegerField()
     observation=models.CharField(max_length=256, null=True)
     tacite_reconduction=models.BooleanField(default=True)
-    client=models.ForeignKey('client', on_delete=models.CASCADE, null=True,)
+    client=models.ForeignKey('client.Client', on_delete=models.CASCADE, null=True,)
     #https: // docs.djangoproject.com / en / 1.11 / ref / models / fields /  # foreignkey
     appartement=models.ForeignKey('appartement.Appartement', on_delete=models.CASCADE, null=True,)
     #signature field needs to be implemented

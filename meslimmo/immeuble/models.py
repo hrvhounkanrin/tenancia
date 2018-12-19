@@ -1,12 +1,11 @@
 from django.db import models
 from countries_plus.models import Country
 
-
 class Immeuble(models.Model):
     intitule = models.CharField(max_length=50)
     description = models.CharField(max_length=512, null=True, )
     adresse = models.CharField(max_length=512, null=True, )
-    proprietaire = models.ForeignKey("prorietaire.Proprietaire", on_delete=models.SET_NULL, null=False)
+    proprietaire = models.ForeignKey('proprietaire.Proprietaire', on_delete=models.CASCADE, null=False)
     jour_emission_facture = models.IntegerField(default=5)
     jour_valeur_facture = models.IntegerField(default=5)
     ville = models.CharField(max_length=128, null=True)
