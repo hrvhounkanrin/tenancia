@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'reglement' ,
     'societe' ,
     'tools',
-    'client'
+    'client' ,
+     'rest_graph_ql'
 
 ]
 
@@ -58,7 +59,7 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
 

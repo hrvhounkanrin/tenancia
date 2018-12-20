@@ -43,7 +43,6 @@ class ActionAPIView(APIView):
     def post(self, request, action, **kwargs):
         return self.get(request, action, **kwargs)
 
-    # @determine_staff
     def get(self, request, action, **kwargs):
         params = self.normalize_params(request)
         kwargs['params'] = params
@@ -80,3 +79,4 @@ class ActionAPIView(APIView):
         else:
             params.update(request.data)
         return params
+

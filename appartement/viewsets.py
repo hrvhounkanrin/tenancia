@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from appartement.serializers import AppartementSerializers
 from rest_framework import views, viewsets, authentication, permissions, mixins, pagination
+from  client.serializers import ClientSerializer
 class GetAppartmentViewSet(ActionAPIView):
     # @determine_staff
     def list_all_appartment(self, request, *args, **kwargs):

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from client.models import Client
 
 class ComposantAppartmentSerializers(serializers.ModelSerializer):
     """ Serializers for model Appartments"""
