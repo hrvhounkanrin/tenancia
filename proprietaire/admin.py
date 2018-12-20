@@ -1,6 +1,10 @@
 from django.contrib import admin
-# from meslimmo.meslimmo.proprietaire.models import  *
-# Register your models here.
-# class ProprietaireAdmin(admin.ModelAdmin):
-#     fields = ('mode_paiement', 'numcompte')
+from .models import  *
+class ImmeubleAdmin(admin.ModelAdmin):
+    save_on_top =  True
+    list_display =  ['id', 'mode_paiement', 'numcompte', 'user',  'banque',
+                     'pays_residence',]
 
+    list_display_links = 'id'
+
+admin.site.register(Proprietaire)

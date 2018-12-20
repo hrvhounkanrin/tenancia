@@ -11,7 +11,7 @@ from rest_framework import permissions
 
 # from application.models import State
 # from tools.security import validate_parameters
-from .mes_api_serializers import GenericModelSerializer, APISerializer
+from . mes_api_serializers import GenericModelSerializer, APISerializer
 from rest_framework.parsers import JSONParser
 # from rest_framework.renderers import JSONRenderer
 # from tools.renderers import XMLRenderer

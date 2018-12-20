@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'client',
     'rest_framework',
     'proprietaire',
     'countries_plus',
@@ -50,7 +49,8 @@ INSTALLED_APPS = [
     'quittance',
     'reglement' ,
     'societe' ,
-    'tools'
+    'tools',
+    'client'
 
 ]
 
