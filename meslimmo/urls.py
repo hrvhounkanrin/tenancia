@@ -14,12 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 app_name ='rest_graph_ql'
+
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import include, path
+from customuser.views import CreateUSerApiView
 urlpatterns = [
     path('proprio/', include('proprietaire.urls')),
     # url(r'^api', include(('appartement.urls' , 'appartement'))),
     url(r'^api/', include(('rest_graph_ql.urls','restapi'))),
+    path(r'^user', include('customuser.urls')),
     url(r'^admin/', admin.site.urls),
 ]
