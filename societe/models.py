@@ -21,3 +21,8 @@ class SocieteUsers(models.Model):
     societe = models.ForeignKey('Societe', related_name='societe_users', on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='societe_users', on_delete=models.SET_NULL,null=True)
 
+    def __unicode__(self):
+        return self.societe.raison_social + " " + self.user.email
+
+
+
