@@ -9,16 +9,17 @@ from .models import Immeuble
 
 
 class ImmeubleViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
     queryset = Immeuble.objects.all()
     serializer_class = ImmeubleSerializers
 
+    """
     def get_queryset(self):
         if self.request.user.is_staff:
             queryset = Immeuble.objects.all()
         else:
-            connected_proprietaire=Proprietaire.object.filter(user=self.request.user)
+            connected_proprietaire=Proprietaire.objects.filter(user=self.request.user)
             queryset = Immeuble.objects.filter(proprietaire=connected_proprietaire)
 
         return queryset
-
+    """

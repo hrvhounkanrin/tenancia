@@ -18,11 +18,14 @@ app_name ='rest_graph_ql'
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import include, path
-from customuser.views import CreateUSerApiView
+#from customuser.views import CreateUSerApiView
 urlpatterns = [
-    path('proprio/', include('proprietaire.urls')),
+    #path(r'^proprio/', include('proprietaire.urls')),
+    #path(r'', include('immeuble.urls')),
+    #path(r'^contrat/', include('contrat.urls')),
+    #path(r'^api/societe/', include('societe.urls')),
     # url(r'^api', include(('appartement.urls' , 'appartement'))),
     url(r'^api/', include(('rest_graph_ql.urls','restapi'))),
-    path(r'^user', include('customuser.urls')),
+    #path(r'^user', include('customuser.urls')),
     url(r'^admin/', admin.site.urls),
 ]

@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     # 'django_auth',
-     'customuser',
+    'customuser',
     'proprietaire',
     'countries_plus',
     'banque',
@@ -49,10 +49,10 @@ INSTALLED_APPS = [
     'appartement',
     'mcore',
     'quittance',
-    'reglement' ,
-    'societe' ,
+    'reglement',
+    'societe',
     'tools',
-    'client' ,
+    'client',
      'rest_graph_ql'
 
 ]
@@ -100,13 +100,15 @@ WSGI_APPLICATION = 'meslimmo.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+   'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'tenancia_db',
+        'USER': 'postgres',
+        'PASSWORD': '1P@$$4PostGres',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -144,3 +146,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
