@@ -26,7 +26,7 @@ class ClientViewSet(viewsets.ViewSet):
         #v1 works with this end/point
         queryset = Client.objects.all()
         print (queryset)
-        return Response(ClientSerializer(queryset, many=True).data)
+        return Response({'success':True},ClientSerializer(queryset, many=True).data)
 
     # @classmethod
     # def get_extra_actions(cls):

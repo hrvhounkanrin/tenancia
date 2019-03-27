@@ -11,10 +11,15 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 AUTH_USER_MODEL = "customuser.User"
 import os
-
+import datetime
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+JWT_AUTH = {
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3000),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -47,13 +52,13 @@ INSTALLED_APPS = [
     'immeuble',
     # 'mauth',
     'appartement',
-    'mcore',
+    # 'mcore',
     'quittance',
     'reglement' ,
     'societe' ,
     'tools',
     'client' ,
-     'rest_graph_ql'
+     'rest_graph_ql' ,
 
 ]
 

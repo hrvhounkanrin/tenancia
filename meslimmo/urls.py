@@ -23,6 +23,6 @@ urlpatterns = [
     path('proprio/', include('proprietaire.urls')),
     # url(r'^api', include(('appartement.urls' , 'appartement'))),
     url(r'^api/', include(('rest_graph_ql.urls','restapi'))),
-    path(r'^user', include('customuser.urls')),
+    url(r'^user/', include('customuser.urls'),),
     url(r'^admin/', admin.site.urls),
 ]
