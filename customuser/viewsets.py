@@ -2,13 +2,12 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions, status
-from .serializers import BanqueSerializers
-from .models import Banque
+from .serializers import UserSerializer
+from .models import User
 
 
-
-class BanqueViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     #permission_classes = (IsAuthenticated,)
-    queryset = Banque.objects.all()
-    serializer_class = BanqueSerializers
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 

@@ -7,3 +7,6 @@ class BanqueSerializers(serializers.ModelSerializer):
     class Meta:
         model = Banque
         fields = '__all__'
+        extra_kwargs = {
+            'codebanque': {'validators': []},
+        }

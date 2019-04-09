@@ -3,3 +3,5 @@ markdown
 django-rest-auth
 djangorestframework-jwt
 psycopg2
+django-countries-plus
+drf-writable-nested

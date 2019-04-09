@@ -11,6 +11,7 @@ des différentes pièces possibles d'un appartement
 class ComposantAppartement(models.Model):
     libelle = models.CharField(max_length=50)
     utilite = models.CharField(max_length=256)
+    #lang = models.CharField(max_length=256)
 
 
 class Appartement(models.Model):
@@ -43,8 +44,8 @@ class Appartement(models.Model):
 Cette classe contient la liste des pièces d'un appartement
 """
 class StructureAppartement(models.Model):
-    appartement= models.ForeignKey('Appartement', related_name='structure_appartement', on_delete=models.SET_NULL, null=True)
-    composant=models.ForeignKey('ComposantAppartement', related_name='structure_appartement', on_delete=models.SET_NULL,null=True)
-    nbre=models.IntegerField(default=1)
-    description=models.CharField(max_length=256)
+    appartement = models.ForeignKey('Appartement', related_name='appartement', on_delete=models.SET_NULL, null=True)
+    composantAppartement = models.ForeignKey('ComposantAppartement', related_name='composant_appartement', on_delete=models.SET_NULL, null=True)
+    nbre = models.IntegerField(default=1)
+    description = models.CharField(max_length=256)
 

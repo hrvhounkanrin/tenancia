@@ -6,7 +6,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework import  viewsets, permissions
 
 class ContratViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
     queryset = Contrat.objects.all()
     serializer_class = ContratSerializers
 

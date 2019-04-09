@@ -8,7 +8,7 @@ class SocieteSerializer(serializers.ModelSerializer):
     """ Reglement serializer"""
 
     class Meta:
-        mode = Societe
+        model = Societe
         fields = '__all__'
 
     @transaction.atomic

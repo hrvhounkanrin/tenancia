@@ -21,5 +21,5 @@ class Immeuble(models.Model):
 
 
     class Meta:
-        verbose_name ="Immeuble"
-        verbose_name_plural= "Immeubles"
+        verbose_name = "Immeuble"
+        verbose_name_plural = "Immeubles"

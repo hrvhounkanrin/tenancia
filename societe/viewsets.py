@@ -9,7 +9,7 @@ from .models import Societe
 
 
 class SocieteViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
     queryset = Societe.objects.all()
     serializer_class = SocieteSerializer
 
