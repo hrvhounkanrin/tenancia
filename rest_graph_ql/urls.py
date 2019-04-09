@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.conf.urls import include, url
 import client.viewsets as client_rest
-import proprietaire.viewsets as proprietaire_rest
 from rest_framework import routers
 
 

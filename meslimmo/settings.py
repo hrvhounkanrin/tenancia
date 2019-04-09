@@ -58,9 +58,9 @@ INSTALLED_APPS = [
     'societe',
     'tools',
     'client',
-     'rest_graph_ql'
-    'client' ,
-     'rest_graph_ql' ,
+    'rest_graph_ql'
+    #'client' ,
+    #'rest_graph_ql',
 
 ]
 
@@ -153,4 +153,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-
+"""
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/django_logs/debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+"""

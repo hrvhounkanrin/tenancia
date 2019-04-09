@@ -79,6 +79,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 from django.db import models
 from django.contrib.auth.models import AbstractUser, AbstractBaseUser, PermissionsMixin, UserManager
 
+"""
 class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
@@ -108,4 +109,4 @@ class User(AbstractUser):
     def __str___(self):
         return self.email
 
-
+"""
