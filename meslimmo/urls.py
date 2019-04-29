@@ -13,8 +13,10 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+from rest_framework_jwt.views import obtain_jwt_token
+from django.contrib import admin
+admin.autodiscover()
 app_name ='rest_graph_ql'
-
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import include, path
@@ -27,6 +29,7 @@ urlpatterns = [
     # url(r'^api', include(('appartement.urls' , 'appartement'))),
     url(r'^api/', include(('rest_graph_ql.urls','restapi'))),
     url(r'^user/', include('customuser.urls'),),
+    url(r'^user_jwt/', obtain_jwt_token) ,
     #path(r'^user', include('customuser.urls')),
     url(r'^admin/', admin.site.urls),
 ]
