@@ -17,6 +17,7 @@ urlpatterns = [
 
     url(r'^v1/', include('rest_graph_ql.urls_v1')),
     # url(r'^v2/', include('rest_graph_ql.urls_v2')),
+    # url(r'^end_point_/(?P<action>[^/.]+)', app_view_name.ClassBaseViewSet.as_view(),name='aactioon')  #example of root endpoint definition,
 ]
 
 urlpatterns += router.urls
