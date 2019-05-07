@@ -14,6 +14,13 @@ from rest_framework import views, viewsets, authentication, permissions, mixins,
 from  client.serializers import ClientSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import viewsets
+
+class ClientViewSet(viewsets.ModelViewSet):
+    #permission_classes = (IsAuthenticated,)
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+
+"""
 class ClientViewSet(viewsets.ViewSet):
     # @permission_classes((permissions.AllowAny,))
     def list(self, request, *args, **kwargs):
@@ -27,7 +34,7 @@ class ClientViewSet(viewsets.ViewSet):
         queryset = Client.objects.all()
         print (queryset)
         return Response({'success':True},ClientSerializer(queryset, many=True).data)
-
+"""
     # @classmethod
     # def get_extra_actions(cls):
     #     return []

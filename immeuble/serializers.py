@@ -10,7 +10,7 @@ class ImmeubleSerializers(RelationModelSerializer):
     class Meta:
         model = Immeuble
         #fields = '__all__'
-        fields = ('intitule', 'description', 'adresse', 'proprietaire', 'jour_emission_facture',
+        fields = ('id', 'intitule', 'description', 'adresse', 'proprietaire', 'jour_emission_facture',
                   'jour_valeur_facture', 'ville', 'quartier', 'pays', 'longitude', 'latitude', 'ref_immeuble', 'appartements')
 
     def get_appartements(self, immeuble):

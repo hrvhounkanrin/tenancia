@@ -42,7 +42,17 @@ class AppartementSerializers(RelationModelSerializer):
         ).data
 
     def create(self, validated_data):
-        #structures_data = self.data.pop('structures')
+        structures_data = self.initial_data['structures']
+        print(structures_data)
         appartement = Appartement.objects.create(**validated_data)
+        if "structures" in self.initial_data:
+            structures = self.initial_data.get("structures")
+            for structure in structures:
+                composant_id = structure.get("composantAppartement", None)
+                composant_instance = ComposantAppartement.objects.get(pk=composant_id)
+                structure.pop('composantAppartement')
+                structure.pop('appartement')
+                StructureAppartement(appartement=appartement, composantAppartement=composant_instance, **structure).save()
+        appartement.save()
         return appartement
 

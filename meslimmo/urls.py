@@ -17,9 +17,13 @@ app_name ='rest_graph_ql'
 
 from django.conf.urls import url
 from django.contrib import admin
-from django.urls import include, path
+#from django.urls import include, path
+from django.conf.urls import include, url
+from landing import views as landing_view
 #from customuser.views import CreateUSerApiView
 urlpatterns = [
+    url(r'^$', landing_view.index, name='index'),
+    #url(r'^$', landing_view.index, name="index"),
     #path(r'^proprio/', include('proprietaire.urls')),
     #path(r'', include('immeuble.urls')),
     #path(r'^contrat/', include('contrat.urls')),

@@ -54,11 +54,12 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         ).data
 
     def create(self, validated_data):
-        logger.info('Information incoming!')
-        user_data = validated_data.pop('user')
+        user_data = validated_data.pop('user', None)
+        banque_data = validated_data.pop('banque', None)
+        if banque_data:
+            banque = Banque.objects.get_or_create(**banque_data)[0]
+            validated_data['banque'] = banque
         user_instance = User.objects.get(username=user_data['username'])
-        #Check if that user is already a proprietaire
-
         try:
             Proprietaire.objects.get(user=user_instance)
         except Proprietaire.DoesNotExist:

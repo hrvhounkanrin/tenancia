@@ -12,18 +12,28 @@ from appartement.viewsets import AppartementViewSet as appartement_views
 from appartement.viewsets import ComposantAppartementViewSet as composant_views
 from appartement.viewsets import StructureAppartementViewset as structure_views
 from societe.viewsets import SocieteViewSet as societe_views
-
+from contrat.viewsets import AccessoireloyerViewSet as accessoires_view
+from contrat.viewsets import ContratAccessoiresloyerViewSet as contrat_acccessoires_view
+from contrat.viewsets import ContratViewSet as contrat_view
+from client.viewsets import ClientViewSet as client_view
+from landing import views as landing_view
 router = routers.SimpleRouter()
 # router.register(r'clients',client_views.ClientViewSet )
 router.register(r'banques', banque_views.BanqueViewSet)
 router.register(r'proprietaires', proprietaire_views.ProprietaireViewSet)
+router.register(r'clients', client_view)
 router.register(r'immeubles', immeuble_views.ImmeubleViewSet)
 router.register(r'appartements', appartement_views)
 router.register(r'composants', composant_views)
 router.register(r'structures', structure_views)
 router.register(r'societes', societe_views)
+router.register(r'contrats', contrat_view)
+router.register(r'accessoires', accessoires_view)
+router.register(r'contrataccessoires', contrat_acccessoires_view)
 
 urlpatterns = [
+    url(r'^/$', landing_view.index, name='index'),
+    url(r'^$', landing_view.index, name="index"),
     #url(r'^list_client$', client_views.ClientViewSet.as_view({'get': 'list'}), name='client'),
     #url(r'^immeuble$', immeuble_views.ImmeubleViewSet.as_view({'get': 'list', 'post': 'create'}), name='immeuble_list'),
     #url(r'^immeuble/(?P.+)/$', immeuble_views.ImmeubleViewSet.as_view({'get': 'retrieve','put': 'update','patch': 'partial_update','delete': 'destroy'}), name='immeuble_detail'),
