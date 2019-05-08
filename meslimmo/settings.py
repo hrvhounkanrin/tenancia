@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3000),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60000),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
 
@@ -30,7 +30,7 @@ SECRET_KEY = 'sz)!59k=#curo2j+bjlpzkx)pg3!mv7_hky!*z(h+n0iujt#fn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'societe',
     'tools',
     'client',
-    'rest_graph_ql'
+    'rest_graph_ql',
     #'client' ,
     #'rest_graph_ql',
 
@@ -67,9 +67,16 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_PERMISSION_CLASSES': (
         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+     'rest_framework.permissions.IsAuthenticated',
+     # 'rest_framework.permissions.IsAdminUser' ,
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+       'rest_framework.authentication.TokenAuthentication',
+       'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
+    )
 }
 
 MIDDLEWARE = [
@@ -110,7 +117,7 @@ DATABASES = {
    'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'tenancia_db',
-        'USER': 'postgres',
+        'USER': 'tenancia_user',
         'PASSWORD': '1P@$$4PostGres',
         'HOST': 'localhost',
         'PORT': '5432',

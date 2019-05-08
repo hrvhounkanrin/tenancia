@@ -40,6 +40,7 @@ class ActionAPIView(APIView):
     success = True
     RESPONSE_KEYS = ['user', 'action', 'token', 'subject', 'type', 'messageid']
 
+
     def post(self, request, action, **kwargs):
         return self.get(request, action, **kwargs)
 
@@ -80,3 +81,125 @@ class ActionAPIView(APIView):
             params.update(request.data)
         return params
 
+
+class accom_socite_proprietaire_square(object):
+    #TODO : Creating an  auto allocation Engine  has to be more explored
+    #TODO : Ce que je veux dire .... est trop profond pour que j'explore :'((
+
+
+    def __init(self,inner_man, societe,__check_proprietaire_, _aux_sur_contract):
+        self.inner_man = inner_man
+        self.societe = societe
+        self.__check_proprietaire  = __check_proprietaire_
+        self._aux_sur_contract = _aux_sur_contract
+
+
+
+    def get_area_by_autolocate_client_to_proprio(self,x ,y):
+        "Assumming We shoudl let the client who want to view the house which needs to be exposses should be based "
+        return abs(sum(i * j for i, j in zip(x, y[1:])) + x[-1] * y[0]
+                   - sum(i * j for i, j in zip(x[1:], y)) - x[0] * y[-1]) / 2
+
+
+class exception_guard(object):
+    """Guard against the given exception and raise a different exception.
+       Will need to have a deep look to how the ActionAPiView will manage the exception
+    """
+
+    def __init__(self, catchable, throwable=RuntimeError):
+        if is_exception_class(catchable):
+            self._catchable = catchable
+        else:
+            raise TypeError('catchable must be one or more exception types')
+        if throwable is None or is_exception(throwable):
+            self._throwable = throwable
+        else:
+            raise TypeError('throwable must be None or an exception')
+
+    def throw(self, cause):
+        """Throw an exception from the given cause."""
+        throwable = self._throwable
+        assert throwable is not None
+        self._raisefrom(throwable, cause)
+
+    def _raisefrom(self, exception, cause):
+        #TODO  : Function will expanded  in some few weeks have not sat down to think about the full exploration
+        # "raise ... from ..." syntax only supported in Python 3.  Need to show that to Herve
+        assert cause is not None  # "raise ... from None" is not supported.
+        if isinstance(exception, BaseException):
+            # We're given an exception instance, so just use it as-is.
+            pass
+        else:
+            # We're given an exception class, so instantiate it with a
+            # helpful error message.
+            assert issubclass(exception, BaseException)
+            name = type(cause).__name__
+            message = 'guard triggered by %s exception' % name
+            exception = exception(message)
+        try:
+            exec("raise exception from cause", globals(), locals())
+        except SyntaxError:
+            # Python too old. Fall back to a simple raise, without cause.
+            raise exception
+
+    # === Context manager special methods ===
+    # ===So when Tenancia , will be running properly this fuction will be expanded
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is not None and issubclass(exc_type, self._catchable):
+            if self._throwable is None:
+                # Suppress the exception.
+                return True
+            else:
+                self.throw(exc_value)
+
+    # === Use exception_guard as a decorator ===
+
+    def __call__(self, function):
+        """
+          This is a callable methoid to suppress the  exception when its thrown
+        :param function:
+        :return:
+        """
+        catchable = self._catchable
+        suppress_exception = (self._throwable is None)
+        @wraps(function)
+        def inner(*args, **kwargs):
+            try:
+                result = function(*args, **kwargs)
+            except catchable as error:
+                if suppress_exception:
+                    return
+                else:
+                    self.throw(error)
+            else:
+                return result
+        return inner
+
+
+# Two helper functions.
+
+def is_exception(obj):
+    """Return whether obj is an exception.
+    False
+
+    """
+    try:
+        return issubclass(obj, BaseException)
+    except TypeError:
+        return isinstance(obj, BaseException)
+
+def is_exception_class(obj):
+    """Return whether obj is an exception class, or a tuple of the same.
+    True
+
+    """
+    try:
+        if isinstance(obj, tuple):
+            return obj and all(issubclass(X, BaseException) for X in obj)
+        return issubclass(obj, BaseException)
+    except TypeError:
+        return False

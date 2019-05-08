@@ -17,6 +17,7 @@ from contrat.viewsets import ContratAccessoiresloyerViewSet as contrat_acccessoi
 from contrat.viewsets import ContratViewSet as contrat_view
 from client.viewsets import ClientViewSet as client_view
 from landing import views as landing_view
+import quittance.viewsets as quitance_viewsets
 router = routers.SimpleRouter()
 # router.register(r'clients',client_views.ClientViewSet )
 router.register(r'banques', banque_views.BanqueViewSet)
@@ -40,6 +41,8 @@ urlpatterns = [
     #url(r'^proprietaire', proprietaire_views.ProprietaireViewSet.as_view({'get': 'list', 'post': 'create'}), name='prorietaire_list'),
     #url(r'^proprietaire/<int:pk>', immeuble_views.ImmeubleViewSet.as_view({'get': 'retrieve','put': 'update','patch': 'partial_update','delete': 'destroy'}), name='proprietaire_detail'),
     url(r'^user', user_views.UserViewSet.as_view({'get': 'list', 'post': 'create'}), name='user_api'),
+    url(r'^quittance_action/(?P<action>[^/.]+)', quitance_viewsets.QuittanceActionViewSet.as_view(), name='quittance_action'),
+
     # url(r'^auth/logout/$', customer_views.LogoutView.as_view(), name='logout')
 
 ]
