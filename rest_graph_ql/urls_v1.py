@@ -6,7 +6,7 @@ from rest_framework import routers
 import client.viewsets as client_views
 import banque.viewsets as banque_views
 import customuser.viewsets as user_views
-import proprietaire.viewsets as proprietaire_views
+import proprietaire.viewsets as proprietaire_viewsets
 import immeuble.viewsets as immeuble_views
 from appartement.viewsets import AppartementViewSet as appartement_views
 from appartement.viewsets import ComposantAppartementViewSet as composant_views
@@ -21,7 +21,7 @@ import quittance.viewsets as quitance_viewsets
 router = routers.SimpleRouter()
 # router.register(r'clients',client_views.ClientViewSet )
 router.register(r'banques', banque_views.BanqueViewSet)
-router.register(r'proprietaires', proprietaire_views.ProprietaireViewSet)
+router.register(r'proprietaires', proprietaire_viewsets.ProprietaireViewSet)
 router.register(r'clients', client_view)
 router.register(r'immeubles', immeuble_views.ImmeubleViewSet)
 router.register(r'appartements', appartement_views)
@@ -42,6 +42,10 @@ urlpatterns = [
     #url(r'^proprietaire/<int:pk>', immeuble_views.ImmeubleViewSet.as_view({'get': 'retrieve','put': 'update','patch': 'partial_update','delete': 'destroy'}), name='proprietaire_detail'),
     url(r'^user', user_views.UserViewSet.as_view({'get': 'list', 'post': 'create'}), name='user_api'),
     url(r'^quittance_action/(?P<action>[^/.]+)', quitance_viewsets.QuittanceActionViewSet.as_view(), name='quittance_action'),
+    url(r'^proprietaire_action/(?P<action>[^/.]+)', proprietaire_viewsets.ProprietairAction.as_view(),
+        name='quittance_action'),
+
+
 
     # url(r'^auth/logout/$', customer_views.LogoutView.as_view(), name='logout')
 
