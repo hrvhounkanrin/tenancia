@@ -1,6 +1,3 @@
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework import viewsets, permissions, status
 from .serializers import ProprietaireSerializers
 from proprietaire.models import  *
@@ -19,21 +16,32 @@ class ProprietairAction(ActionAPIView):
         :return:
         """
         proprio_all = Proprietaire.objects.all()
-        serialized_obj = ProprietaireSerializers(proprio_all, many=True).dat
-        return {"success":True, "payload":serialized_obj}
+        serialized_obj = ProprietaireSerializers(proprio_all, many=True).data
+        return {"success": True, "payload": serialized_obj}
 
-class ProprietaireViewSet(viewsets.ModelViewSet):
-    #permission_classes = (IsAuthenticated,)
-    queryset = Proprietaire.objects.all()
-    serializer_class = ProprietaireSerializers
+    def create_proprio(self, request, param={}, *args, **kwargs):
+        """
+         Create proprio based on existing user
+        :param request:
+        :param params:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        if isinstance(request.data.get('proprietaire', None), list):
+            print("Liste de proprietaire")
+            proprietaires = request.data.pop('proprietaire')
+            proprietaire_objects = []
+            for proprio in proprietaires:
+                serializer = ProprietaireSerializers(data=proprio)
+                serializer.is_valid(raise_exception=True)
+                proprietaire_objects.append(serializer)
+            saved_proprio = [model.save() for model in proprietaire_objects]
+            serialized_proprio = ProprietaireSerializers(saved_proprio, many=True)
+            return {"success": True, "proprietaire": serialized_proprio.data}
 
-    """
-    def get_queryset(self):
-        if self.request.user.is_staff:
-            queryset = Immeuble.objects.all()
-        else:
-            connected_proprietaire=Proprietaire.objects.filter(user=self.request.user)
-            queryset = Immeuble.objects.filter(proprietaire=connected_proprietaire)
-
-        return queryset
-    """
+        #print(request.data.pop('user'))
+        serializer = ProprietaireSerializers(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "proprietaire": serializer.data}

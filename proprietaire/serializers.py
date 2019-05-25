@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from drf_writable_nested import NestedUpdateMixin
 from immeuble.serializers import ImmeubleSerializers
-from appartement.serializers import  AppartementSerializers;
+#from appartement.serializers import  AppartementSerializers;
 from immeuble.models import Immeuble
 from customuser.models import User
 from customuser.serializers import UserSerializer
@@ -18,13 +18,13 @@ class ProprietaireSerializers(serializers.ModelSerializer):
     """
        Serializer for class proprietaire
     """
-    immeubles = serializers.SerializerMethodField()
+    #immeubles = serializers.SerializerMethodField()
     banque = BanqueSerializers()
     user = UserSerializer()
     #appartements=serializers.SerializerMethodField()
     class Meta:
         model = Proprietaire
-        fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence', 'user', 'banque', 'immeubles']
+        fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence', 'user', 'banque',]
         #list_serializer_class = DictSerializer
 
 
@@ -35,7 +35,7 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         return ImmeubleSerializers(
             immeubles,
             many=True,
-            context={'request': self.context['request']}
+
         ).data
 
 
@@ -54,12 +54,13 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         ).data
 
     def create(self, validated_data):
+        #print(validated_data)
         user_data = validated_data.pop('user', None)
         banque_data = validated_data.pop('banque', None)
         if banque_data:
             banque = Banque.objects.get_or_create(**banque_data)[0]
             validated_data['banque'] = banque
-        user_instance = User.objects.get(username=user_data['username'])
+        user_instance = User.objects.get(email=user_data['email'])
         try:
             Proprietaire.objects.get(user=user_instance)
         except Proprietaire.DoesNotExist:
