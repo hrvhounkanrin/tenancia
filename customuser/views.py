@@ -1,12 +1,16 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.views import  APIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import  AllowAny, IsAuthenticated
-from customuser.serializers import  UserSerializer
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from customuser.serializers import UserSerializer
+
+
 # Create your views here.
+
 class CreateUSerApiView(APIView):
     permission_classes = (AllowAny,)
+
     def post(self, request):
         user = request.data
         serializer = UserSerializer(data=user)

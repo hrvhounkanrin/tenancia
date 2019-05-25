@@ -59,6 +59,8 @@ INSTALLED_APPS = [
     'tools',
     'client',
     'rest_graph_ql',
+    'rest_framework.authtoken',  # Add this line
+    'rest_auth',
     #'client' ,
     #'rest_graph_ql',
 
@@ -78,6 +80,7 @@ REST_FRAMEWORK = {
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
     )
 }
+REST_USE_JWT = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
