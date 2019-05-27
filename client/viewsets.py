@@ -7,7 +7,7 @@ from appartement.models import Appartement
 from django.http.response import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
-from appartement.serializers import AppartementSerializers
+
 from .models import Client
 
 from rest_framework import views, viewsets, authentication, permissions, mixins, pagination

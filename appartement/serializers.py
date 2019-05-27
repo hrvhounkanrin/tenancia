@@ -1,35 +1,36 @@
 from rest_framework import serializers
-from .models import (StructureAppartement, ComposantAppartement, Appartement, )
+from .models import ( ComposantAppartement, Appartement,StructureAppartement, )
 #from immeuble.serializers import ImmeubleSerializers
+from proprietaire.serializers import ProprietaireSerializers
+from immeuble.models import Immeuble
 from tools.serializers import RelationModelSerializer
 from client.models import Client
 
-class ComposantAppartmentSerializers(RelationModelSerializer):
+class ComposantAppartmentSerializers(serializers.ModelSerializer):
     """ Serializers for model Appartments"""
     class Meta:
+
         model = ComposantAppartement
         fields = '__all__'
 
-
 class StructureAppartmentSerializers(serializers.ModelSerializer):
-    """
-    Structure Serializers
-    """
-    composantAppartement = ComposantAppartmentSerializers(read_only=False, is_relation=True)
-    #appartement = AppartementSerializers(read_only=False, is_relation=True)
 
     class Meta:
         model = StructureAppartement
-        fields = ('appartement', "composantAppartement", 'nbre', 'description', )
+        #fields = ('nbre', 'description',)
+        fields = '__all__'
 
 
-class AppartementSerializers(RelationModelSerializer):
-    #immeuble = ImmeubleSerializers(read_only=False, is_relation=True)
+
+class AppartementSerializers(serializers.ModelSerializer):
+    #immeuble = ImmeubleSerializers()
     structures = serializers.SerializerMethodField()
     #structure = StructureAppartmentSerializers(many=True)
+    immeuble = serializers.PrimaryKeyRelatedField(queryset=Immeuble.objects.all())
+    proprietaire = serializers.SerializerMethodField()
     class Meta:
         model = Appartement
-        fields = ('id', 'intitule', 'level', 'autre_description', 'statut', 'immeuble', 'structures' )
+        fields = ('id', 'intitule', 'level', 'autre_description', 'statut', 'immeuble', 'structures', 'proprietaire')
 
 
     def get_structures(self, appartement):
@@ -39,6 +40,14 @@ class AppartementSerializers(RelationModelSerializer):
         return StructureAppartmentSerializers(
             structures,
             many=True,
+        ).data
+
+    def get_proprietaire(self, appartement):
+        id_immeuble=appartement.immeuble.id
+        proprietaire = appartement.immeuble.proprietaire
+        return ProprietaireSerializers(
+            proprietaire,
+            many=False,
         ).data
 
     def create(self, validated_data):
@@ -52,7 +61,7 @@ class AppartementSerializers(RelationModelSerializer):
                 composant_instance = ComposantAppartement.objects.get(pk=composant_id)
                 structure.pop('composantAppartement')
                 structure.pop('appartement')
-                StructureAppartement(appartement=appartement, composantAppartement=composant_instance, **structure).save()
+                StructureAppartement(appartement=appartement, composantAppartement=composant_instance,
+                                     **structure).save()
         appartement.save()
         return appartement
-
