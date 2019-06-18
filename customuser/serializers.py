@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from customuser.models import User, UserProfile
+import logging
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -17,9 +18,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
+        """ Create function based on  the validated_data args """
         profile_data = validated_data.pop('profile')
+        logging.debug(f'**Profile  data information', f'{profile_data}')
         password = validated_data.pop('password')
         user = User(**validated_data)
+        logging.debug(f'User is', f'{user}')
         user.set_password(password)
         user.save()
         UserProfile.objects.create(user=user, **profile_data)
