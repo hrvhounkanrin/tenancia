@@ -9,9 +9,11 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-AUTH_USER_MODEL = 'customuser.User'
-import os
 import datetime
+import os
+
+AUTH_USER_MODEL = 'customuser.User'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JWT_AUTH = {
@@ -19,7 +21,7 @@ JWT_AUTH = {
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60000),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-}
+    }
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -32,7 +34,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,43 +44,35 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    # 'django_auth',
     'customuser',
     'proprietaire',
     'countries_plus',
+    'corsheaders',
     'banque',
     'contrat',
     'immeuble',
-    # 'mauth',
     'appartement',
-    # 'mcore',
     'quittance',
     'reglement',
     'societe',
     'tools',
     'client',
     'rest_graph_ql',
-    'rest_framework.authtoken',  # Add this line
+    'rest_framework.authtoken',
     'rest_auth',
-    #'client' ,
-    #'rest_graph_ql',
 
-]
+    ]
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': (
-        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-     'rest_framework.permissions.IsAuthenticated',
-     # 'rest_framework.permissions.IsAdminUser' ,
-    ),
+        'rest_framework.permissions.IsAuthenticated',
+        ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-       'rest_framework.authentication.TokenAuthentication',
-       'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
-    )
-}
+        )
+    }
 REST_USE_JWT = True
 
 MIDDLEWARE = [
@@ -90,7 +83,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    ]
 
 ROOT_URLCONF = 'meslimmo.urls'
 
@@ -105,45 +100,43 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-            ],
+                ],
+            },
         },
-    },
-]
+    ]
 
 WSGI_APPLICATION = 'meslimmo.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-   'default': {
+    'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'tenancia_db',
         'USER': 'tenancia_user',
         'PASSWORD': '1P@$$4PostGres',
         'HOST': 'localhost',
         'PORT': '5432',
+        }
     }
-}
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
+        },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
+        },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
+        },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
+        },
+    ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -158,14 +151,13 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
-)
+    )
 
 LOGGING = {
     'version': 1,
@@ -174,75 +166,75 @@ LOGGING = {
         'verbose': {
             'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] {message}',
             'datefmt': '%d/%b/%Y %H:%M:%S'
-        },
+            },
         'verbose2': {
             'format': '[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)s:%(funcName)s()] %(message)s',
             'datefmt': '%d/%b/%Y %H:%M:%S'
-        },
+            },
         'with_ip': {
             'format': '[%(asctime)s] [%(clientip)s] %(levelname)s %(message)s',
             'datefmt': '%d/%b/%Y %H:%M:%S'
-        },
+            },
         'simple': {
             'format': '%(levelname)s %(message)s'
+            },
         },
-    },
     'handlers': {
         'file': {
             'level': 'WARNING',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'LOGS/debug.log' ,
-            'maxBytes': 1024*1024*100,  # 100 MB
+            'filename': 'LOGS/debug.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
             'backupCount': 5,
             'formatter': 'verbose'
-        }, 'staff': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'LOGS/debug.log' ,
-            'maxBytes': 1024*1024*100,  # 100 MB
-            'backupCount': 5,
-            'formatter': 'with_ip'
-        }, 'application': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'LOGS/NOTES.log',
-            'maxBytes': 1024*1024*100,  # 100 MB
-            'backupCount': 5,
-            'formatter': 'with_ip'
-        }, 'ddyxdebug': {
+            }, 'staff': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'LOGS/debug.log',
-            'maxBytes': 1024*1024*100,  # 100 MB
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
+            'backupCount': 5,
+            'formatter': 'with_ip'
+            }, 'application': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'LOGS/NOTES.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
+            'backupCount': 5,
+            'formatter': 'with_ip'
+            }, 'ddyxdebug': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'LOGS/debug.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
             'backupCount': 5,
             'formatter': 'verbose2'
-        }, 'other_sources': {
+            }, 'other_sources': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'LOGS/OTHER_SOURCES.log',
-            'maxBytes': 1024*1024*500,  # 100 MB
+            'maxBytes': 1024 * 1024 * 500,  # 100 MB
             'backupCount': 5,
             'formatter': 'verbose2'
+            },
         },
-    },
     'loggers': {
         'django': {
             'handlers': ['file'],
             'propagate': True,
             'level': 'WARNING',
-        },
+            },
         'staff': {
             'handlers': ['staff'],
             'level': 'INFO',
-        },
+            },
         'application': {
             'handlers': ['application'],
             'level': 'INFO',
-        },
+            },
         'other_sources': {
             'handlers': ['other_sources'],
             'propagate': True,
             'level': 'DEBUG',
-        },
+            },
+        }
     }
-}
