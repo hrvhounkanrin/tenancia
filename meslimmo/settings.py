@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-AUTH_USER_MODEL = "customuser.User"
+AUTH_USER_MODEL = 'customuser.User'
 import os
 import datetime
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -172,16 +172,16 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] {message}",
-            'datefmt': "%d/%b/%Y %H:%M:%S"
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] {message}',
+            'datefmt': '%d/%b/%Y %H:%M:%S'
         },
         'verbose2': {
-            'format': "[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)s:%(funcName)s()] %(message)s",
-            'datefmt': "%d/%b/%Y %H:%M:%S"
+            'format': '[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)s:%(funcName)s()] %(message)s',
+            'datefmt': '%d/%b/%Y %H:%M:%S'
         },
         'with_ip': {
-            'format': "[%(asctime)s] [%(clientip)s] %(levelname)s %(message)s",
-            'datefmt': "%d/%b/%Y %H:%M:%S"
+            'format': '[%(asctime)s] [%(clientip)s] %(levelname)s %(message)s',
+            'datefmt': '%d/%b/%Y %H:%M:%S'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
