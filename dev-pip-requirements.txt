@@ -1,7 +1,8 @@
-djangorestframework
-markdown
-django-rest-auth
-djangorestframework-jwt
-psycopg2
+django-countries-plus==1.2.1
 django-countries-plus
+django-rest-auth
+djangorestframework
+djangorestframework-jwt
 drf-writable-nested
+markdown
+psycopg2-binary
