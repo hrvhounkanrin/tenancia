@@ -1,6 +1,12 @@
-from rest_framework import serializers
-from customuser.models import User, UserProfile
 import logging
+
+from rest_framework import serializers
+
+from customuser.models import User
+from customuser.models import UserProfile
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

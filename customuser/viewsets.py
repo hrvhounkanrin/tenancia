@@ -17,7 +17,7 @@ class UserViewSet(viewsets.ModelViewSet):
     #permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    logging.debug(f'**Fetching the user serializer_class', f'{serializer_class}')
+    logging.debug(f'user serializer class, {serializer_class}')
     def get_permissions(self):
         permission_classes = []
         if self.action == 'create':

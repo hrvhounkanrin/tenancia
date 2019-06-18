@@ -166,23 +166,83 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
-"""
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] {message}",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'verbose2': {
+            'format': "[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)s:%(funcName)s()] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'with_ip': {
+            'format': "[%(asctime)s] [%(clientip)s] %(levelname)s %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'handlers': {
         'file': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'LOGS/debug.log' ,
+            'maxBytes': 1024*1024*100,  # 100 MB
+            'backupCount': 5,
+            'formatter': 'verbose'
+        }, 'staff': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': '/django_logs/debug.log',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'LOGS/debug.log' ,
+            'maxBytes': 1024*1024*100,  # 100 MB
+            'backupCount': 5,
+            'formatter': 'with_ip'
+        }, 'application': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'LOGS/NOTES.log',
+            'maxBytes': 1024*1024*100,  # 100 MB
+            'backupCount': 5,
+            'formatter': 'with_ip'
+        }, 'ddyxdebug': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'LOGS/debug.log',
+            'maxBytes': 1024*1024*100,  # 100 MB
+            'backupCount': 5,
+            'formatter': 'verbose2'
+        }, 'other_sources': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'LOGS/OTHER_SOURCES.log',
+            'maxBytes': 1024*1024*500,  # 100 MB
+            'backupCount': 5,
+            'formatter': 'verbose2'
         },
     },
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'DEBUG',
             'propagate': True,
+            'level': 'WARNING',
         },
-    },
+        'staff': {
+            'handlers': ['staff'],
+            'level': 'INFO',
+        },
+        'application': {
+            'handlers': ['application'],
+            'level': 'INFO',
+        },
+        'other_sources': {
+            'handlers': ['other_sources'],
+            'propagate': True,
+            'level': 'DEBUG',
+        },
+    }
 }
-"""
