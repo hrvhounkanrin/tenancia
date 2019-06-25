@@ -1,13 +1,7 @@
 import logging
-from rest_framework import serializers, exceptions
-from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
-from drf_writable_nested import NestedUpdateMixin
-from immeuble.serializers import ImmeubleSerializers
-#from appartement.serializers import  AppartementSerializers;
+from rest_framework import serializers
 from immeuble.models import Immeuble
 from customuser.models import User
-from customuser.serializers import UserSerializer
 from banque.serializers import BanqueSerializers
 from banque.models import Banque
 from . models import *
@@ -18,19 +12,15 @@ class ProprietaireSerializers(serializers.ModelSerializer):
     """
        Serializer for class proprietaire
     """
-    #immeubles = serializers.SerializerMethodField()
     banque = BanqueSerializers()
-    #user = UserSerializer()
     user = UserSerializer(read_only=True)
     user_id = serializers.PrimaryKeyRelatedField(source='User', queryset=User.objects.all(), write_only=True, )
 
-    #appartements=serializers.SerializerMethodField()
     class Meta:
         model = Proprietaire
         fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence', 'user', 'user_id', 'banque']
-        #list_serializer_class = DictSerializer
 
-
+    """
     def get_immeubles(self, proprietaire):
         immeubles = Immeuble.objects.filter(
             proprietaire=proprietaire,
@@ -40,7 +30,7 @@ class ProprietaireSerializers(serializers.ModelSerializer):
             many=True,
 
         ).data
-
+    """
 
     def get_user(self, proprietaire):
         return UserSerializer(

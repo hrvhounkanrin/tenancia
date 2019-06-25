@@ -1,26 +1,20 @@
-#from appartement.serializers import (AppartementSerializers,)
-from rest_framework import serializers, exceptions
 from .models import *
-from tools.serializers import RelationModelSerializer
-from appartement.models import Appartement
-#from appartement.serializers import AppartementSerializers
+from proprietaire.serializers import ProprietaireSerializers
+from proprietaire.models import Proprietaire
+from rest_framework import serializers
 
-class ImmeubleSerializers(RelationModelSerializer):
-    #appartements = serializers.SerializerMethodField()
+class ImmeubleSerializers(serializers.ModelSerializer):
+    proprietaire = ProprietaireSerializers(read_only=True)
+    proprietaire_id = serializers.PrimaryKeyRelatedField(source='Proprietaire', queryset=Proprietaire.objects.all(), write_only=True, )
     class Meta:
         model = Immeuble
-        #fields = '__all__'
-        fields = ('id', 'intitule', 'description', 'adresse', 'proprietaire', 'jour_emission_facture',
-                  'jour_valeur_facture', 'ville', 'quartier', 'pays', 'longitude', 'latitude', 'ref_immeuble')
+        fields = ('id', 'intitule', 'description', 'adresse', 'jour_emission_facture',
+                  'jour_valeur_facture', 'ville', 'quartier', 'pays', 'longitude', 'latitude', 'ref_immeuble', 'proprietaire', 'proprietaire_id')
 
-    """
-    def get_appartements(self, immeuble):
-        appartements = Appartement.objects.filter(
-            immeuble=immeuble,
-        )
-        return AppartementSerializers(
-            appartements,
-            many=True
-        ).data
-    """
+    def create(self, validated_data):
+        proprietaire = validated_data.pop('Proprietaire', None)
+        return Immeuble.objects.create(proprietaire=proprietaire, **validated_data)
 
+    def update(self, instance, validated_data):
+        instance.save()
+        return instance

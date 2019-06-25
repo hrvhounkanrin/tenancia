@@ -19,8 +19,6 @@ class ProprietairAction(ActionAPIView):
         serializer_context = {
             'request': request,
         }
-        print(params)
-
         if 'id' in params:
             queryset = Proprietaire.objects.filter(id__in=params['id'].split(","))
             serializer = ProprietaireSerializers(queryset, context=serializer_context, many=True)
