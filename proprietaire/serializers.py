@@ -9,9 +9,9 @@ from immeuble.models import Immeuble
 from customuser.models import User
 from customuser.serializers import UserSerializer
 from banque.serializers import BanqueSerializers
-from tools.serializers import (DictSerializer, AsymetricRelatedField, )
 from banque.models import Banque
 from . models import *
+from customuser.serializers import UserSerializer
 logger = logging.getLogger(__name__)
 
 class ProprietaireSerializers(serializers.ModelSerializer):
@@ -20,11 +20,14 @@ class ProprietaireSerializers(serializers.ModelSerializer):
     """
     #immeubles = serializers.SerializerMethodField()
     banque = BanqueSerializers()
-    user = UserSerializer()
+    #user = UserSerializer()
+    user = UserSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(source='User', queryset=User.objects.all(), write_only=True, )
+
     #appartements=serializers.SerializerMethodField()
     class Meta:
         model = Proprietaire
-        fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence', 'user', 'banque',]
+        fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence', 'user', 'user_id', 'banque']
         #list_serializer_class = DictSerializer
 
 
@@ -54,25 +57,25 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         ).data
 
     def create(self, validated_data):
-        #print(validated_data)
-        user_data = validated_data.pop('user', None)
+        user = validated_data.pop('User', None)
         banque_data = validated_data.pop('banque', None)
         if banque_data:
             banque = Banque.objects.get_or_create(**banque_data)[0]
             validated_data['banque'] = banque
-        user_instance = User.objects.get(email=user_data['email'])
         try:
-            Proprietaire.objects.get(user=user_instance)
+            Proprietaire.objects.get(user=user)
         except Proprietaire.DoesNotExist:
             pass
         else:
             raise serializers.ValidationError("Cet utilisateur est déjà un propriétaire")
-        return Proprietaire.objects.create(user=user_instance, **validated_data)
+        return Proprietaire.objects.create(user=user, **validated_data)
 
     def update(self, instance, validated_data):
         instance.mode_paiement = validated_data['mode_paiement']
         instance.numcompte = validated_data['numcompte']
         instance.pays_residence = validated_data['pays_residence']
+        if instance.user.id != self.initial_data.get('user_id', None):
+            raise serializers.ValidationError("Impossible de changer l'objet user du proprietaire")
         try:
             banque_instance = Banque.objects.get(pk=self.initial_data['banque']['id'])
             instance.banque = banque_instance
