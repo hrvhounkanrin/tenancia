@@ -1,10 +1,9 @@
+from django.db import transaction
 from rest_framework import serializers
 from .models import ( ComposantAppartement, Appartement,StructureAppartement, )
-#from immeuble.serializers import ImmeubleSerializers
 from proprietaire.serializers import ProprietaireSerializers
 from immeuble.models import Immeuble
-from tools.serializers import RelationModelSerializer
-from client.models import Client
+from immeuble.serializers import ImmeubleSerializers
 
 class ComposantAppartmentSerializers(serializers.ModelSerializer):
     """ Serializers for model Appartments"""
@@ -14,23 +13,22 @@ class ComposantAppartmentSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 class StructureAppartmentSerializers(serializers.ModelSerializer):
-
+    composantAppartement = ComposantAppartmentSerializers(read_only=True)
+    composantAppartement_id = serializers.PrimaryKeyRelatedField(source='ComposantAppartement', queryset=ComposantAppartement.objects.all(), write_only=True, )
     class Meta:
         model = StructureAppartement
-        #fields = ('nbre', 'description',)
-        fields = '__all__'
+        fields = ['appartement', 'composantAppartement', 'composantAppartement_id', 'nbre', 'description']
 
 
 
 class AppartementSerializers(serializers.ModelSerializer):
-    #immeuble = ImmeubleSerializers()
     structures = serializers.SerializerMethodField()
-    #structure = StructureAppartmentSerializers(many=True)
-    immeuble = serializers.PrimaryKeyRelatedField(queryset=Immeuble.objects.all())
-    proprietaire = serializers.SerializerMethodField()
+    immeuble = ImmeubleSerializers(read_only=True)
+    immeuble_id = serializers.PrimaryKeyRelatedField(source='Immeuble', queryset=Immeuble.objects.all(), write_only=True, )
+
     class Meta:
         model = Appartement
-        fields = ('id', 'intitule', 'level', 'autre_description', 'statut', 'immeuble', 'structures', 'proprietaire')
+        fields = ('id', 'intitule', 'level', 'autre_description', 'statut', 'immeuble', 'immeuble_id', 'structures',)
 
 
     def get_structures(self, appartement):
@@ -42,26 +40,33 @@ class AppartementSerializers(serializers.ModelSerializer):
             many=True,
         ).data
 
-    def get_proprietaire(self, appartement):
-        id_immeuble=appartement.immeuble.id
-        proprietaire = appartement.immeuble.proprietaire
-        return ProprietaireSerializers(
-            proprietaire,
-            many=False,
-        ).data
 
+    @transaction.atomic
     def create(self, validated_data):
-        structures_data = self.initial_data['structures']
-        print(structures_data)
-        appartement = Appartement.objects.create(**validated_data)
+        immeuble = validated_data.pop('Immeuble', None)
+        appartement_instance = Appartement.objects.create(immeuble=immeuble, **validated_data)
         if "structures" in self.initial_data:
             structures = self.initial_data.get("structures")
             for structure in structures:
-                composant_id = structure.get("composantAppartement", None)
-                composant_instance = ComposantAppartement.objects.get(pk=composant_id)
-                structure.pop('composantAppartement')
-                structure.pop('appartement')
-                StructureAppartement(appartement=appartement, composantAppartement=composant_instance,
+                StructureAppartement(appartement=appartement_instance,
                                      **structure).save()
-        appartement.save()
-        return appartement
+            appartement_instance.save()
+        return appartement_instance
+
+    # TODO : Check whether Component exist before saving structure
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        print(instance)
+        instance.intitule = validated_data['intitule']
+        instance.level = validated_data['level']
+        instance.autre_description = validated_data['autre_description']
+        instance.statut = validated_data['statut']
+        #instance.statut = validated_data['statut']
+        instance.save()
+        if "structures" in self.initial_data:
+            StructureAppartement.objects.filter(appartement__id=instance.id).delete()
+            structures = self.initial_data.get("structures")
+            for structure in structures:
+                StructureAppartement(appartement=instance,**structure).save()
+        return instance
+

@@ -120,7 +120,7 @@ DATABASES = {
    'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'tenancia_db',
-        'USER': 'tenancia_user',
+        'USER': 'postgres',
         'PASSWORD': '1P@$$4PostGres',
         'HOST': 'localhost',
         'PORT': '5432',

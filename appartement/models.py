@@ -10,7 +10,7 @@ des différentes pièces possibles d'un appartement
 
 class ComposantAppartement(models.Model):
     libelle = models.CharField(max_length=50)
-    utilite = models.CharField(max_length=256)
+    utilite = models.CharField(max_length=256, null=True)
     #lang = models.CharField(max_length=256)
 
 

@@ -15,5 +15,8 @@ class CreateUSerApiView(APIView):
         user = request.data
         serializer = UserSerializer(data=user)
         serializer.is_valid(raise_exception=True)
+        serializer_context = {
+            'request': request,
+        }
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, context=serializer_context, status=status.HTTP_201_CREATED)

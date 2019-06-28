@@ -1,9 +1,9 @@
-from rest_framework.response import Response
-from rest_framework import exceptions, status
+import logging
+
 from appartement.serializers import ( AppartementSerializers, StructureAppartmentSerializers, ComposantAppartmentSerializers,)
 from appartement.models import (Appartement, ComposantAppartement, StructureAppartement, )
-from rest_framework import views, viewsets, authentication, permissions, mixins, pagination
 from tools.viewsets import ActionAPIView
+logger = logging.getLogger(__name__)
 
 class AppartementViewSet(ActionAPIView):
     def get_appartment(self, request, params ={} , *args, **kwargs):
@@ -17,66 +17,128 @@ class AppartementViewSet(ActionAPIView):
         pass
 
     def create_appartment(self, request, params={}, *args, **kwargs):
-        """Create appartment"""
-        serialized_appartment = AppartementSerializers(data=request.data)
-        if(serialized_appartment.is_valid()):
-            serialized_appartment.save()
-        return Response(serialized_appartment.data, status=status.HTTP_201_CREATED)
-        create_appartment.__doc__="Create appartment"
+        """
+         Create appartement
+        :param request:
+        :param params:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        serializer_context = {
+            'request': request,
+        }
+        if isinstance(request.data.get('appartement', None), list):
+            appartements = request.data.pop('appartement')
+            appart_objects = []
+            for appart in appartements:
+                serializer = AppartementSerializers(data=appart, context=serializer_context)
+                serializer.is_valid(raise_exception=True)
+                appart_objects.append(serializer)
+            saved_appartements = [model.save() for model in appart_objects]
+            serialized_proprio = AppartementSerializers(saved_appartements, many=True, context=serializer_context)
+            return {"success": True, "appartement": serialized_proprio.data}
 
+        #print(request.data.pop('user'))
+        serializer = AppartementSerializers(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "appartement": serializer.data}
+
+    def update_appartement(self, request, params={}, *args, **kwargs):
+        """
+         Update appartement
+        :param request:
+        :param params:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        serializer_context = {
+            'request': request,
+        }
+        if isinstance(request.data.get('appartement', None), list):
+            appartements = request.data.pop('appartement')
+            for appart in appartements:
+                instance = Appartement.objects.get(pk=params.get('id', None))
+                serializer = AppartementSerializers(instance, data=appart, context=serializer_context)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return {"success": True, "appartement": serializer.data}
+
+        instance = Appartement.objects.get(pk=params.get('id', None))
+        serializer = AppartementSerializers(instance, data=request.data, context=serializer_context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "appartement": serializer.data}
 
 
 class ComposantAppartementViewSet(ActionAPIView):
+
     def get_component(self, request, params ={} , *args, **kwargs):
         """  Get all avavaible appartement component whatever the language"""
-        get_all_appartment_component = ComposantAppartement.objects.all()
-        serialized_component = ComposantAppartmentSerializers(get_all_appartment_component, many=True).data
-        return {"success": True, "composantAppartements": serialized_component}
+        serializer_context = {
+            'request': request,
+        }
+
+        if 'id' in params:
+            queryset = ComposantAppartement.objects.filter(id__in=params['id'].split(","))
+            serializer = ComposantAppartmentSerializers(queryset, context=serializer_context, many=True)
+            logger.debug('**retrieving ComposantAppartement **')
+            return serializer.data
+
+        queryset = ComposantAppartement.objects.all()
+        serializer = ComposantAppartmentSerializers(queryset, many=True)
+        return {"success": True, "composantAppartements": serializer.data}
         get_component.__doc__ =  "The simple way to get the list of all the appartment component using the APIActionViewSet"
 
-    """
-    Le premier create_component que j'ai écrit
-    def create_component(self, request, params={}, *args, **kwargs):
-        serialized_component = ComposantAppartmentSerializers(data=request.data)
-        if serialized_component.is_valid():
-            serialized_component.save()
-            return Response(serialized_component.data, status=status.HTTP_201_CREATED)
-        return Response(serialized_component._errors, status=status.HTTP_400_BAD_REQUEST)
-    """
-
-    """
-    def create_component(self, request, params={}, *args, **kwargs):
-        #This request should return only newly objects(those in request.data object). Not the whole
-        #Le second problème c'est que la requête n'est pas atomique
-       
-        composant_appart = ComposantAppartement.objects.all()
-        for composant_appartement in params['composant_appartement']:
-            lib_ = composant_appartement['libelle']
-            util_ = composant_appartement['utilite']
-            create_appart = ComposantAppartement.objects.create(
-                libelle=lib_,
-                utilite=util_
-            )
-        create_appart =ComposantAppartmentSerializers(composant_appart, many=True).data
-        return {"success": True, "composant_apart": create_appart}
-    """
     def create_component(self, request, params={}, *args, **kwargs):
         """  Create an appartment component, it take a single component or a list of components"""
-        #When request.data content a list of objects
+        serializer_context = {
+            'request': request,
+        }
         if isinstance(request.data.get('composant_appartement', None), list):
             composants = request.data.pop('composant_appartement')
             aappartment_component_objects = []
             for composant in composants:
-                # validate each model with one seat at a time
-                serializer = ComposantAppartmentSerializers(data=composant)
+                serializer = ComposantAppartmentSerializers(data=composant, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
                 aappartment_component_objects.append(serializer)
-            # Save all validated models in bloc
             saved_components = [model.save() for model in aappartment_component_objects]
-            serialized_composants = ComposantAppartmentSerializers(saved_components, many=True)
+            serialized_composants = ComposantAppartmentSerializers(saved_components, context=serializer_context, many=True)
             return {"success": True, "composant_apart": serialized_composants.data}
-        #when request.data content single object
-        serializer = ComposantAppartmentSerializers(data=request.data)
+
+        serializer = ComposantAppartmentSerializers(data=request.data, context=serializer_context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "composant_apart": serializer.data}
+
+    def update_component(self, request, params={}, *args, **kwargs):
+        """
+         Update Component
+        :param request:
+        :param params:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        serializer_context = {
+            'request': request,
+        }
+        if isinstance(request.data.get('composant_appartement', None), list):
+            components = request.data.pop('composant_appartement')
+            component_objects = []
+            for component in components:
+                instance = ComposantAppartement.objects.get(pk=params.get('id', None))
+                serializer = ComposantAppartmentSerializers(instance, data=component, context=serializer_context)
+                serializer.is_valid(raise_exception=True)
+                component_objects.append(serializer)
+            saved_components = [model.save() for model in component_objects]
+            serializer = ComposantAppartmentSerializers(saved_components, many=True, context=serializer_context)
+            return {"success": True, "composant_apart": serializer.data}
+
+        instance = ComposantAppartement.objects.get(pk=params.get('id', None))
+        serializer = ComposantAppartmentSerializers(instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return {"success": True, "composant_apart": serializer.data}
@@ -85,6 +147,7 @@ class ComposantAppartementViewSet(ActionAPIView):
 class StructureAppartmentViewSet(ActionAPIView):
     def get_structure(self, request, params ={} , *args, **kwargs):
         """  Get all  structure """
+
         get_all_structure = StructureAppartement.objects.all()
         serialized_structure = StructureAppartmentSerializers(get_all_structure, many=True).data
         return {"success": True, "structures": serialized_structure}
