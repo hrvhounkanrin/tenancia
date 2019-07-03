@@ -5,8 +5,8 @@ from countries_plus.models import Country
 
 
 class Client(models.Model):
-    nom =  models.CharField(max_length=132, null=True, blank=True)
-    prenom = models.CharField(max_length=132, null=True, blank=True)
+    #nom =  models.CharField(max_length=132, null=True, blank=True)
+    #prenom = models.CharField(max_length=132, null=True, blank=True)
     mode_paiement = models.CharField(max_length=64, null=True, blank=True)
     profession = models.CharField(max_length=128, null=True, blank=True)
     ice_contact = models.CharField(max_length=128, null=True, blank=False)

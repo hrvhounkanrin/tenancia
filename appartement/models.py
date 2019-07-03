@@ -48,4 +48,5 @@ class StructureAppartement(models.Model):
     composantAppartement = models.ForeignKey('ComposantAppartement', related_name='composant_appartement', on_delete=models.SET_NULL, null=True)
     nbre = models.IntegerField(default=1)
     description = models.CharField(max_length=256)
+    is_periodic = models.BooleanField(default=False)
 

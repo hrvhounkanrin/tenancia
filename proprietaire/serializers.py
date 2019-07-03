@@ -1,6 +1,6 @@
 import logging
 from rest_framework import serializers
-from immeuble.models import Immeuble
+from rest_framework.utils.model_meta import get_field_info
 from customuser.models import User
 from banque.serializers import BanqueSerializers
 from banque.models import Banque
@@ -12,13 +12,14 @@ class ProprietaireSerializers(serializers.ModelSerializer):
     """
        Serializer for class proprietaire
     """
-    banque = BanqueSerializers()
+    banque = BanqueSerializers(read_only=True)
+    banque_id = serializers.PrimaryKeyRelatedField(source='Banque', queryset=Banque.objects.all(), write_only=True, )
     user = UserSerializer(read_only=True)
     user_id = serializers.PrimaryKeyRelatedField(source='User', queryset=User.objects.all(), write_only=True, )
 
     class Meta:
         model = Proprietaire
-        fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence', 'user', 'user_id', 'banque']
+        fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence', 'user', 'user_id', 'banque', 'banque_id']
 
     """
     def get_immeubles(self, proprietaire):
@@ -61,15 +62,14 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         return Proprietaire.objects.create(user=user, **validated_data)
 
     def update(self, instance, validated_data):
-        instance.mode_paiement = validated_data['mode_paiement']
-        instance.numcompte = validated_data['numcompte']
-        instance.pays_residence = validated_data['pays_residence']
         if instance.user.id != self.initial_data.get('user_id', None):
-            raise serializers.ValidationError("Impossible de changer l'objet user du proprietaire")
-        try:
-            banque_instance = Banque.objects.get(pk=self.initial_data['banque']['id'])
-            instance.banque = banque_instance
-        except Banque.DoesNotExist:
-            raise serializers.ValidationError("Cette banque n'existe pas.")
+            raise serializers.ValidationError("Impossible de changer l'objet user du propriétaire")
+        info = get_field_info(instance)
+        for attr, value in validated_data.items():
+            if attr in info.relations and info.relations[attr].to_many:
+                field = getattr(instance, attr)
+                field.set(value)
+            else:
+                setattr(instance, attr, value)
         instance.save()
         return instance

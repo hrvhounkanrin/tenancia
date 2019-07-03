@@ -45,6 +45,7 @@ class ContratAccessoiresloyer(models.Model):
     contrat = models.ForeignKey('Contrat', related_name='contrat', on_delete=models.SET_NULL, null=True)
     accesoireloyer = models.ForeignKey('Accesoireloyer', related_name='accesoireloyer', on_delete=models.SET_NULL, null=True)
     montant = models.DecimalField(max_digits=19, decimal_places=10, default=0)
+    is_peridic = models.BooleanField(default=False)
     devise = models.CharField(max_length=256, null=False, default='XOF')
     statut = models.CharField(max_length=256, null=False, default='NON PAYE')
     description = models.CharField(max_length=256)

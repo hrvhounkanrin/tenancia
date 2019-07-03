@@ -1,11 +1,12 @@
 from rest_framework import serializers
-from .models import (Accesoireloyer, Contrat, ContratAccessoiresloyer, )
-from appartement.models import (Appartement, )
-#from immeuble.serializers import ImmeubleSerializers
+from client.serializers import ClientSerializer
+from appartement.serializers import AppartementSerializers
 from tools.serializers import RelationModelSerializer
 from client.models import Client
-
+from appartement.models import Appartement
+from django.db import transaction
 from .models import *
+from rest_framework.utils.model_meta import get_field_info
 #pip install xmtodict later on /'''
 
 class AccesoireloyerSerializers(RelationModelSerializer):
@@ -14,24 +15,20 @@ class AccesoireloyerSerializers(RelationModelSerializer):
         model = Accesoireloyer
         fields = '__all__'
 
-class ContratAccessoiresloyerSerializers(serializers.ModelSerializer):
-    """
-    Structure Serializers
-    """
-    accesoireloyer = AccesoireloyerSerializers(read_only=False, is_relation=True)
-    #appartement = AppartementSerializers(read_only=False, is_relation=True)
-
-    class Meta:
-        model = ContratAccessoiresloyer
-        fields = ('contrat', "accesoireloyer", 'montant', 'devise', 'statut', 'devise', 'description')
 
 class ContratSerializers(serializers.ModelSerializer):
     accessoires = serializers.SerializerMethodField()
+    client = ClientSerializer(read_only=True, )
+    client_id = serializers.PrimaryKeyRelatedField(source='Client',
+                                                         queryset=Client.objects.all(), write_only=True, )
+    appartement = AppartementSerializers(read_only=True)
+    appartement_id = serializers.PrimaryKeyRelatedField(source='Appartement',
+                                                   queryset=Appartement.objects.all(), write_only=True, )
     class Meta:
         model = Contrat
         fields =('id', 'reference_bail', 'date_signature', 'date_effet', 'periodicite', 'duree',
                  'montant_bail', 'statut', 'observation', 'tacite_reconduction',
-                 'client', 'appartement', 'accessoires')
+                 'client', 'client_id', 'appartement', 'appartement_id', 'accessoires' )
 
     def get_accessoires(self, contrat):
         accessoires = ContratAccessoiresloyer.objects.filter(
@@ -39,18 +36,47 @@ class ContratSerializers(serializers.ModelSerializer):
         )
         return ContratAccessoiresloyerSerializers(
             accessoires,
+            context=self.context,
             many=True,
         ).data
 
+    @transaction.atomic
     def create(self, validated_data):
-        contrat = Contrat.objects.create(**validated_data)
+        client_instance = validated_data.pop('Client', None)
+        appartement_instance = validated_data.pop('Appartement', None)
+        contrat = Contrat.objects.create(client=client_instance, appartement=appartement_instance, **validated_data)
         if "accessoires" in self.initial_data:
             accessoires = self.initial_data.get("accessoires")
             for accessoire in accessoires:
-                accessoire_id = accessoire.get("accessoire", None)
-                accessoire_instance = Accesoireloyer.objects.get(pk=accessoire_id)
-                accessoire_id = accessoire.pop('accessoire')
+                accessoire_instance = Accesoireloyer.objects.get(pk=accessoire.pop("accesoireloyer", None))
                 print(accessoire)
-                ContratAccessoiresloyer(contrat=contrat, accesoireloyer=accessoire_instance, **accessoire).save()
-        #contrat.save()
+                accessoire.pop('contrat', None)
+                ContratAccessoiresloyer(contrat_id=contrat.id, accesoireloyer_id=accessoire_instance.id, **accessoire).save()
+        contrat.save()
         return contrat
+
+    def update(self, instance, validated_data):
+        info = get_field_info(instance)
+        for attr, value in validated_data.items():
+            if attr in info.relations and info.relations[attr].to_many:
+                field = getattr(instance, attr)
+                field.set(value)
+            else:
+                setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+class ContratAccessoiresloyerSerializers(serializers.ModelSerializer):
+    """
+    Structure Serializers
+    """
+    accesoireloyer = AccesoireloyerSerializers(read_only=True)
+    accesoireloyer_id = serializers.PrimaryKeyRelatedField(source='Accesoireloyer',
+                                                           queryset=Accesoireloyer.objects.all(), write_only=True, )
+    #contrat = ContratSerializers(read_only=True)
+    #contrat_id = serializers.PrimaryKeyRelatedField(source='Contrat', queryset=Contrat.objects.all(),)
+    class Meta:
+        model = ContratAccessoiresloyer
+        fields = ('contrat', 'accesoireloyer', 'accesoireloyer_id', 'montant', 'devise',
+                  'statut', 'devise', 'description')

@@ -6,8 +6,6 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.include_root_view = False
-router.register(r'client', client_rest.ClientViewSet, base_name='client')
-
 
 urlpatterns = [
     # url(r'^', include(router.urls)),

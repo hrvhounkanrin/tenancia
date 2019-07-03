@@ -17,7 +17,8 @@ class StructureAppartmentSerializers(serializers.ModelSerializer):
     composantAppartement_id = serializers.PrimaryKeyRelatedField(source='ComposantAppartement', queryset=ComposantAppartement.objects.all(), write_only=True, )
     class Meta:
         model = StructureAppartement
-        fields = ['appartement', 'composantAppartement', 'composantAppartement_id', 'nbre', 'description']
+        fields = ['appartement', 'composantAppartement', 'composantAppartement_id', 'nbre',
+                  'description', 'is_periodic']
 
 
 
