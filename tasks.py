@@ -7,7 +7,6 @@ app = Celery('tasks', broker='pyamqp://guest@localhost//')
 def add(x, y):
     """
      Mini  implementation test.
-
     :param x:
     :param y:
     :return:

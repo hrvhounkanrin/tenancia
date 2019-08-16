@@ -13,7 +13,7 @@ import datetime
 import os
 
 AUTH_USER_MODEL = 'customuser.User'
-
+import logging
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JWT_AUTH = {
@@ -22,7 +22,7 @@ JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60000),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     }
-
+LOGGER = logging.getLogger(__name__)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -120,6 +120,7 @@ DATABASES = {
         'PORT': '5432',
         }
     }
+LOGGER.info(f'Using DB -- {DATABASES}')
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -238,3 +239,9 @@ LOGGING = {
             },
         }
     }
+
+
+INV_MODULE = getattr( 'INV_MODULE', 'invoice.pdf')
+INV_CURRENCY = getattr('INV_CURRENCY', u'EUR')
+INV_CURRENCY_SYMBOL = getattr('INV_CURRENCY_SYMBOL', u'€')
+INV_EMAIL_SUBJECT = getattr( 'INV_EMAIL_SUBJECT', u'[%s] Invoice %%(invoice_id)s')
