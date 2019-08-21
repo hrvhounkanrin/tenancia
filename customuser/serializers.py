@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ('title', 'address', 'country', 'photo')
+        fields = ('dob', 'title', 'address', 'country', 'photo')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

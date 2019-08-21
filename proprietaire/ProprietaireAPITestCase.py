@@ -4,14 +4,23 @@ from proprietaire.models import Proprietaire
 
 class ProprietaireAPITestCase(TestCase):
 
-    """
+    '''
     Proprietaire API
-    """
+    '''
 
     def setUp(self):
         self.c = Client()
-
-        self.normal_user = User.objects.get(pk=11)
+        #Create and save a user object
+        self.user = User(username='ipattey', email='epatey@gmail.com').save()
+        self.user, created = Person.objects.get_or_create(
+            {
+                email:'ipattey@gmail.com', first_name: 'Pattey', last_name: 'ISMAEL',
+                password:'ipattey',  profile:{
+                    title: 'IT', dob: '1986-05-09', address: 'UNKOWN', country: 'BJ',
+                    zip: '093', city: 'COTONOU'
+                }
+            }
+        )
 
     def test_can_get_proprietaire_list(self):
         assert False is True
