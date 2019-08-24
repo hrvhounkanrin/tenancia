@@ -1,3 +1,8 @@
+import datetime
+import os
+
+AUTH_USER_MODEL = 'customuser.User'
+import logging
 """
 Django settings for meslimmo project.
 
@@ -9,11 +14,7 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-import datetime
-import os
 
-AUTH_USER_MODEL = 'customuser.User'
-import logging
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JWT_AUTH = {
@@ -241,7 +242,7 @@ LOGGING = {
     }
 
 
-INV_MODULE = getattr( 'INV_MODULE', 'invoice.pdf')
-INV_CURRENCY = getattr('INV_CURRENCY', u'EUR')
-INV_CURRENCY_SYMBOL = getattr('INV_CURRENCY_SYMBOL', u'€')
-INV_EMAIL_SUBJECT = getattr( 'INV_EMAIL_SUBJECT', u'[%s] Invoice %%(invoice_id)s')
+# INV_MODULE = getattr( 'INV_MODULE', 'invoice.pdf')
+# INV_CURRENCY = getattr('INV_CURRENCY', u'EUR')
+# INV_CURRENCY_SYMBOL = getattr('INV_CURRENCY_SYMBOL', u'€')
+# INV_EMAIL_SUBJECT = getattr( 'INV_EMAIL_SUBJECT', u'[%s] Invoice %%(invoice_id)s')
