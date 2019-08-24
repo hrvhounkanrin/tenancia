@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from django.conf.urls import include, url
 from rest_framework import routers
 from appartement import viewsets

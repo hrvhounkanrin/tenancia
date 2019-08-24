@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import logging
 from .serializers import ImmeubleSerializers
 from tools.viewsets import ActionAPIView

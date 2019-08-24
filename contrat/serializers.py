@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from rest_framework import serializers
 from client.serializers import ClientSerializer
 from appartement.serializers import AppartementSerializers

@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from .models import *
 from proprietaire.serializers import ProprietaireSerializers
 from proprietaire.models import Proprietaire

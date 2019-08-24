@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from django.test import TestCase, Client
 from customuser.models import User
 from proprietaire.models import Proprietaire
@@ -19,10 +20,10 @@ class ProprietaireAPITestCase(TestCase):
                     title: 'IT', dob: '1986-05-09', address: 'UNKOWN', country: 'BJ',
                     zip: '093', city: 'COTONOU'
                 }
-            }
-        )
+            t
+        t
 
-    def test_can_get_proprietaire_list(self):
+   tdeet_proprietaire_lise(self):
         assert False is True
 
     def test_get_proprietaire_returns_correct_fields(self):

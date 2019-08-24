@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import logging
 from .serializers import (AccesoireloyerSerializers, ContratAccessoiresloyerSerializers, ContratSerializers, )
 from .models import (Accesoireloyer, ContratAccessoiresloyer, Contrat, )

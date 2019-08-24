@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from django.db import transaction
 from rest_framework import serializers
 from .models import ( ComposantAppartement, Appartement,StructureAppartement, )

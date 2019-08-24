@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import logging
 from .serializers import ClientSerializer
 from client.models import  *

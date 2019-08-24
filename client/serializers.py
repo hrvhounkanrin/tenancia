@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from  .models import Client
 from rest_framework import serializers
 from rest_framework.utils.model_meta import get_field_info

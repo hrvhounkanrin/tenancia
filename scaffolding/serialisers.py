@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from django.db import transaction
 from .models import *
 from appartement.serializers import ComposantAppartmentSerializers
