@@ -49,7 +49,7 @@ class ContratSerializers(serializers.ModelSerializer):
         if "accessoires" in self.initial_data:
             accessoires = self.initial_data.get("accessoires")
             for accessoire in accessoires:
-                accessoire_instance = Accesoireloyer.objects.get(pk=accessoire.pop("accesoireloyer", None))
+                accessoire_instance = Accesoireloyer.objects.get(pk=accessoire.pop("accessoire_id", None))
                 print(accessoire)
                 accessoire.pop('contrat', None)
                 ContratAccessoiresloyer(contrat_id=contrat.id, accesoireloyer_id=accessoire_instance.id, **accessoire).save()

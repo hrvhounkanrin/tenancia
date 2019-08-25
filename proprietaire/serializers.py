@@ -49,18 +49,21 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         ).data
 
     def create(self, validated_data):
-        user = validated_data.pop('User', None)
-        banque_data = validated_data.pop('banque', None)
+        user_instance = validated_data.pop('User', None)
+        banque_instance = validated_data.pop('Banque', None)
+        """
         if banque_data:
             banque = Banque.objects.get_or_create(**banque_data)[0]
             validated_data['banque'] = banque
+        """
         try:
-            Proprietaire.objects.get(user=user)
+            Proprietaire.objects.get(user=user_instance)
         except Proprietaire.DoesNotExist:
             pass
         else:
             raise serializers.ValidationError("Cet utilisateur est déjà un propriétaire")
-        return Proprietaire.objects.create(user=user, **validated_data)
+        print(validated_data)
+        return Proprietaire.objects.create(**validated_data, user=user_instance, banque=banque_instance )
 
     def update(self, instance, validated_data):
         if instance.user.id != self.initial_data.get('user_id', None):

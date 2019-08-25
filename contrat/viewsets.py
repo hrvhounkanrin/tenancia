@@ -13,10 +13,10 @@ class AccessoireloyerAction(ActionAPIView):
         }
 
         if 'id' in params:
-            queryset = Accesoireloyer.objects.filter(id__in=params['id'].split(","))
-            serializer = AccesoireloyerSerializers(queryset, context=serializer_context, many=True)
-            logger.debug('**retrieving Accessoireloyer **')
-            return serializer.data
+            queryaccessoireset = Accesoireloyer.objects.filter(id__in=params['id'].split(","))
+            seriaaccessoirelizer = AccesoireloyerSerializers(queryset, context=serializer_context, many=True)
+            loggeaccessoirer.debug('**retrieving Accessoireloyer **')
+            returaccessoiren serializer.data
 
         queryset = Accesoireloyer.objects.all()
         serializer = AccesoireloyerSerializers(queryset, many=True)
