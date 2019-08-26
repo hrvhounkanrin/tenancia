@@ -11,3 +11,4 @@ class BanqueSerializers(serializers.ModelSerializer):
         extra_kwargs = {
             'codebanque': {'validators': []},
         }
+        

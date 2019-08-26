@@ -46,14 +46,14 @@ class AppartementSerializers(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         immeuble = validated_data.pop('Immeuble', None)
-        appartement_instance = Appartement.objects.create(immeuble=immeuble, **validated_data)
+        logement_instance = Appartement.objects.create(immeuble=immeuble, **validated_data)
         if "structures" in self.initial_data:
             structures = self.initial_data.get("structures")
             for structure in structures:
-                StructureAppartement(appartement=appartement_instance,
-                                     **structure).save()
-            appartement_instance.save()
-        return appartement_instance
+                structure.pop('appartement', None)
+                StructureAppartement(appartement=logement_instance, **structure).save()
+            logement_instance.save()
+        return logement_instance
 
     # TODO : Check whether Component exist before saving structure
     @transaction.atomic

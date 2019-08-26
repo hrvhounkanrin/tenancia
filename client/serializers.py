@@ -24,15 +24,15 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
-        user = validated_data.pop('User', None)
+        user_instance = validated_data.pop('User', None)
         banque_instance = validated_data.pop('Banque', None)
         try:
-            Client.objects.get(user=user)
+            Client.objects.get(user=user_instance)
         except Client.DoesNotExist:
             pass
         else:
             raise serializers.ValidationError("Cet utilisateur est déjà un client")
-        return Client.objects.create(user=user, banque=banque_instance, **validated_data)
+        return Client.objects.create(user=user_instance, banque=banque_instance, **validated_data)
 
     def update(self, instance, validated_data):
         if instance.user.id != self.initial_data.get('user_id', None):

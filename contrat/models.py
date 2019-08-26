@@ -24,7 +24,7 @@ class Contrat(models.Model):
     date_signature = models.DateField(null=False)
     date_effet = models.DateField(null=False)
     periodicite = models.IntegerField()
-    """La durée est fonction de la périodicité"""
+    """La durée est fonction de la périodicite"""
     duree = models.IntegerField()
     montant_bail = models.DecimalField(max_digits=19, decimal_places=10, default=0)
     statut = models.CharField(max_length=64, choices=STATUT_CONTRAT, default=PROPOSITION)
