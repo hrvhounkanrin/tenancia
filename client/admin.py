@@ -1,6 +1,8 @@
 from django.contrib import admin
 
 from .models import Client
+
+
 # Register your models here.
 class ClientAdmin(admin.ModelAdmin):
     save_on_top = True
@@ -8,4 +10,5 @@ class ClientAdmin(admin.ModelAdmin):
     # search_fields = ('id','nom')
     search_fields = 'id'
 
-admin.register(Client)
+
+admin.register(Client, ClientAdmin)

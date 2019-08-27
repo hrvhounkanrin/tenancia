@@ -106,3 +106,5 @@ venv.bak/
 dev_meslimmo/
 .vscode/
 .idea/
+
+meslimmo/settings.py
