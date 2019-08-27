@@ -1,8 +1,9 @@
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.translation import ugettext_lazy as _
 
-from .models import User, UserProfile
+from .models import User
+from .models import UserProfile
 
 
 class UserProfileInline(admin.StackedInline):

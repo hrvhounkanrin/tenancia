@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
 from .models import Immeuble
+# Register your models here.
 
 
 class ImmeubleAdmin(admin.ModelAdmin):

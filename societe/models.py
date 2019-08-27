@@ -1,5 +1,5 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 
 
 class Societe(models.Model):
@@ -7,8 +7,8 @@ class Societe(models.Model):
     num_telephone = models.CharField(max_length=50, null=False)
     adresse = models.CharField(max_length=150, null=True)
     logo = models.CharField(max_length=150)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="SocieteUsers",
-                                   related_name="users", blank=True)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='SocieteUsers',
+                                   related_name='users', blank=True)
 
     def __str__(self):
         return 'Raison social: %s' % (self.raison_social)
@@ -26,4 +26,4 @@ class SocieteUsers(models.Model):
                              null=True)
 
     def __unicode__(self):
-        return self.societe.raison_social + " " + self.user.email
+        return self.societe.raison_social + ' ' + self.user.email

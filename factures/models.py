@@ -1,11 +1,13 @@
 from datetime import date
 from decimal import Decimal
-from jsonfield import JSONField
+
 from django_extensions.db.models import TimeStampedModel
+from jsonfield import JSONField
+
+from appartement.models import *
 from client.models import *
 from proprietaire.models import *
 from tools import format_currency
-from appartement.models import *
 
 
 class Currency(models.Model):

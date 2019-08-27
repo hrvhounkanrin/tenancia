@@ -1,5 +1,7 @@
-from rest_framework import serializers
 import logging
+
+from rest_framework import serializers
+
 from factures.models import *
 
 LOGGER = logging.getLogger(__name__)
@@ -34,6 +36,3 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = '__all__'
-
-
-

@@ -1,8 +1,10 @@
-from factures.models import *
 import logging
+
 from rest_framework.serializers import Serializer
-from tools.viewsets import ActionAPIView
+
+from factures.models import *
 from factures.serializers import *
+from tools.viewsets import ActionAPIView
 
 LOGGER = logging.getLogger(__name__)
 logger = logging.getLogger('ddyxdebug')
@@ -64,6 +66,3 @@ class InvoicingAction(ActionAPIView):
             return {'success': True, 'response': item_serialiazed_data.data}
         except Exception as e:
             return {'success': False, 'reason': '%s' % e}
-
-
-
