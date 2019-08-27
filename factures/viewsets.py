@@ -1,16 +1,14 @@
 import logging
 
-from rest_framework.serializers import Serializer
 
-from factures.models import *
-from factures.serializers import *
+from factures.serializers import ItemSerializer, InvoiceSerializer, InvoiceItemSerializer
 from tools.viewsets import ActionAPIView
-
+from factures.models import  Invoice, InvoiceItem, Item
 LOGGER = logging.getLogger(__name__)
 logger = logging.getLogger('ddyxdebug')
 
 
-class InvoicingAction(ActionAPIView):
+class InvoicingActionViewSet(ActionAPIView):
     """ Invoicing Action"""
 
     def get_invoicing(self, request, params={}, *args, **kwargs):
@@ -41,8 +39,8 @@ class InvoicingAction(ActionAPIView):
         :return:
         """
         try:
-            queryset = InvoiceItemSerializer.objects.all()
-            invoice_item_serialiazed_data = InvoiceSerializer(queryset, many=True, )
+            queryset = InvoiceItem.objects.all()
+            invoice_item_serialiazed_data = InvoiceItemSerializer(queryset, many=True, )
             logger.debug(f'**retrieving invoicing items** --{invoice_item_serialiazed_data} ')
             logger.info(f'**retrieving invoicing items** --{invoice_item_serialiazed_data} ')
             return {'success': True, 'response': invoice_item_serialiazed_data.data}
@@ -59,8 +57,8 @@ class InvoicingAction(ActionAPIView):
         :return:
         """
         try:
-            queryset = ItemSerializer.objects.all()
-            item_serialiazed_data = InvoiceSerializer(queryset, many=True, )
+            queryset = Item.objects.all()
+            item_serialiazed_data = ItemSerializer(queryset, many=True, )
             logger.debug(f'**retrieving items** --{item_serialiazed_data} ')
             logger.info(f'**retrieving items** --{item_serialiazed_data} ')
             return {'success': True, 'response': item_serialiazed_data.data}

@@ -1,9 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from django_extensions.db.models import TimeStampedModel
 from jsonfield import JSONField
-
 from appartement.models import *
 from client.models import *
 from proprietaire.models import *
@@ -51,9 +49,7 @@ class Item(models.Model):
         ordering = ['-id']
 
 
-class Invoice(TimeStampedModel):
-    client = models.ForeignKey(Client,
-                               on_delete=models.CASCADE)
+class Invoice(models.Model):
     proprietaire = models.ForeignKey(Proprietaire,
                                      on_delete=models.CASCADE)
     currency = models.ForeignKey(Currency, blank=True, null=True,
@@ -67,7 +63,7 @@ class Invoice(TimeStampedModel):
     paid_date = models.DateField(blank=True, null=True)
     appartement = JSONField(default=dict())
 
-    objects = InvoiceManager()
+    # objects = InvoiceManager()
 
     def __str__(self):
         return u'%s (%s)' % (self.invoice_id, self.total_amount())
