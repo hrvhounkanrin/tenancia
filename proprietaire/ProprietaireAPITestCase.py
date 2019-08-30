@@ -40,3 +40,20 @@ class ProprietaireAPITestCase(TestCase):
 
     def test_can_update_prorietaire_data(self):
         assert False is True
+
+
+class APITest(unittest.TestCase):
+    """API Unit Test Class."""
+
+    def setUp(self):
+        """Initialize the class with relevant variables."""
+        self.client = APIClient()
+
+    def test_api_get(self) -> None:
+        """Test Get API."""
+        response = self.client.get("/proprietaire_action/create_proprio")
+        response_dict = response.json()
+
+        print(response_dict)
+
+        self.assertIsNotNone(response_dict)
