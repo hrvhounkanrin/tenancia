@@ -34,7 +34,7 @@ class Contrat(models.Model):
     appartement = models.ForeignKey('appartement.Appartement', on_delete=models.CASCADE, null=True, )
     accessoires = models.ManyToManyField(Accesoireloyer, through="ContratAccessoiresloyer",
                                          related_name="accessoires", blank=False)
-    #mandat = models.ForeignKey('societe.Mandat', null=True, on_delete=models.SET_NULL)
+    mandat = models.ForeignKey('societe.Mandat', null=True, on_delete=models.SET_NULL)
     # signature field needs to be implemented
 
 
