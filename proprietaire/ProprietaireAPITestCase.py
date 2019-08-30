@@ -1,5 +1,8 @@
 # -*- coding: UTF-8 -*-
-from django.test import TestCase, Client
+import unittest
+from django.test import TestCase
+from django.urls import reverse
+from rest_framework.test import APIClient
 from customuser.models import User
 from proprietaire.models import Proprietaire
 
@@ -10,21 +13,21 @@ class ProprietaireAPITestCase(TestCase):
     '''
 
     def setUp(self):
-        self.c = Client()
+        print('Set up test')
+        self.client = APIClient()
         #Create and save a user object
-        self.user = User(username='ipattey', email='epatey@gmail.com').save()
-        self.user, created = Person.objects.get_or_create(
-            {
-                email:'ipattey@gmail.com', first_name: 'Pattey', last_name: 'ISMAEL',
-                password:'ipattey',  profile:{
-                    title: 'IT', dob: '1986-05-09', address: 'UNKOWN', country: 'BJ',
-                    zip: '093', city: 'COTONOU'
-                }
-            t
-        t
-
-   tdeet_proprietaire_lise(self):
-        assert False is True
+        self.user = User.objects.get_or_create(username='ipattey', email='epatey@gmail.com')
+      
+        
+    def test_proprietaire_list(self):
+        url = reverse("proprietaire_action")
+        #url1 = reverse('proprietaire:proprietaire_action')
+        #print('URl 1:{} '.format(url1))
+        response = self.client.get(url1)
+        response_dict = response.json()
+        print(response_dict)
+        self.assertIsNotNone(response_dict)
+        
 
     def test_get_proprietaire_returns_correct_fields(self):
         assert False is True

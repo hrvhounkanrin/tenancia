@@ -28,16 +28,13 @@ class Contrat(models.Model):
     duree = models.IntegerField()
     montant_bail = models.DecimalField(max_digits=19, decimal_places=10, default=0)
     statut = models.CharField(max_length=64, choices=STATUT_CONTRAT, default=PROPOSITION)
-    #caution_loyer = models.IntegerField()
-    #caution_eau = models.IntegerField()
-    #caution_electricite = models.IntegerField()
     observation = models.CharField(max_length=256, null=True)
     tacite_reconduction = models.BooleanField(default=True)
     client = models.ForeignKey('client.Client', on_delete=models.CASCADE, null=True, )
-    # https: // docs.djangoproject.com / en / 1.11 / ref / models / fields /  # foreignkey
     appartement = models.ForeignKey('appartement.Appartement', on_delete=models.CASCADE, null=True, )
     accessoires = models.ManyToManyField(Accesoireloyer, through="ContratAccessoiresloyer",
                                          related_name="accessoires", blank=False)
+    #mandat = models.ForeignKey('societe.Mandat', null=True, on_delete=models.SET_NULL)
     # signature field needs to be implemented
 
 
