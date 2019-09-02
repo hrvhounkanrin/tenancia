@@ -43,7 +43,6 @@ class ProprietairAction(ActionAPIView):
             'request': request,
         }
         if isinstance(request.data.get('proprietaire', None), list):
-            print("Liste de proprietaire")
             proprietaires = request.data.pop('proprietaire')
             proprietaire_objects = []
             for proprio in proprietaires:
