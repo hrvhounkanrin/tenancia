@@ -1,5 +1,8 @@
-
+from django.test import Client
 from django.test import TestCase
+
+from customuser.models import User
+
 
 class UserAPITestCase(TestCase):
     """
@@ -10,9 +13,9 @@ class UserAPITestCase(TestCase):
         self.c = Client()
 
         self.normal_user = User.objects.create_user(
-            username="joe", password="password", email="joe@soap.com")
+            username='joe', password='password', email='joe@soap.com')
         self.superuser = User.objects.create_superuser(
-            username="clark", password="supersecret", email="joe@soap.com")
+            username='clark', password='supersecret', email='joe@soap.com')
 
     def test_can_get_user_list(self):
         """GET /user returns a list of users"""
@@ -38,4 +41,3 @@ a logged in user who is not superuser"""
     def tearDown(self):
         for user in User.objects.all():
             user.delete()
-

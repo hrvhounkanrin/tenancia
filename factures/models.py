@@ -2,8 +2,7 @@ from datetime import date
 from decimal import Decimal
 
 from jsonfield import JSONField
-from appartement.models import *
-from client.models import *
+
 from proprietaire.models import *
 from tools import format_currency
 
@@ -50,6 +49,7 @@ class Item(models.Model):
 
 
 class Invoice(models.Model):
+    client = JSONField(default=dict())
     proprietaire = models.ForeignKey(Proprietaire,
                                      on_delete=models.CASCADE)
     currency = models.ForeignKey(Currency, blank=True, null=True,
@@ -63,7 +63,6 @@ class Invoice(models.Model):
     paid_date = models.DateField(blank=True, null=True)
     appartement = JSONField(default=dict())
 
-    # objects = InvoiceManager()
 
     def __str__(self):
         return u'%s (%s)' % (self.invoice_id, self.total_amount())
@@ -82,38 +81,6 @@ class Invoice(models.Model):
 
     def file_name(self):
         return u'Invoice %s.pdf' % self.invoice_id
-
-    # def send_invoice(self):
-    #     pdf = StringIO()
-    #     draw_pdf(pdf, self)
-    #     pdf.seek(0)
-    #
-    #     attachment = MIMEApplication(pdf.read())
-    #     attachment.add_header("Content-Disposition", "attachment",
-    #                           filename=self.file_name())
-    #     pdf.close()
-    #
-    #     subject = app_settings.INV_EMAIL_SUBJECT % {"invoice_id": self.invoice_id}
-    #     email_kwargs = {
-    #         "invoice": self,
-    #         "SITE_NAME": settings.SITE_NAME,
-    #         "INV_CURRENCY": app_settings.INV_CURRENCY,
-    #         "INV_CURRENCY_SYMBOL": app_settings.INV_CURRENCY_SYMBOL,
-    #         "SUPPORT_EMAIL": settings.MANAGERS[0][1],
-    #         }
-    #     try:
-    #         template = get_template("invoice/invoice_email.html")
-    #         body = template.render(Context(email_kwargs))
-    #     except TemplateDoesNotExist:
-    #         body = render_to_string("invoice/invoice_email.txt", email_kwargs)
-    #     email = EmailMultiAlternatives(subject=subject, body=strip_tags(body), to=[self.user.email])
-    #     email.attach_alternative(body, "text/html")
-    #     email.attach(attachment)
-    #     email.send()
-    #
-    #     self.invoiced = True
-    #     self.save()
-
 
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name='items', unique=False,

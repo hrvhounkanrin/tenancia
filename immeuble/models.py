@@ -1,5 +1,6 @@
-from django.db import models
 from countries_plus.models import Country
+from django.db import models
+
 
 class Immeuble(models.Model):
     intitule = models.CharField(max_length=50)
@@ -19,7 +20,6 @@ class Immeuble(models.Model):
     def __str__(self):
         return '%s %s' % (self.intitule, self.proprietaire.user.last_name)
 
-
     class Meta:
-        verbose_name = "Immeuble"
-        verbose_name_plural = "Immeubles"
+        verbose_name = 'Immeuble'
+        verbose_name_plural = 'Immeubles'

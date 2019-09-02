@@ -1,11 +1,14 @@
-from  .models import Client
 from rest_framework import serializers
-from banque.serializers import BanqueSerializers
+
+from  .models import Client
 from banque.models import Banque
-from customuser.serializers import UserSerializer
-from customuser.models import User
-from contrat.serializers import ContratSerializers
+from banque.serializers import BanqueSerializers
 from contrat.models import Contrat
+from contrat.serializers import ContratSerializers
+from customuser.models import User
+from customuser.serializers import UserSerializer
+
+
 class ClientSerializer(serializers.ModelSerializer):
     """
         Serializer for class Client
@@ -15,7 +18,8 @@ class ClientSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Client
-        fields = ('id','nom', 'prenom', 'profession', 'mode_paiement', 'ice_contact', 'ice_number', 'ice_relation'
+        fields = ('id','nom', 'prenom', 'profession', 'mode_paiement',
+                  'ice_contact', 'ice_number', 'ice_relation'
                   , 'user', 'banque', 'contrats')
 
     def get_contrats(self, client):
@@ -54,5 +58,5 @@ class ClientSerializer(serializers.ModelSerializer):
         except Client.DoesNotExist:
             pass
         else:
-            raise serializers.ValidationError("Cet utilisateur est déjà un client tenancia")
+            raise serializers.ValidationError('Cet utilisateur est déjà un client tenancia')
         return Client.objects.create(user=user_instance, **validated_data)

@@ -1,9 +1,13 @@
 import logging
 
-
-from factures.serializers import ItemSerializer, InvoiceSerializer, InvoiceItemSerializer
+from factures.models import Invoice
+from factures.models import InvoiceItem
+from factures.models import Item
+from factures.serializers import InvoiceItemSerializer
+from factures.serializers import InvoiceSerializer
+from factures.serializers import ItemSerializer
 from tools.viewsets import ActionAPIView
-from factures.models import  Invoice, InvoiceItem, Item
+
 LOGGER = logging.getLogger(__name__)
 logger = logging.getLogger('ddyxdebug')
 
@@ -64,3 +68,7 @@ class InvoicingActionViewSet(ActionAPIView):
             return {'success': True, 'response': item_serialiazed_data.data}
         except Exception as e:
             return {'success': False, 'reason': '%s' % e}
+
+    def create_invoice(self, request, *args, **kwargs):
+        """ Setting up invoicing"""
+        pass

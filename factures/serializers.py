@@ -2,7 +2,9 @@ import logging
 
 from rest_framework import serializers
 
-from factures.models import *
+from factures.models import Invoice
+from factures.models import InvoiceItem
+from factures.models import Item
 
 LOGGER = logging.getLogger(__name__)
 
