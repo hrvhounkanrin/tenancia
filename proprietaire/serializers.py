@@ -1,18 +1,17 @@
 import logging
-from rest_framework import serializers, exceptions
-from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
-from drf_writable_nested import NestedUpdateMixin
-from immeuble.serializers import ImmeubleSerializers
-from appartement.serializers import  AppartementSerializers;
-from immeuble.models import Immeuble
+
+from rest_framework import serializers
+
+from .models import *
+from banque.models import Banque
+from banque.serializers import BanqueSerializers
 from customuser.models import User
 from customuser.serializers import UserSerializer
-from banque.serializers import BanqueSerializers
-from tools.serializers import (DictSerializer, AsymetricRelatedField, )
-from banque.models import Banque
-from . models import *
+from immeuble.models import Immeuble
+from immeuble.serializers import ImmeubleSerializers
+
 logger = logging.getLogger(__name__)
+
 
 class ProprietaireSerializers(serializers.ModelSerializer):
     """
@@ -21,37 +20,35 @@ class ProprietaireSerializers(serializers.ModelSerializer):
     immeubles = serializers.SerializerMethodField()
     banque = BanqueSerializers()
     user = UserSerializer()
-    #appartements=serializers.SerializerMethodField()
+
     class Meta:
         model = Proprietaire
-        fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence', 'user', 'banque', 'immeubles']
-        #list_serializer_class = DictSerializer
-
+        fields = ['id', 'mode_paiement', 'numcompte',
+                  'pays_residence', 'user', 'banque', 'immeubles']
 
     def get_immeubles(self, proprietaire):
         immeubles = Immeuble.objects.filter(
             proprietaire=proprietaire,
-        )
+            )
         return ImmeubleSerializers(
             immeubles,
             many=True,
             context={'request': self.context['request']}
-        ).data
-
+            ).data
 
     def get_user(self, proprietaire):
         return UserSerializer(
             proprietaire.user,
             many=False,
             context={'request': self.context['request']}
-        ).data
+            ).data
 
     def get_banque(self, proprietaire):
         return BanqueSerializers(
             proprietaire.banque,
             many=False,
             context={'request': self.context['request']}
-        ).data
+            ).data
 
     def create(self, validated_data):
         user_data = validated_data.pop('user', None)
@@ -65,7 +62,7 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         except Proprietaire.DoesNotExist:
             pass
         else:
-            raise serializers.ValidationError("Cet utilisateur est déjà un propriétaire")
+            raise serializers.ValidationError('Cet utilisateur est déjà un propriétaire')
         return Proprietaire.objects.create(user=user_instance, **validated_data)
 
     def update(self, instance, validated_data):
