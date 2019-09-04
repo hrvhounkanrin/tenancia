@@ -50,8 +50,14 @@ class AppartementSerializers(serializers.ModelSerializer):
         if "structures" in self.initial_data:
             structures = self.initial_data.get("structures")
             for structure in structures:
-                structure.pop('appartement', None)
-                StructureAppartement(appartement=logement_instance, **structure).save()
+                #structure.pop('appartement', None)
+                dependency_id=structure.pop('composantAppartement', None)
+                try:
+                    dependency_instance = ComposantAppartement.objects.get(id=dependency_id)
+                except ObjectDoesNotExist:
+                    continue
+                StructureAppartement(appartement=logement_instance, composantAppartement=dependency_instance,
+                 **structure).save()
             logement_instance.save()
         return logement_instance
 
