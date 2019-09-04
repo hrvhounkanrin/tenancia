@@ -54,7 +54,6 @@ class MandataireAPITestCase(TestCase):
         response = self.client.post(url, mandataire_data,format='json')
         #print(response.data)
         response_dict = response.json()
-        #print(response_dict['payload']['mandataire'][0]['numcompte'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert response.status_code == 200, \
             'Expect 201 OK. got: {}' . format(response.status_code)
