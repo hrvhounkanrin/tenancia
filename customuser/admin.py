@@ -1,17 +1,23 @@
+"""Customuser admin.py."""
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.translation import ugettext_lazy as _
 
-from .models import User, UserProfile
+from .models import User
+from .models import UserProfile
 
 
 class UserProfileInline(admin.StackedInline):
+    """Userprofil admin class."""
+
     model = UserProfile
     can_delete = False
 
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
+    """UserAdmin class."""
+
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name')}),

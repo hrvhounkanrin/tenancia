@@ -1,12 +1,16 @@
 # -*- coding: UTF-8 -*-
+"""Banque app admin.py."""
 from django.contrib import admin
 
 from .models import Client
-# Register your models here.
+
+
 class ClientAdmin(admin.ModelAdmin):
+    """ClientAdmin class."""
+
     save_on_top = True
     list_display = ['nom', 'prenom', 'address']
-    # search_fields = ('id','nom')
     search_fields = 'id'
+
 
 admin.register(Client)

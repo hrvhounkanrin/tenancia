@@ -1,7 +1,4 @@
-"""
- Constances to be used as errors codes
- Des constances que je suis entrain de creer qui peuvent etre utilisees
-"""
+"""Constances to be used as errors codes."""
 
 UNDEFINE = 0
 IN_USE = 1

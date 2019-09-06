@@ -1,30 +1,39 @@
+"""Customuser serializer."""
 import logging
 
 from rest_framework import serializers
 
 from customuser.models import User
 from customuser.models import UserProfile
-
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    """Userprofil serializer."""
+
     class Meta:
+        """Userprofil serializer meta."""
+
         model = UserProfile
         fields = ('dob', 'title', 'address', 'country', 'photo')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    """Userserializer class."""
+
     profile = UserProfileSerializer(required=False)
 
     class Meta:
+        """Userserializer meta."""
+
         model = User
-        fields = ('url', 'email', 'first_name', 'last_name', 'password', 'profile')
+        fields = ('url', 'email', 'first_name',
+                  'last_name', 'password', 'profile')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        """ Create function based on  the validated_data args """
+        """User serializer create."""
         profile_data = validated_data.pop('profile')
         logging.debug(f'**Profile  data information', f'{profile_data}')
         password = validated_data.pop('password')
@@ -36,12 +45,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+        """Customuser update."""
         profile_data = validated_data.pop('profile')
         profile = instance.profile
-
         instance.email = validated_data.get('email', instance.email)
         instance.save()
-
         profile.title = profile_data.get('title', profile.title)
         profile.dob = profile_data.get('dob', profile.dob)
         profile.address = profile_data.get('address', profile.address)
@@ -50,5 +58,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         profile.zip = profile_data.get('zip', profile.zip)
         profile.photo = profile_data.get('photo', profile.photo)
         profile.save()
-
         return instance

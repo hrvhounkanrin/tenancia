@@ -1,11 +1,16 @@
 # -*- coding: UTF-8 -*-
-from django.db import models
+"""Banque app models."""
 from countries_plus.models import Country
+from django.db import models
+
 
 class Banque(models.Model):
-    codebanque=models.CharField(max_length=25, unique=True)
-    libbanque=models.CharField(max_length=100)
+    """Banque model."""
+
+    codebanque = models.CharField(max_length=25, unique=True)
+    libbanque = models.CharField(max_length=100)
     pays = models.ForeignKey(Country, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
-        return  self.libbanque
+        """Banque model representation."""
+        return self.libbanque
