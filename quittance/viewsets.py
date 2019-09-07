@@ -1,29 +1,29 @@
-from tools.viewsets import  ActionAPIView
-from  quittance.models import  *
-from quittance.serializers import  *
-from rest_framework.viewsets import  ModelViewSet
+"""Quitance app viewset."""
+from .models import Quittance
+from quittance.serializers import QuittanceSerializers
+from tools.viewsets import ActionAPIView
 
 
 class QuittanceActionViewSet(ActionAPIView):
+    """Quittance action viewet."""
 
-    def get_quittances(self, request, params ={} , *args, **kwargs):
-        """  The simplest way to  get the list of all the quittances"""
+    def get_quittances(self, request, params={}, *args, **kwargs):
+        """Get quitances."""
         get_all_quittances_ = Quittance.objects.all()
-        ser_quittance = QuittanceSerializers(get_all_quittances_, many=True).data
-        return {"success":True, "quittances":ser_quittance }
-    get_quittances.__doc__ =  "The simple way to get the list of all the quittanceb using the APIActionViewSet"
+        ser_quittance = QuittanceSerializers(
+            get_all_quittances_, many=True).data
+        return {'success': True, 'quittances': ser_quittance}
 
-
-
-    def get_client_per_invoice(self,request,  params={} , *args, **kwargs):
-
+    def get_client_per_invoice(self, request, params={}, *args, **kwargs):
         """
-         test
+        Get client invoice.
+
         :param params:
         :param args:
         :param kwargs:
         :return:
         """
         get_all_quittances_ = Quittance.objects.all()
-        ser_quittance = QuittanceSerializers(get_all_quittances_, many=True).data
-        return {"success":True, "quittances":ser_quittance }
+        ser_quittance = QuittanceSerializers(
+            get_all_quittances_, many=True).data
+        return {'success': True, 'quittances': ser_quittance}

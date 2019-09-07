@@ -1,78 +1,81 @@
+# -*- coding: UTF-8 -*-
+"""Proprietaire serializer.py."""
 import logging
 
 from rest_framework import serializers
+from rest_framework.utils.model_meta import get_field_info
 
-from .models import *
+from . models import Proprietaire
 from banque.models import Banque
 from banque.serializers import BanqueSerializers
 from customuser.models import User
 from customuser.serializers import UserSerializer
-from immeuble.models import Immeuble
-from immeuble.serializers import ImmeubleSerializers
-
 logger = logging.getLogger(__name__)
 
 
 class ProprietaireSerializers(serializers.ModelSerializer):
-    """
-       Serializer for class proprietaire
-    """
-    immeubles = serializers.SerializerMethodField()
-    banque = BanqueSerializers()
-    user = UserSerializer()
+    """Poprietaire model serializer."""
+
+    banque = BanqueSerializers(read_only=True)
+    banque_id = serializers.PrimaryKeyRelatedField(
+        source='Banque', queryset=Banque.objects.all(), write_only=True, )
+    user = UserSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(
+        source='User', queryset=User.objects.all(), write_only=True, )
 
     class Meta:
-        model = Proprietaire
-        fields = ['id', 'mode_paiement', 'numcompte',
-                  'pays_residence', 'user', 'banque', 'immeubles']
+        """Proprietaire model meta class."""
 
-    def get_immeubles(self, proprietaire):
-        immeubles = Immeuble.objects.filter(
-            proprietaire=proprietaire,
-            )
-        return ImmeubleSerializers(
-            immeubles,
-            many=True,
-            context={'request': self.context['request']}
-            ).data
+        model = Proprietaire
+        fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence',
+                  'user', 'user_id', 'banque', 'banque_id']
 
     def get_user(self, proprietaire):
+        """Get user model of proprietaire."""
         return UserSerializer(
             proprietaire.user,
             many=False,
             context={'request': self.context['request']}
-            ).data
+        ).data
 
     def get_banque(self, proprietaire):
+        """Get banque of designated proprietaire."""
         return BanqueSerializers(
             proprietaire.banque,
             many=False,
             context={'request': self.context['request']}
-            ).data
+        ).data
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user', None)
-        banque_data = validated_data.pop('banque', None)
-        if banque_data:
-            banque = Banque.objects.get_or_create(**banque_data)[0]
-            validated_data['banque'] = banque
-        user_instance = User.objects.get(username=user_data['username'])
+        """
+        Create proprietaire.
+
+        :rtype: Proprietaire instance
+        """
+        user_instance = validated_data.pop('User', None)
+        banque_instance = validated_data.pop('Banque', None)
         try:
             Proprietaire.objects.get(user=user_instance)
         except Proprietaire.DoesNotExist:
             pass
         else:
-            raise serializers.ValidationError('Cet utilisateur est déjà un propriétaire')
-        return Proprietaire.objects.create(user=user_instance, **validated_data)
+            raise serializers.ValidationError(
+                'Cet utilisateur est déjà un propriétaire')
+        return Proprietaire.objects.create(
+            **validated_data, user=user_instance, banque=banque_instance)
 
     def update(self, instance, validated_data):
-        instance.mode_paiement = validated_data['mode_paiement']
-        instance.numcompte = validated_data['numcompte']
-        instance.pays_residence = validated_data['pays_residence']
-        try:
-            banque_instance = Banque.objects.get(pk=self.initial_data['banque']['id'])
-            instance.banque = banque_instance
-        except Banque.DoesNotExist:
-            raise serializers.ValidationError("Cette banque n'existe pas.")
+        """Update proprietaire serializer."""
+        if instance.user.id != self.initial_data.get(
+                'user_id', None):
+            raise serializers.ValidationError(
+                "Impossible de changer l'objet user du propriétaire")
+        info = get_field_info(instance)
+        for attr, value in validated_data.items():
+            if attr in info.relations and info.relations[attr].to_many:
+                field = getattr(instance, attr)
+                field.set(value)
+            else:
+                setattr(instance, attr, value)
         instance.save()
         return instance

@@ -1,78 +1,61 @@
-"""Client Seriazlizers."""
+# -*- coding: UTF-8 -*-
+"""Cient app serializer."""
 from rest_framework import serializers
+from rest_framework.utils.model_meta import get_field_info
 
+from .models import Client
 from banque.models import Banque
 from banque.serializers import BanqueSerializers
-from client.models import Client
-from contrat.models import Contrat
-from contrat.serializers import ContratSerializers
 from customuser.models import User
 from customuser.serializers import UserSerializer
 
 
 class ClientSerializer(serializers.ModelSerializer):
-    """Serializer for class Client."""
+    """Client serializer."""
 
-    contrats = serializers.SerializerMethodField()
-    banque = BanqueSerializers()
-    user = UserSerializer()
+    banque = BanqueSerializers(read_only=True)
+    banque_id = serializers.PrimaryKeyRelatedField(
+        source='Banque', queryset=Banque.objects.all(), write_only=True, )
+    user = UserSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(
+        source='User', queryset=User.objects.all(), write_only=True, )
 
     class Meta:
-        """Meta Class."""
+        """Client serializer meta."""
 
         model = Client
-        fields = ('id', 'nom', 'prenom',
-                  'profession',
-                  'mode_paiement',
-                  'ice_contact',
-                  'ice_number',
-                  'ice_relation',
-                  'user',
-                  'banque',
-                  'contrats')
-
-    def get_contrats(self, client):
-        """String.:return."""
-        contrats = Contrat.objects.filter(
-            client=client,
-            )
-        return ContratSerializers(
-            contrats,
-            many=True,
-            context={'request': self.context['request']}
-            ).data
-
-    def get_user(self, client):
-        """Get user."""
-        return UserSerializer(
-            client.user,
-            many=False,
-            context={'request': self.context['request']}
-            ).data
-
-    def get_banque(self, client):
-        """Get banque."""
-        return BanqueSerializers(
-            client.banque,
-            many=False,
-            context={'request': self.context['request']}
-            ).data
+        fields = ('id', 'profession', 'mode_paiement', 'ice_contact',
+                  'ice_number', 'ice_relation', 'user', 'user_id',
+                  'banque', 'banque_id',)
 
     def create(self, validated_data):
-        """Create function."""
-        user_data = validated_data.pop('user', None)
-        banque_data = validated_data.pop('banque', None)
-        if banque_data:
-            banque = Banque.objects.get_or_create(**banque_data)[0]
-            validated_data['banque'] = banque
-        user_instance = User.objects. \
-            get(username=user_data['username'])
+        """Create a client.
+
+        :rtype:
+        """
+        user_instance = validated_data.pop('User', None)
+        banque_instance = validated_data.pop('Banque', None)
         try:
             Client.objects.get(user=user_instance)
         except Client.DoesNotExist:
             pass
         else:
-            raise serializers. \
-                ValidationError('Cet utilisateur est déjà un client tenancia')
-        return Client.objects. \
-            create(user=user_instance, **validated_data)
+            raise serializers.ValidationError(
+                'Cet utilisateur est déjà un client')
+        return Client.objects.create(user=user_instance,
+                                     banque=banque_instance, **validated_data)
+
+    def update(self, instance, validated_data):
+        """Update client."""
+        if instance.user.id != self.initial_data.get('user_id', None):
+            raise serializers.ValidationError(
+                "Impossible de changer l'objet user du client")
+        info = get_field_info(instance)
+        for attr, value in validated_data.items():
+            if attr in info.relations and info.relations[attr].to_many:
+                field = getattr(instance, attr)
+                field.set(value)
+            else:
+                setattr(instance, attr, value)
+        instance.save()
+        return instance

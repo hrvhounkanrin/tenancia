@@ -1,3 +1,1 @@
-from django.contrib import admin
-
-# Register your models here.
+"""rest_graph_ql app admin."""

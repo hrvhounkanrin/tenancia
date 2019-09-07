@@ -1,38 +1,35 @@
 # -*- coding: UTF-8 -*-
-"""Housing app serializers."""
-from django.core.exceptions import ObjectDoesNotExist
+"""Scaffolding serializer."""
 from django.db import transaction
 from rest_framework import serializers
 
 from .models import Appartement
-from .models import ComposantAppartement
+from .models import Immeuble
 from .models import StructureAppartement
-from immeuble.models import Immeuble
-from immeuble.serializers import ImmeubleSerializers
+from appartement.models import ComposantAppartement
+from appartement.serializers import ComposantAppartmentSerializers
 
 
-class ComposantAppartmentSerializers(serializers.ModelSerializer):
-    """ComposantApapartement(Housing dependecy type) serializer."""
+class ImmeubleSerializers(serializers.ModelSerializer):
+    """Immeuble serializer."""
 
     class Meta:
-        """ComposantApapartement serializer meta."""
+        """Immeuble serializer meta."""
 
-        model = ComposantAppartement
+        model = Immeuble
         fields = '__all__'
 
 
 class StructureAppartmentSerializers(serializers.ModelSerializer):
-    """Housing dependecies of specfic housing."""
+    """StructureApparement serializer."""
 
-    composantAppartement =\
-        ComposantAppartmentSerializers(read_only=True)
+    composantAppartement = ComposantAppartmentSerializers(read_only=True)
     composantAppartement_id = serializers.PrimaryKeyRelatedField(
         source='ComposantAppartement',
-        queryset=ComposantAppartement.objects.all(),
-        write_only=True, )
+        queryset=ComposantAppartement.objects.all(), write_only=True,)
 
     class Meta:
-        """StructureAppartement meta."""
+        """Structure appatement serializer meta."""
 
         model = StructureAppartement
         fields = ['appartement', 'composantAppartement',
@@ -41,7 +38,7 @@ class StructureAppartmentSerializers(serializers.ModelSerializer):
 
 
 class AppartementSerializers(serializers.ModelSerializer):
-    """Housing serializer."""
+    """Appartement serializer."""
 
     structures = serializers.SerializerMethodField()
     immeuble = ImmeubleSerializers(read_only=True)
@@ -49,18 +46,14 @@ class AppartementSerializers(serializers.ModelSerializer):
         source='Immeuble', queryset=Immeuble.objects.all(), write_only=True, )
 
     class Meta:
-        """Housing serializer meta."""
+        """Apapartement serializer meta."""
 
         model = Appartement
-        fields = ('id', 'intitule', 'level', 'autre_description', 'statut',
-                  'immeuble', 'immeuble_id', 'structures',)
+        fields = ('id', 'intitule', 'level', 'autre_description',
+                  'statut', 'immeuble', 'immeuble_id', 'structures',)
 
     def get_structures(self, appartement):
-        """Get housing dependecies.
-
-        :param appartement:
-        :return:
-        """
+        """Get appartment structure."""
         structures = StructureAppartement.objects.filter(
             appartement=appartement.id,
         )
@@ -71,32 +64,26 @@ class AppartementSerializers(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        """Create housing.
+        """
+        Create appartement.
 
-        :rtype: Appartement
+        :rtype: Immeuble
         """
         immeuble = validated_data.pop('Immeuble', None)
-        logement_instance = Appartement.objects.create(
+        appartement_instance = Appartement.objects.create(
             immeuble=immeuble, **validated_data)
         if 'structures' in self.initial_data:
             structures = self.initial_data.get('structures')
             for structure in structures:
-                dependency_id = structure.pop('composantAppartement', None)
-                try:
-                    dependency_instance = \
-                        ComposantAppartement.objects.get(id=dependency_id)
-                except ObjectDoesNotExist:
-                    continue
-                StructureAppartement(appartement=logement_instance,
-                                     composantAppartement=dependency_instance,
+                StructureAppartement(appartement=appartement_instance,
                                      **structure).save()
-            logement_instance.save()
-        return logement_instance
+            appartement_instance.save()
+        return appartement_instance
 
-    # TODO : Check whether Component exist before saving structure
+    # TODO : Changer le update pour le rendre plus agnostique des attributs
     @transaction.atomic
     def update(self, instance, validated_data):
-        """Update housing."""
+        """Update appartement."""
         instance.intitule = validated_data['intitule']
         instance.level = validated_data['level']
         instance.autre_description = validated_data['autre_description']
