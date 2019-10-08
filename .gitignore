@@ -106,3 +106,9 @@ venv.bak/
 dev_meslimmo/
 .vscode/
 .idea/
+meslimmo/settings.py
+
+# django migrations
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py

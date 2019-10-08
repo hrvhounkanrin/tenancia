@@ -1,25 +1,41 @@
 # -*- coding: UTF-8 -*-
+"""Housing app Action viewset."""
 import logging
-
-from appartement.serializers import ( AppartementSerializers, StructureAppartmentSerializers, ComposantAppartmentSerializers,)
-from appartement.models import (Appartement, ComposantAppartement, StructureAppartement, )
+from django.shortcuts import get_object_or_404
+from appartement.models import Appartement
+from appartement.models import ComposantAppartement
+from appartement.models import StructureAppartement
+from appartement.serializers import AppartementSerializers
+from appartement.serializers import ComposantAppartmentSerializers
+from appartement.serializers import StructureAppartmentSerializers
 from tools.viewsets import ActionAPIView
 logger = logging.getLogger(__name__)
 
+
 class AppartementViewSet(ActionAPIView):
-    def get_appartment(self, request, params ={} , *args, **kwargs):
-        """  Get all  appartements """
+    """Housing Viewset."""
+
+    def get_logement(self, request, params={}, *args, **kwargs):
+        """Get housing."""
+        serializer_context = {
+            'request': request,
+        }
+        if 'id' in params:
+            queryset = Appartement.objects.filter(
+                id__in=params['id'].split(','))
+            serializer = AppartementSerializers(
+                queryset, context=serializer_context, many=True)
+            logger.debug('**retrieving housing **')
+            return serializer.data
         get_all_appartment = Appartement.objects.all()
-        serialized_appartment = AppartementSerializers(get_all_appartment, many=True).data
-        return {"success": True, "appartements": serialized_appartment}
-    get_appartment.__doc__ = "  Get all  appartements "
+        serialized_appartment = AppartementSerializers(
+            get_all_appartment, many=True, context={'request': request}).data
+        return {'success': True, 'appartements': serialized_appartment}
 
-    def get_building_appartment(self, request, params={}, *args, **kwargs):
-        pass
-
-    def create_appartment(self, request, params={}, *args, **kwargs):
+    def create_logement(self, request, params={}, *args, **kwargs):
         """
-         Create appartement
+         Create appartement.
+
         :param request:
         :param params:
         :param args:
@@ -33,22 +49,26 @@ class AppartementViewSet(ActionAPIView):
             appartements = request.data.pop('appartement')
             appart_objects = []
             for appart in appartements:
-                serializer = AppartementSerializers(data=appart, context=serializer_context)
+                serializer = AppartementSerializers(
+                    data=appart, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
                 appart_objects.append(serializer)
-            saved_appartements = [model.save() for model in appart_objects]
-            serialized_proprio = AppartementSerializers(saved_appartements, many=True, context=serializer_context)
-            return {"success": True, "appartement": serialized_proprio.data}
-
-        #print(request.data.pop('user'))
-        serializer = AppartementSerializers(data=request.data)
+            saved_appartements = \
+                [model.save(created_by=request.user)
+                 for model in appart_objects]
+            serialized_proprio = AppartementSerializers(
+                saved_appartements, many=True, context=serializer_context)
+            return {'success': True, 'appartement': serialized_proprio.data}
+        serializer = AppartementSerializers(
+            data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return {"success": True, "appartement": serializer.data}
+        serializer.save(created_by=request.user)
+        return {'success': True, 'appartement': serializer.data}
 
-    def update_appartement(self, request, params={}, *args, **kwargs):
+    def update_logement(self, request, params={}, *args, **kwargs):
         """
-         Update appartement
+         Update appartement.
+
         :param request:
         :param params:
         :param args:
@@ -61,62 +81,72 @@ class AppartementViewSet(ActionAPIView):
         if isinstance(request.data.get('appartement', None), list):
             appartements = request.data.pop('appartement')
             for appart in appartements:
-                instance = Appartement.objects.get(pk=params.get('id', None))
-                serializer = AppartementSerializers(instance, data=appart, context=serializer_context)
+                instance = Appartement.objects.get(
+                    pk=params.get('id', None))
+                serializer = AppartementSerializers(
+                    instance, data=appart, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
-                serializer.save()
-                return {"success": True, "appartement": serializer.data}
-
-        instance = Appartement.objects.get(pk=params.get('id', None))
-        serializer = AppartementSerializers(instance, data=request.data, context=serializer_context)
+                serializer.save(modified_by=request.user)
+                return {'success': True, 'appartement': serializer.data}
+        instance = get_object_or_404(Appartement, pk=params.get('id', None))
+        serializer = AppartementSerializers(
+            instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return {"success": True, "appartement": serializer.data}
+        serializer.save(modified_by=request.user)
+        return {'success': True, 'appartement': serializer.data}
 
 
 class ComposantAppartementViewSet(ActionAPIView):
+    """Housing dependency Action Viewset."""
 
-    def get_component(self, request, params ={} , *args, **kwargs):
-        """  Get all avavaible appartement component whatever the language"""
+    def get_dependency(self, request, params={}, *args, **kwargs):
+        """Get all housing dependencies."""
         serializer_context = {
             'request': request,
         }
 
         if 'id' in params:
-            queryset = ComposantAppartement.objects.filter(id__in=params['id'].split(","))
-            serializer = ComposantAppartmentSerializers(queryset, context=serializer_context, many=True)
-            logger.debug('**retrieving ComposantAppartement **')
+            queryset = ComposantAppartement.objects.filter(
+                id__in=params['id'].split(','))
+            serializer = ComposantAppartmentSerializers(
+                queryset, context=serializer_context, many=True)
+            logger.debug('**retrieving housing dependencies **')
             return serializer.data
 
         queryset = ComposantAppartement.objects.all()
         serializer = ComposantAppartmentSerializers(queryset, many=True)
-        return {"success": True, "composantAppartements": serializer.data}
-        get_component.__doc__ =  "The simple way to get the list of all the appartment component using the APIActionViewSet"
+        return {'success': True, 'dependency': serializer.data}
 
-    def create_component(self, request, params={}, *args, **kwargs):
-        """  Create an appartment component, it take a single component or a list of components"""
+    def create_dependency(self, request, params={}, *args, **kwargs):
+        """Create housing dependency."""
         serializer_context = {
             'request': request,
         }
-        if isinstance(request.data.get('composant_appartement', None), list):
-            composants = request.data.pop('composant_appartement')
-            aappartment_component_objects = []
-            for composant in composants:
-                serializer = ComposantAppartmentSerializers(data=composant, context=serializer_context)
+        if isinstance(request.data.get('housing_dependency', None), list):
+            dependencies = request.data.pop('housing_dependency')
+            housing_dependency_objects = []
+            for dependency in dependencies:
+                serializer = ComposantAppartmentSerializers(
+                    data=dependency, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
-                aappartment_component_objects.append(serializer)
-            saved_components = [model.save() for model in aappartment_component_objects]
-            serialized_composants = ComposantAppartmentSerializers(saved_components, context=serializer_context, many=True)
-            return {"success": True, "composant_apart": serialized_composants.data}
-
-        serializer = ComposantAppartmentSerializers(data=request.data, context=serializer_context)
+                housing_dependency_objects.append(serializer)
+            saved_dependencies = [model.save()
+                                  for model in housing_dependency_objects]
+            serialized_dependencies = ComposantAppartmentSerializers(
+                saved_dependencies, context=serializer_context,
+                many=True)
+            return {'success': True,
+                    'dependency': serialized_dependencies.data}
+        serializer = ComposantAppartmentSerializers(
+            data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "composant_apart": serializer.data}
+        return {'success': True, 'dependency': serializer.data}
 
-    def update_component(self, request, params={}, *args, **kwargs):
+    def update_dependency(self, request, params={}, *args, **kwargs):
         """
-         Update Component
+         Update housing dependency.
+
         :param request:
         :param params:
         :param args:
@@ -126,30 +156,35 @@ class ComposantAppartementViewSet(ActionAPIView):
         serializer_context = {
             'request': request,
         }
-        if isinstance(request.data.get('composant_appartement', None), list):
-            components = request.data.pop('composant_appartement')
-            component_objects = []
-            for component in components:
-                instance = ComposantAppartement.objects.get(pk=params.get('id', None))
-                serializer = ComposantAppartmentSerializers(instance, data=component, context=serializer_context)
+        if isinstance(request.data.get('housing_dependency', None), list):
+            dependencies = request.data.pop('housing_dependency')
+            dependency_objects = []
+            for dependency in dependencies:
+                instance = ComposantAppartement.objects.get(
+                    pk=params.get('id', None))
+                serializer = ComposantAppartmentSerializers(
+                    instance, data=dependency, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
-                component_objects.append(serializer)
-            saved_components = [model.save() for model in component_objects]
-            serializer = ComposantAppartmentSerializers(saved_components, many=True, context=serializer_context)
-            return {"success": True, "composant_apart": serializer.data}
-
-        instance = ComposantAppartement.objects.get(pk=params.get('id', None))
-        serializer = ComposantAppartmentSerializers(instance, data=request.data, context=serializer_context)
+                dependency_objects.append(serializer)
+            saved_dependencies = [model.save() for model in dependency_objects]
+            serializer = ComposantAppartmentSerializers(
+                saved_dependencies, many=True, context=serializer_context)
+            return {'success': True, 'dependance': serializer.data}
+        instance = get_object_or_404(ComposantAppartement,
+                                     pk=params.get('id', None))
+        serializer = ComposantAppartmentSerializers(
+            instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "composant_apart": serializer.data}
+        return {'success': True, 'dependance': serializer.data}
 
 
 class StructureAppartmentViewSet(ActionAPIView):
-    def get_structure(self, request, params ={} , *args, **kwargs):
-        """  Get all  structure """
+    """StructureAppartement Actions viewset."""
 
+    def get_structure(self, request, params={}, *args, **kwargs):
+        """Get all  structure."""
         get_all_structure = StructureAppartement.objects.all()
-        serialized_structure = StructureAppartmentSerializers(get_all_structure, many=True).data
-        return {"success": True, "structures": serialized_structure}
-        get_structure.__doc__ = "  Get all  structure "
+        serialized_structure = StructureAppartmentSerializers(
+            get_all_structure, many=True).data
+        return {'success': True, 'structures': serialized_structure}

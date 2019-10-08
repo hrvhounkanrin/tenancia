@@ -1,24 +1,24 @@
+"""Rest_graph_ql app serializer.."""
 from rest_framework import serializers
 
 
-
-
-
 class GenericModelSerializer(serializers.ModelSerializer):
+    """Generic model serializer."""
+
     """
-    A ModelSerializer that takes additional `fields` and `model_class` arguments that
+    A ModelSerializer that takes additional
+     'fields' and 'model_class' arguments that
     controls which fields should be displayed.
     """
     class Meta:
+        """GenericModelSerializer meta."""
+
         model = None
         fields = []
 
-
     def __init__(self, *args, **kwargs):
-        # Don't pass the 'fields' arg up to the superclass
+        """Model serializer  init."""
         fields = kwargs.pop('fields', None)
-        # print fields
-        # Don't pass the 'model_class' arg up to the superclass
         model = kwargs.pop('model_class', None)
         if fields is not None:
             self.Meta.fields = fields
@@ -26,14 +26,9 @@ class GenericModelSerializer(serializers.ModelSerializer):
             self.Meta.model = model
             if fields is None:
                 fields = [item.name for item in model._meta.fields]
-
-        # Instantiate the superclass normally
         super(GenericModelSerializer, self).__init__(*args, **kwargs)
-
         if fields is not None:
-            # print(fields)
             self.Meta.fields = fields
-            # Drop any fields that are not specified in the `fields` argument.
             allowed = set(fields)
             existing = set(self.fields.keys())
             for field_name in existing - allowed:
@@ -41,15 +36,13 @@ class GenericModelSerializer(serializers.ModelSerializer):
 
 
 class FieldMixin(object):
-    """
-       Turning to mixin / This class maybe extended to futureproofing stuffs/
-       Can override the get_fields_names to get a specific field on our serializer
+    """Turning to mixin / This class maybe extended."""
 
-    """
     # TODO : TO be customized fully---> then make it more usable
-
     def get_fields_names(self, *args, **kwargs):
         """
+        Get field names.
+
         :param args:
         :param kwargs:
         :return:
@@ -60,11 +53,11 @@ class FieldMixin(object):
         return super(FieldMixin, self).get_fields_names(*args, **kwargs)
 
 
-
-
 class APISerializer(serializers.BaseSerializer):
+    """APISerializer."""
 
     def to_representation(self, data):
+        """To representation."""
         success = True
         payload = data
         if isinstance(data, dict):

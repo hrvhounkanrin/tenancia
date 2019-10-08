@@ -1,3 +1,13 @@
+"""Quittance app admin.py."""
 from django.contrib import admin
 
-# Register your models here.
+from . models import Quittance
+
+
+class QuittanceAdmin(admin.ModelAdmin):
+    """Quittance admin class."""
+
+    pass
+
+
+admin.site.register(Quittance, QuittanceAdmin)
