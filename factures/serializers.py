@@ -1,3 +1,4 @@
+"""Item serializer."""
 import logging
 
 from rest_framework import serializers
@@ -10,31 +11,39 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ItemSerializer(serializers.ModelSerializer):
-    """ So far so good with the  serializer class of the items -serialize the model Item"""
+    """Item serializer."""
+
     price = serializers.SerializerMethodField()
 
     def get_price(self, obj):
+        """Get item price."""
         price = obj.price.all().first()
         if price:
             return price.fee
 
     class Meta:
-        """Class Meta defining the model used and  placed an option on the read_only_fields"""
+        """Class Meta defining the model used."""
+
         model = Item
-        read_only_fields = ('id', 'item_type')
+        read_only_fields = ("id", "item_type")
         exclude = []
 
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
-    """ Defining the invoicing serializers"""
+    """Defining the invoicing serializers."""
 
     class Meta:
+        """Invoice item serializer meta."""
+
         model = InvoiceItem
-        fields = '__all__'
+        fields = "__all__"
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
-    """ Defining Invoicing Serializers"""
+    """Defining Invoicing Serializers."""
+
     class Meta:
+        """Invoice serializer meta."""
+
         model = Invoice
-        fields = '__all__'
+        fields = "__all__"

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Housing app Action viewset."""
 import logging
-
+from django.shortcuts import get_object_or_404
 from appartement.models import Appartement
 from appartement.models import ComposantAppartement
 from appartement.models import StructureAppartement
@@ -27,7 +27,6 @@ class AppartementViewSet(ActionAPIView):
                 queryset, context=serializer_context, many=True)
             logger.debug('**retrieving housing **')
             return serializer.data
-
         get_all_appartment = Appartement.objects.all()
         serialized_appartment = AppartementSerializers(
             get_all_appartment, many=True, context={'request': request}).data
@@ -54,14 +53,16 @@ class AppartementViewSet(ActionAPIView):
                     data=appart, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
                 appart_objects.append(serializer)
-            saved_appartements = [model.save() for model in appart_objects]
+            saved_appartements = \
+                [model.save(created_by=request.user)
+                 for model in appart_objects]
             serialized_proprio = AppartementSerializers(
                 saved_appartements, many=True, context=serializer_context)
             return {'success': True, 'appartement': serialized_proprio.data}
         serializer = AppartementSerializers(
             data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(created_by=request.user)
         return {'success': True, 'appartement': serializer.data}
 
     def update_logement(self, request, params={}, *args, **kwargs):
@@ -85,14 +86,13 @@ class AppartementViewSet(ActionAPIView):
                 serializer = AppartementSerializers(
                     instance, data=appart, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
-                serializer.save()
+                serializer.save(modified_by=request.user)
                 return {'success': True, 'appartement': serializer.data}
-        instance = Appartement.objects.get(
-            pk=params.get('id', None))
+        instance = get_object_or_404(Appartement, pk=params.get('id', None))
         serializer = AppartementSerializers(
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(modified_by=request.user)
         return {'success': True, 'appartement': serializer.data}
 
 
@@ -170,7 +170,8 @@ class ComposantAppartementViewSet(ActionAPIView):
             serializer = ComposantAppartmentSerializers(
                 saved_dependencies, many=True, context=serializer_context)
             return {'success': True, 'dependance': serializer.data}
-        instance = ComposantAppartement.objects.get(pk=params.get('id', None))
+        instance = get_object_or_404(ComposantAppartement,
+                                     pk=params.get('id', None))
         serializer = ComposantAppartmentSerializers(
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)

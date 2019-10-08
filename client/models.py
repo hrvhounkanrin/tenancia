@@ -16,6 +16,14 @@ class Client(models.Model):
                                 on_delete=models.CASCADE, null=True, )
     banque = models.ForeignKey('banque.Banque',
                                on_delete=models.SET_NULL, null=True, )
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='client_created_user')
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='client_updated_user')
 
     def __str__(self):
         """Client representation."""

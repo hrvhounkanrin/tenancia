@@ -12,11 +12,11 @@ class ComposantAppartement(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True,
-        editable=False, related_name='created_user')
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='depenency_created_user')
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True,
-        editable=False, related_name='updated_user')
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='depenency_updated_user')
 
 
 class Appartement(models.Model):
@@ -48,11 +48,11 @@ class Appartement(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True,
-        editable=False, related_name='created_user')
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='appartement_created_user')
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True,
-        editable=False, related_name='updated_user')
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='appartement_updated_user')
 
     def __str__(self):
         """Housing reprensentation."""
@@ -74,8 +74,8 @@ class StructureAppartement(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True,
-        editable=False, related_name='created_user')
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='structure_created_user')
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True,
-        editable=False, related_name='updated_user')
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='structure_updated_user')

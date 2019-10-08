@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Client app Actions Viewset."""
 import logging
-
+from django.shortcuts import get_object_or_404
 from .serializers import ClientSerializer
 from client.models import (Client,)
 from tools.viewsets import ActionAPIView
@@ -88,7 +88,8 @@ class ClientAction(ActionAPIView):
             serializer = ClientSerializer(
                 saved_client, many=True, context=serializer_context)
             return {'success': True, 'client': serializer.data}
-        instance = Client.objects.get(pk=params.get('id', None))
+        instance = get_object_or_404(Client,
+                                     pk=params.get('id', None))
         serializer = ClientSerializer(
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)

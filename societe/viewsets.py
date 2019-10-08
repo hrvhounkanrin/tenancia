@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Societe app viewsets."""
 import logging
-
+from django.shortcuts import get_object_or_404
 from .models import Mandat
 from .models import Societe
 from .serializers import MandatSerializer
@@ -96,8 +96,8 @@ class SocieteViewSetAction(ActionAPIView):
             serializer = SocieteSerializer(
                 saved_mandataire, many=True, context=serializer_context)
             return {'success': True, 'societe': serializer.data}
-
-        instance = Societe.objects.get(pk=params.get('id', None))
+        instance = get_object_or_404(Societe,
+                                     pk=params.get('id', None))
         serializer = SocieteSerializer(
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
