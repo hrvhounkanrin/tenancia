@@ -13,6 +13,7 @@ import os
 import datetime
 AUTH_USER_MODEL = 'customuser.User'
 
+SITE_ID = 1
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -294,7 +295,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
-    )
+    ),
+    'PASSWORD_RESET_SERIALIZER':
+        'customuser.serializers.PasswordResetSerializer1',
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -316,12 +319,12 @@ OLD_PASSWORD_FIELD_ENABLED = True
 
 # Email Settings
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-SENDGRID_SANDBOX_MODE_IN_DEBUG = True
-SENDGRID_ECHO_TO_STDOUT = True
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+SENDGRID_ECHO_TO_STDOUT = False
 SENDGRID_API_KEY = \
     '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'
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
-
+DEFAULT_FROM_EMAIL = 'Tenancia <noreply@tenancia.com>'
 JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,

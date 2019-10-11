@@ -19,6 +19,9 @@ from societe.viewsets import MandatViewSetAction as mandat_viewset
 from societe.viewsets import SocieteViewSetAction as societe_views
 from customuser import viewsets as user_views
 from customuser.viewsets import AccountViewset
+from customuser.views import PasswordResetView
+from rest_auth.views import PasswordResetConfirmView
+
 router = routers.SimpleRouter()
 urlpatterns = [
     url(r'^$', landing_view.index, name='index'),
@@ -55,6 +58,9 @@ urlpatterns = [
         {'get': 'list', 'post': 'create'}), name='user_api'),
     url(r'^users/activate$', AccountViewset.as_view(
         {'get': 'activate_account'}), name='account-activate'),
-
+    url(r'^password/reset/$', PasswordResetView.as_view(),
+        name='rest_password_reset'),
+    url(r'^password/reset/confirm/$', PasswordResetConfirmView.as_view(),
+        name='rest_password_reset_confirm'),
 ]
 urlpatterns += router.urls

@@ -1,10 +1,8 @@
 """Customuser serializer."""
 import logging
-from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.forms import PasswordResetForm
 from django.conf import settings
-from django.contrib.auth.password_validation import validate_password
-from django.core import exceptions as django_exceptions
-from django.db import IntegrityError, transaction
+from django.utils.translation import gettext as _
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -95,54 +93,33 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
-    """Override djoser create user serializer."""
+class PasswordResetSerializer(serializers.Serializer):
+    """Custom password serializer."""
 
-    password = serializers.CharField(
-        style={"input_type": "password"}, write_only=True)
-    profile = UserProfileSerializer(required=False)
-    default_error_messages = {
-        "cannot_create_user": _("Unable to create account.")
-    }
+    email = serializers.EmailField()
+    password_reset_form_class = PasswordResetForm
 
-    class Meta:
-        """User create serializer meta."""
+    def validate_email(self, value):
+        """Validate user mail."""
+        self.reset_form = self.password_reset_form_class(
+            data=self.initial_data)
+        if not self.reset_form.is_valid():
+            raise serializers.ValidationError(_('Error'))
 
-        model = User
-        fields = ('id', 'email', 'first_name',
-                  'last_name', 'password', 'profile')
-        extra_kwargs = {'password': {'write_only': True}}
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(_('Invalid e-mail address'))
+        return value
 
-    def validate(self, attrs):
-        """Validate."""
-        attrs.pop('profile', None)
-        user = User(**attrs)
-        password = attrs.get("password")
-
-        try:
-            validate_password(password, user)
-        except django_exceptions.ValidationError as e:
-            serializer_error = serializers.as_serializer_error(e)
-            raise serializers.ValidationError(
-                {"password": serializer_error["non_field_errors"]}
-            )
-
-        return attrs
-
-    def create(self, validated_data):
-        """Perform create."""
-        try:
-            user = self.perform_create(validated_data)
-        except IntegrityError:
-            self.fail("cannot_create_user")
-
-        return user
-
-    def perform_create(self, validated_data):
-        """Perform create."""
-        with transaction.atomic():
-            user = User.objects.create_user(**validated_data)
-            profile_data = self.initial_data.get('profile', None)
-            if profile_data:
-                UserProfile.objects.create(user=user, **profile_data)
-        return user
+    def save(self):
+        """Save."""
+        request = self.context.get('request')
+        opts = {
+            'use_https': request.is_secure(),
+            'from_email': getattr(settings, 'DEFAULT_FROM_EMAIL'),
+            'subject_template_name':
+                'registration/password_reset_subject.txt',
+            'html_email_template_name':
+                'registration/password_reset_email.html',
+            'request': request,
+        }
+        self.reset_form.save(**opts)
