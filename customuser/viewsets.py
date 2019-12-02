@@ -40,7 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class AccountViewset(GenericViewSet):
     """Account activation viewset."""
-
+    serializer_class = None
     permission_classes = (AllowAny,)
     @action(methods=["get"], detail=False, permission_classes=(AllowAny,))
     def activate_account(self, request, uidb64, token):
@@ -59,3 +59,6 @@ class AccountViewset(GenericViewSet):
             return {'success': True, 'user': serializer}
         else:
             return {'success': False, 'msg': 'An error occured.'}
+
+    def get_serializer_class(self):
+        pass

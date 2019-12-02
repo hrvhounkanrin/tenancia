@@ -12,7 +12,7 @@ from sendgrid.helpers.mail import Mail
 from customuser.models import User
 from customuser.models import UserProfile
 from .token_generator import account_activation_token
-
+from rest_framework.validators import UniqueValidator
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Userserializer class."""
+    def __init__(self, *args, **kwargs):
+        super(UserSerializer, self).__init__(*args, **kwargs)
+        # Find UniqueValidator and set custom message
+        for validator in self.fields['email'].validators:
+            if isinstance(validator, UniqueValidator):
+                validator.message = _('A user with this email already exist.')
 
     profile = UserProfileSerializer(required=False)
 
@@ -43,20 +49,22 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """User serializer create."""
         profile_data = validated_data.pop('profile')
-        logging.debug(f'**Profile  data information', f'{profile_data}')
+        # logging.debug(f'**Profile  data information', f'{profile_data}')
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
         user.save()
         UserProfile.objects.create(user=user, **profile_data)
-        self.send_activation_mail(user)
+        # self.send_activation_mail(user)
         return user
+
+
 
     def send_activation_mail(self, user):
         """Send activation mail to user."""
         token = account_activation_token.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        msg_content = render_to_string('activate_account.html', {
+        msg_content = render_to_string('registration/activate_account.html', {
             'user': user,
             'domain': 'https://tenancia.com',
             'uid': uid,
@@ -91,6 +99,16 @@ class UserSerializer(serializers.ModelSerializer):
         profile.photo = profile_data.get('photo', profile.photo)
         profile.save()
         return instance
+
+    def validate_email(self, value):
+        try:
+            User.objects.get(email=value)
+        except User.DoesNotExist:
+            pass
+        else:
+            raise serializers.ValidationError(
+                "A user with this email address already exists.")
+        return value
 
 
 class PasswordResetSerializer(serializers.Serializer):
