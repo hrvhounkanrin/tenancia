@@ -17,3 +17,4 @@ jsonfield
 markdown
 pre-commit
 psycopg2-binary
+djangorestframework-simplejwt
