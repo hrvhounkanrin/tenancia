@@ -1,6 +1,6 @@
 """Tenancia urls v1."""
-from django.conf.urls import url
-from django.urls import re_path, path
+from django.conf.urls import url, include
+from django.urls import path
 
 from rest_framework import routers
 import banque.viewsets as banque_views
@@ -23,11 +23,10 @@ from customuser import viewsets as user_views
 from customuser.viewsets import AccountViewset
 from customuser.views import PasswordResetView
 from rest_auth.views import PasswordResetConfirmView
-from rest_auth.registration.views import RegisterView, VerifyEmailView
-from allauth.account.views import ConfirmEmailView
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 router = routers.SimpleRouter()
 urlpatterns = [
@@ -69,36 +68,15 @@ urlpatterns = [
         name='rest_password_reset'),
     url(r'^password/reset/confirm/$', PasswordResetConfirmView.as_view(),
         name='rest_password_reset_confirm'),
-
-    url(r'^account-confirm-email/(?P<key>[-:\w]+)/$', ConfirmEmailView.as_view(),
-        name='account_confirm_email'),
-    url(r'^users/register/$', RegisterView.as_view(), name='rest_register'),
-
-    # path('registration/', RegisterView.as_view(), name='account_signup'),
-    re_path(r'^account-confirm-email/', VerifyEmailView.as_view(),
-         name='account_email_verification_sent'),
-    re_path(r'^account-confirm-email/(?P<key>[-:\w]+)/$', VerifyEmailView.as_view(),
-         name='account_confirm_email'),
+    url('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    url('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
-schema_view = get_schema_view(
-   openapi.Info(
-      title="Snippets API",
-      default_version='v1',
-      description="Test description",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="contact@snippets.local"),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
-)
-
-urlpatterns_swagger = [
-   url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-   url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-   url(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+api_urlpatterns = [
+    path('accounts/', include('rest_registration.api.urls')),
 ]
 
-urlpatterns += urlpatterns_swagger
+
+
 urlpatterns += router.urls
+urlpatterns += api_urlpatterns
