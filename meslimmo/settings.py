@@ -167,7 +167,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-SITE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
@@ -278,10 +277,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAdminUser',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'PASSWORD_RESET_SERIALIZER':
         'customuser.serializers.PasswordResetSerializer1',
@@ -312,12 +311,6 @@ SENDGRID_API_KEY = \
     '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'
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 DEFAULT_FROM_EMAIL = 'Tenancia'
-JWT_AUTH = {
-    'JWT_VERIFY': True,
-    'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60000),
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-}
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -333,7 +326,7 @@ REST_REGISTRATION = {
 }
 from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
