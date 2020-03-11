@@ -1,0 +1,1 @@
+"""Quittance app views."""

@@ -1,0 +1,1 @@
+"""Banque app views."""

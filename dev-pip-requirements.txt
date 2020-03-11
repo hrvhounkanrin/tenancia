@@ -1,0 +1,15 @@
+amqp==1.4.9
+anyjson==0.3.3
+billiard==3.3.0.23
+celery==3.1.18
+certifi==2018.11.29
+chardet==3.0.4
+Django==1.11
+django-countries-plus==1.2.1
+django-countries-plus
+django-rest-auth
+djangorestframework
+djangorestframework-jwt
+drf-writable-nested
+markdown
+psycopg2-binary
