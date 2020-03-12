@@ -1,6 +1,3 @@
-from __future__ import (unicode_literals, print_function,
-                        absolute_import, division, with_statement,
-                        generator_stop, nested_scopes, )
 import os
 import sys
 

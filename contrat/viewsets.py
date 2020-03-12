@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Contrat Actions viewsets."""
 import logging
-
+from django.shortcuts import get_object_or_404
 from .models import Accesoireloyer
 from .models import Contrat
 from .models import ContratAccessoiresloyer
@@ -75,8 +75,8 @@ class AccessoireloyerAction(ActionAPIView):
             serializer = AccesoireloyerSerializers(
                 saved_components, many=True, context=serializer_context)
             return {'success': True, 'accessoire': serializer.data}
-        instance = Accesoireloyer.objects.get(
-            pk=params.get('id', None))
+        instance = get_object_or_404(Accesoireloyer,
+                                     pk=params.get('id', None))
         serializer = AccesoireloyerSerializers(
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)

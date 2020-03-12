@@ -69,7 +69,7 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         if instance.user.id != self.initial_data.get(
                 'user_id', None):
             raise serializers.ValidationError(
-                "Impossible de changer l'objet user du propriétaire")
+                "Impossible de changer l'objet user du proprietaire")
         info = get_field_info(instance)
         for attr, value in validated_data.items():
             if attr in info.relations and info.relations[attr].to_many:

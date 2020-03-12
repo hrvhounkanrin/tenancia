@@ -17,6 +17,14 @@ class Societe(models.Model):
     users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, through='SocieteUsers', related_name='users',
         blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='societe_created_user')
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='societe_updated_user')
 
     def __str__(self):
         """Mandataire reprensentation."""
@@ -32,6 +40,8 @@ class SocieteUsers(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name='societe_users',
                              on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         """Mandataire user representation."""
@@ -53,3 +63,11 @@ class Mandat(models.Model):
         'immeuble.Immeuble', null=True, on_delete=models.SET_NULL)
     societe = models.ForeignKey('Societe',
                                 null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='mandat_created_user')
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='mandat_updated_user')

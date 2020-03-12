@@ -9,17 +9,13 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-AUTH_USER_MODEL = 'customuser.User'
 import os
 import datetime
+AUTH_USER_MODEL = 'customuser.User'
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-JWT_AUTH = {
-    'JWT_VERIFY': True,
-    'JWT_VERIFY_EXPIRATION': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60000),
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -32,21 +28,35 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# Application definition
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
+)
+
+THIRD_PARTY_APPS = (
     'rest_framework',
-    # 'django_auth',
+    'rest_framework.authtoken',
+    # 'djoser',
+    # 'rest_auth',
+    'corsheaders',
+    # 'allauth',
+    # 'allauth.account',
+    # 'rest_auth.registration',
+    'countries_plus'
+)
+
+LOCAL_APPS = (
     'customuser',
     'proprietaire',
-    'countries_plus',
     'banque',
     'contrat',
     'immeuble',
@@ -59,27 +69,27 @@ INSTALLED_APPS = [
     'tools',
     'client',
     'rest_graph_ql',
-    'rest_framework.authtoken',  # Add this line
-    'rest_auth',
-    #'client' ,
-    #'rest_graph_ql',
+    # 'client' ,
+    # 'rest_graph_ql',
+)
 
-]
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': (
         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-     'rest_framework.permissions.IsAuthenticated',
-     # 'rest_framework.permissions.IsAdminUser' ,
+        'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAdminUser' ,
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-       'rest_framework.authentication.TokenAuthentication',
-       'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
     )
 }
+
 REST_USE_JWT = True
 
 MIDDLEWARE = [
@@ -98,17 +108,26 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
         'OPTIONS': {
+            'debug': DEBUG,
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'meslimmo.wsgi.application'
 
@@ -117,7 +136,7 @@ WSGI_APPLICATION = 'meslimmo.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-   'default': {
+    'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'tenancia_db',
         'USER': 'postgres',
@@ -131,16 +150,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.NumericPasswordValidator',
     },
 ]
 
@@ -158,25 +181,37 @@ USE_L10N = True
 
 USE_TZ = True
 
+SITE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
-
 STATIC_URL = '/static/'
+
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 )
+
+STATIC_ROOT = "/var/www/static/"
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+
+MEDIA_URL = '/media/'
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] {message}',
+            'format': '[%(asctime)s] %(levelname)s '
+                      '[%(name)s:%(lineno)s] {message}',
             'datefmt': '%d/%b/%Y %H:%M:%S'
         },
         'verbose2': {
-            'format': '[%(asctime)s] %(levelname)s [%(filename)s:%(lineno)s:%(funcName)s()] %(message)s',
+            'format': '[%(asctime)s] %(levelname)s'
+                      ' [%(filename)s:%(lineno)s:%(funcName)s()] %(message)s',
             'datefmt': '%d/%b/%Y %H:%M:%S'
         },
         'with_ip': {
@@ -191,36 +226,36 @@ LOGGING = {
         'file': {
             'level': 'WARNING',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'LOGS/debug.log' ,
-            'maxBytes': 1024*1024*100,  # 100 MB
+            'filename': 'LOGS/debug.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
             'backupCount': 5,
             'formatter': 'verbose'
         }, 'staff': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'LOGS/debug.log' ,
-            'maxBytes': 1024*1024*100,  # 100 MB
+            'filename': 'LOGS/debug.log',
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
             'backupCount': 5,
             'formatter': 'with_ip'
         }, 'application': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'LOGS/NOTES.log',
-            'maxBytes': 1024*1024*100,  # 100 MB
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
             'backupCount': 5,
             'formatter': 'with_ip'
         }, 'ddyxdebug': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'LOGS/debug.log',
-            'maxBytes': 1024*1024*100,  # 100 MB
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
             'backupCount': 5,
             'formatter': 'verbose2'
         }, 'other_sources': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'LOGS/OTHER_SOURCES.log',
-            'maxBytes': 1024*1024*500,  # 100 MB
+            'maxBytes': 1024 * 1024 * 500,  # 100 MB
             'backupCount': 5,
             'formatter': 'verbose2'
         },
@@ -245,4 +280,61 @@ LOGGING = {
             'level': 'DEBUG',
         },
     }
+}
+
+MEDIA_URL = '/media/'
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
+    )
+}
+
+AUTHENTICATION_BACKENDS = (
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+# Remove username functionality. Email is identifier
+# https://django-allauth.readthedocs.io/en/latest/advanced.html#custom-user-models
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+REST_USE_JWT = True
+OLD_PASSWORD_FIELD_ENABLED = True
+
+# Email Settings
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+SENDGRID_SANDBOX_MODE_IN_DEBUG = True
+SENDGRID_ECHO_TO_STDOUT = True
+SENDGRID_API_KEY = \
+    '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'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+
+JWT_AUTH = {
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60000),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
+
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'SERIALIZERS': {
+        'user_create': 'customuser.serializers.UserCreateSerializer',
+    },
 }

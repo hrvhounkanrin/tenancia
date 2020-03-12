@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 """Scaffolding app models."""
+from django.conf import settings
 from django.db import models
 
 from appartement.models import ComposantAppartement
@@ -13,6 +14,14 @@ class Immeuble(models.Model):
     adresse = models.CharField(max_length=512, null=True, )
     jour_emission_facture = models.IntegerField(default=5)
     jour_valeur_facture = models.IntegerField(default=5)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True,
+        editable=False, related_name='simmeuble_created_user')
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True,
+        editable=False, related_name='simmeuble_updated_user')
 
     def __str__(self):
         """Immeuble representation."""
@@ -48,6 +57,14 @@ class Appartement(models.Model):
         blank=False, related_name='scaffolding_structure')
     statut = models.CharField(max_length=50,
                               choices=STATUT_APPARTEMENT, default='LIBRE')
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True,
+        editable=False, related_name='sappartement_created_user')
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True,
+        editable=False, related_name='sappartement_updated_user')
 
     def __str__(self):
         """Appartement representation."""

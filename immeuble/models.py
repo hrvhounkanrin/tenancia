@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
 """Immeuble app models."""
-from countries_plus.models import Country
+from django.conf import settings
 from django.db import models
+from countries_plus.models import Country
 
 
 class Immeuble(models.Model):
@@ -22,6 +23,14 @@ class Immeuble(models.Model):
     longitude = models.DecimalField(max_digits=20, decimal_places=12)
     latitude = models.DecimalField(max_digits=20, decimal_places=12)
     ref_immeuble = models.CharField(max_length=50, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='immeuble_created_user')
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='immeuble_updated_user')
 
     def __str__(self):
         """Immeuble reprensentation."""

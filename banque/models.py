@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
 """Banque app models."""
-from countries_plus.models import Country
+from django.conf import settings
 from django.db import models
+from countries_plus.models import Country
 
 
 class Banque(models.Model):
@@ -10,6 +11,14 @@ class Banque(models.Model):
     codebanque = models.CharField(max_length=25, unique=True)
     libbanque = models.CharField(max_length=100)
     pays = models.ForeignKey(Country, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='banque_created_user')
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='banque_updated_user')
 
     def __str__(self):
         """Banque model representation."""

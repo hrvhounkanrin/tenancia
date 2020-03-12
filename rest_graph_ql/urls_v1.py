@@ -1,10 +1,8 @@
 """Tenancia urls v1."""
 from django.conf.urls import url
 from rest_framework import routers
-
 import banque.viewsets as banque_views
 import client.viewsets as client_viewset
-import customuser.viewsets as user_views
 import immeuble.viewsets as immeuble_viewsets
 import proprietaire.viewsets as proprietaire_viewsets
 import quittance.viewsets as quitance_viewsets
@@ -19,15 +17,11 @@ from contrat.viewsets import ContratAction
 from landing import views as landing_view
 from societe.viewsets import MandatViewSetAction as mandat_viewset
 from societe.viewsets import SocieteViewSetAction as societe_views
+from customuser import viewsets as user_views
+from customuser.viewsets import AccountViewset
 router = routers.SimpleRouter()
-
-
 urlpatterns = [
     url(r'^$', landing_view.index, name='index'),
-    url(r'^$', landing_view.index, name='index'),
-    url(r'^user', user_views.UserViewSet.as_view(
-        {'get': 'list', 'post': 'create'}), name='user_api'),
-
     url(r'^banque_action/(?P<action>[^/.]+)',
         banque_views.BanqueViewSet.as_view(), name='banque_action'),
     url(r'^quittance_action/(?P<action>[^/.]+)',
@@ -57,6 +51,10 @@ urlpatterns = [
         name='mandataire_action'),
     url(r'^mandat_action/(?P<action>[^/.]+)', mandat_viewset.as_view(),
         name='mandat_action'),
-]
+    url(r'^users$', user_views.UserViewSet.as_view(
+        {'get': 'list', 'post': 'create'}), name='user_api'),
+    url(r'^users/activate$', AccountViewset.as_view(
+        {'get': 'activate_account'}), name='account-activate'),
 
+]
 urlpatterns += router.urls
