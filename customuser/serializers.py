@@ -1,10 +1,8 @@
 """Customuser serializer."""
 import logging
-from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.forms import PasswordResetForm
 from django.conf import settings
-from django.contrib.auth.password_validation import validate_password
-from django.core import exceptions as django_exceptions
-from django.db import IntegrityError, transaction
+from django.utils.translation import gettext as _
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -14,7 +12,7 @@ from sendgrid.helpers.mail import Mail
 from customuser.models import User
 from customuser.models import UserProfile
 from .token_generator import account_activation_token
-
+from rest_framework.validators import UniqueValidator
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -31,6 +29,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Userserializer class."""
+    def __init__(self, *args, **kwargs):
+        super(UserSerializer, self).__init__(*args, **kwargs)
+        # Find UniqueValidator and set custom message
+        for validator in self.fields['email'].validators:
+            if isinstance(validator, UniqueValidator):
+                validator.message = _('A user with this email already exist.')
 
     profile = UserProfileSerializer(required=False)
 
@@ -45,20 +49,22 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """User serializer create."""
         profile_data = validated_data.pop('profile')
-        logging.debug(f'**Profile  data information', f'{profile_data}')
+        # logging.debug(f'**Profile  data information', f'{profile_data}')
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
         user.save()
         UserProfile.objects.create(user=user, **profile_data)
-        self.send_activation_mail(user)
+        # self.send_activation_mail(user)
         return user
+
+
 
     def send_activation_mail(self, user):
         """Send activation mail to user."""
         token = account_activation_token.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        msg_content = render_to_string('activate_account.html', {
+        msg_content = render_to_string('registration/activate_account.html', {
             'user': user,
             'domain': 'https://tenancia.com',
             'uid': uid,
@@ -94,55 +100,44 @@ class UserSerializer(serializers.ModelSerializer):
         profile.save()
         return instance
 
-
-class UserCreateSerializer(serializers.ModelSerializer):
-    """Override djoser create user serializer."""
-
-    password = serializers.CharField(
-        style={"input_type": "password"}, write_only=True)
-    profile = UserProfileSerializer(required=False)
-    default_error_messages = {
-        "cannot_create_user": _("Unable to create account.")
-    }
-
-    class Meta:
-        """User create serializer meta."""
-
-        model = User
-        fields = ('id', 'email', 'first_name',
-                  'last_name', 'password', 'profile')
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def validate(self, attrs):
-        """Validate."""
-        attrs.pop('profile', None)
-        user = User(**attrs)
-        password = attrs.get("password")
-
+    def validate_email(self, value):
         try:
-            validate_password(password, user)
-        except django_exceptions.ValidationError as e:
-            serializer_error = serializers.as_serializer_error(e)
+            User.objects.get(email=value)
+        except User.DoesNotExist:
+            pass
+        else:
             raise serializers.ValidationError(
-                {"password": serializer_error["non_field_errors"]}
-            )
+                "A user with this email address already exists.")
+        return value
 
-        return attrs
 
-    def create(self, validated_data):
-        """Perform create."""
-        try:
-            user = self.perform_create(validated_data)
-        except IntegrityError:
-            self.fail("cannot_create_user")
+class PasswordResetSerializer(serializers.Serializer):
+    """Custom password serializer."""
 
-        return user
+    email = serializers.EmailField()
+    password_reset_form_class = PasswordResetForm
 
-    def perform_create(self, validated_data):
-        """Perform create."""
-        with transaction.atomic():
-            user = User.objects.create_user(**validated_data)
-            profile_data = self.initial_data.get('profile', None)
-            if profile_data:
-                UserProfile.objects.create(user=user, **profile_data)
-        return user
+    def validate_email(self, value):
+        """Validate user mail."""
+        self.reset_form = self.password_reset_form_class(
+            data=self.initial_data)
+        if not self.reset_form.is_valid():
+            raise serializers.ValidationError(_('Error'))
+
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(_('Invalid e-mail address'))
+        return value
+
+    def save(self):
+        """Save."""
+        request = self.context.get('request')
+        opts = {
+            'use_https': request.is_secure(),
+            'from_email': getattr(settings, 'DEFAULT_FROM_EMAIL'),
+            'subject_template_name':
+                'registration/password_reset_subject.txt',
+            'html_email_template_name':
+                'registration/password_reset_email.html',
+            'request': request,
+        }
+        self.reset_form.save(**opts)

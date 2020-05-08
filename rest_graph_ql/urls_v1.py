@@ -1,5 +1,7 @@
 """Tenancia urls v1."""
-from django.conf.urls import url
+from django.conf.urls import url, include
+from django.urls import path
+
 from rest_framework import routers
 import banque.viewsets as banque_views
 import client.viewsets as client_viewset
@@ -19,42 +21,62 @@ from societe.viewsets import MandatViewSetAction as mandat_viewset
 from societe.viewsets import SocieteViewSetAction as societe_views
 from customuser import viewsets as user_views
 from customuser.viewsets import AccountViewset
+from customuser.views import PasswordResetView
+from rest_auth.views import PasswordResetConfirmView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 router = routers.SimpleRouter()
 urlpatterns = [
     url(r'^$', landing_view.index, name='index'),
-    url(r'^banque_action/(?P<action>[^/.]+)',
+    url(r'^banque_action/(?P<action>[^/.]+)$',
         banque_views.BanqueViewSet.as_view(), name='banque_action'),
-    url(r'^quittance_action/(?P<action>[^/.]+)',
+    url(r'^quittance_action/(?P<action>[^/.]+)$',
         quitance_viewsets.QuittanceActionViewSet.as_view(),
         name='quittance_action'),
-    url(r'^proprietaire_action/(?P<action>[^/.]+)',
+    url(r'^proprietaire_action/(?P<action>[^/.]+)$',
         proprietaire_viewsets.ProprietairAction.as_view(),
         name='proprietaire_action'),
-    url(r'^client_action/(?P<action>[^/.]+)',
+    url(r'^client_action/(?P<action>[^/.]+)$',
         client_viewset.ClientAction.as_view(),
         name='client_action'),
-    url(r'^dependency_action/(?P<action>[^/.]+)', component_viewsets.as_view(),
+    url(r'^dependency_action/(?P<action>[^/.]+)$', component_viewsets.as_view(),
         name='dependency_action'),
-    url(r'^logement_action/(?P<action>[^/.]+)', appartement_viewsets.as_view(),
+    url(r'^logement_action/(?P<action>[^/.]+)$', appartement_viewsets.as_view(),
         name='logement_action'),
-    url(r'^structure_action/(?P<action>[^/.]+)', structure_viewsets.as_view(),
+    url(r'^structure_action/(?P<action>[^/.]+)$', structure_viewsets.as_view(),
         name='structure_action'),
-    url(r'^immeuble_action/(?P<action>[^/.]+)',
+    url(r'^immeuble_action/(?P<action>[^/.]+)$',
         immeuble_viewsets.ImmeubleAction.as_view(),
         name='immeuble_action'),
-    url(r'^accessoire_action/(?P<action>[^/.]+)',
+    url(r'^accessoire_action/(?P<action>[^/.]+)$',
         AccessoireloyerAction.as_view(),
         name='accessoire_action'),
-    url(r'^contrat_action/(?P<action>[^/.]+)', ContratAction.as_view(),
+    url(r'^contrat_action/(?P<action>[^/.]+)$', ContratAction.as_view(),
         name='contrat_action'),
-    url(r'^mandataire_action/(?P<action>[^/.]+)', societe_views.as_view(),
+    url(r'^mandataire_action/(?P<action>[^/.]+)$', societe_views.as_view(),
         name='mandataire_action'),
-    url(r'^mandat_action/(?P<action>[^/.]+)', mandat_viewset.as_view(),
+    url(r'^mandat_action/(?P<action>[^/.]+)$', mandat_viewset.as_view(),
         name='mandat_action'),
     url(r'^users$', user_views.UserViewSet.as_view(
         {'get': 'list', 'post': 'create'}), name='user_api'),
     url(r'^users/activate$', AccountViewset.as_view(
         {'get': 'activate_account'}), name='account-activate'),
-
+    url(r'^password/reset/$', PasswordResetView.as_view(),
+        name='rest_password_reset'),
+    url(r'^password/reset/confirm/$', PasswordResetConfirmView.as_view(),
+        name='rest_password_reset_confirm'),
+    url('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    url('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
+
+api_urlpatterns = [
+    path('accounts/', include('rest_registration.api.urls')),
+]
+
+
+
 urlpatterns += router.urls
+urlpatterns += api_urlpatterns

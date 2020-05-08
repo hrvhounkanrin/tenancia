@@ -41,7 +41,7 @@ class User(AbstractUser):
     """Abtract user Model."""
 
     username = models.CharField(max_length=128, blank=True, null=True)
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('adresse mail'), unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
     objects = UserManager()

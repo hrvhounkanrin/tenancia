@@ -8,6 +8,7 @@ Django==2.2
 django-countries-plus
 django-filter
 django-rest-auth
+django-sendgrid-v5
 djangorestframework
 djangorestframework-jwt
 drf-writable-nested
@@ -16,3 +17,4 @@ jsonfield
 markdown
 pre-commit
 psycopg2-binary
+djangorestframework-simplejwt
