@@ -18,7 +18,7 @@ class SocieteSerializer(serializers.ModelSerializer):
         """Societe serializer meta."""
 
         model = Societe
-        fields = '__all__'
+        fields = "__all__"
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -41,10 +41,10 @@ class SocieteSerializer(serializers.ModelSerializer):
         :rtype:Societe
         """
         societe = Societe.objects.create(**validated_data)
-        if 'users' in self.initial_data:
-            users = self.initial_data.get('users')
+        if "users" in self.initial_data:
+            users = self.initial_data.get("users")
             for user in users:
-                id = user.get('id')
+                id = user.get("id")
                 user_instance = User.objects.get(pk=id)
                 SocieteUsers(societe=societe, user=user_instance).save()
         societe.save()
@@ -54,14 +54,14 @@ class SocieteSerializer(serializers.ModelSerializer):
 class SocieteUsersSerializer(serializers.ModelSerializer):
     """SocieteUser serializer."""
 
-    id = serializers.ReadOnlyField(source='societe.id')
-    name = serializers.ReadOnlyField(source='user.name')
+    id = serializers.ReadOnlyField(source="societe.id")
+    name = serializers.ReadOnlyField(source="user.name")
 
     class Meta:
         """Societeuser meta."""
 
         model = SocieteUsers
-        fields = ('id', 'name',)
+        fields = ("id", "name")
 
 
 class MandatSerializer(serializers.ModelSerializer):
@@ -69,21 +69,37 @@ class MandatSerializer(serializers.ModelSerializer):
 
     immeuble = ImmeubleSerializers(read_only=True)
     immeuble_id = serializers.PrimaryKeyRelatedField(
-        source='Societe', queryset=Societe.objects.all(),
-        write_only=True, required=False)
+        source="Societe",
+        queryset=Societe.objects.all(),
+        write_only=True,
+        required=False,
+    )
     societe = SocieteSerializer(read_only=True)
     societe_id = serializers.PrimaryKeyRelatedField(
-        source='Societe', queryset=Societe.objects.all(),
-        write_only=True, required=False)
+        source="Societe",
+        queryset=Societe.objects.all(),
+        write_only=True,
+        required=False,
+    )
 
     class Meta:
         """Mandat model serializer meta."""
 
         model = Mandat
-        fields = ('id', 'reference_mandat', 'date_debut', 'duree',
-                  'date_echeance', 'tacite_reconduction', 'taux_commission',
-                  'mandant_physique', 'immeuble', 'immeuble_id',
-                  'societe', 'societe_id',)
+        fields = (
+            "id",
+            "reference_mandat",
+            "date_debut",
+            "duree",
+            "date_echeance",
+            "tacite_reconduction",
+            "taux_commission",
+            "mandant_physique",
+            "immeuble",
+            "immeuble_id",
+            "societe",
+            "societe_id",
+        )
 
     @transaction.atomic
     def create(self, validated_data):
@@ -92,10 +108,11 @@ class MandatSerializer(serializers.ModelSerializer):
 
         :rtype: Mandat
         """
-        immeuble = validated_data.pop('Immeuble', None)
-        societe = validated_data.pop('Societe', None)
+        immeuble = validated_data.pop("Immeuble", None)
+        societe = validated_data.pop("Societe", None)
         mandat_instance = Mandat.objects.create(
-            immeuble=immeuble, societe=societe, **validated_data)
+            immeuble=immeuble, societe=societe, **validated_data
+        )
         return mandat_instance
 
     @transaction.atomic

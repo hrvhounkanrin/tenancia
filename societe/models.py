@@ -13,39 +13,60 @@ class Societe(models.Model):
     logo = models.CharField(max_length=150)
     num_carte_professionnel = models.CharField(max_length=150, null=True)
     date_delivrance = models.DateField(null=True)
-    carte_professionnel = models.FileField(upload_to='documents/', null=True)
+    carte_professionnel = models.FileField(upload_to="documents/", null=True)
     users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, through='SocieteUsers', related_name='users',
-        blank=True)
+        settings.AUTH_USER_MODEL,
+        through="SocieteUsers",
+        related_name="users",
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name='societe_created_user')
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="societe_created_user",
+    )
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name='societe_updated_user')
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="societe_updated_user",
+    )
 
     def __str__(self):
         """Mandataire reprensentation."""
-        return 'Raison social: %s' % (self.raison_social)
+        return "Raison social: %s" % (self.raison_social)
 
 
 class SocieteUsers(models.Model):
     """Mandataire users."""
 
+    MASTER = "MASTER"
+    USER = "USER"
+    USER_PROFIL = ((MASTER, "MASTER"), (USER, "USER"))
     societe = models.ForeignKey(
-        'Societe', related_name='societe_users',
-        on_delete=models.SET_NULL, null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             related_name='societe_users',
-                             on_delete=models.SET_NULL, null=True)
+        "Societe",
+        related_name="societe_users",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="societe_users",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    profil = models.CharField(max_length=64, choices=USER_PROFIL, default=USER)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
         """Mandataire user representation."""
-        return self.societe.raison_social + ' ' + self.user.email
+        return self.societe.raison_social + " " + self.user.email
 
 
 class Mandat(models.Model):
@@ -57,17 +78,26 @@ class Mandat(models.Model):
     date_echeance = models.DateField()
     tacite_reconduction = models.BooleanField(default=False)
     taux_commission = models.IntegerField(default=10, null=False)
-    mandant_physique = models.FileField(
-        upload_to='documents/', null=True)
+    mandant_physique = models.FileField(upload_to="documents/", null=True)
     immeuble = models.ForeignKey(
-        'immeuble.Immeuble', null=True, on_delete=models.SET_NULL)
-    societe = models.ForeignKey('Societe',
-                                null=True, on_delete=models.SET_NULL)
+        "immeuble.Immeuble", null=True, on_delete=models.SET_NULL
+    )
+    societe = models.ForeignKey(
+        "Societe", null=True, on_delete=models.SET_NULL
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name='mandat_created_user')
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="mandat_created_user",
+    )
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name='mandat_updated_user')
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="mandat_updated_user",
+    )

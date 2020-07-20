@@ -1,64 +1,42 @@
-"""Customuser viewset."""
+# -*- coding: UTF-8 -*-
+"""Customuser app viewsets."""
 import logging
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_bytes
-from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import GenericViewSet
-from customuser.models import User
-from customuser.permissions import IsAdminUser
-from customuser.permissions import IsLoggedInUserOrAdmin
-from customuser.serializers import UserSerializer
+
+from proprietaire.serializers import ProprietaireSerializers
+from .serializers import UserSerializer
 from django.contrib.auth import get_user_model
-from .token_generator import account_activation_token
+from tools.viewsets import ActionAPIView
+from proprietaire.models import Proprietaire
+from client.models import Client
+from client.serializers import ClientSerializer
+
+logger = logging.getLogger(__name__)
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """User Serializer Class ViewSet."""
+class CustomUserAction(ActionAPIView):
+    """Customuser action view."""
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    logging.debug(f'user serializer class, {serializer_class}')
-
-    def get_permissions(self):
-        """
-        Set up class permission.
-
-        :return:
-        """
-        permission_classes = []
-        if self.action == 'create':
-            permission_classes = [AllowAny]
-        elif self.action == 'retrieve' or\
-                self.action == 'update' or self.action == 'partial_update':
-            permission_classes = [IsLoggedInUserOrAdmin]
-        elif self.action == 'list' or self.action == 'destroy':
-            permission_classes = [IsAdminUser]
-        return [permission() for permission in permission_classes]
-
-
-class AccountViewset(GenericViewSet):
-    """Account activation viewset."""
-    serializer_class = None
-    permission_classes = (AllowAny,)
-    @action(methods=["get"], detail=False, permission_classes=(AllowAny,))
-    def activate_account(self, request, uidb64, token):
-        """Account activation."""
+    def get_profile(self, request, params={}, *args, **kwargs):
+        """Get all user profile."""
         User = get_user_model()
         try:
-            uid = force_bytes(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
-        if user is not None and \
-                account_activation_token.check_token(user, token):
-            user.is_active = True
-            user.save()
+            user = User.objects.get(pk=request.user.id)
             serializer = UserSerializer(user)
-            return {'success': True, 'user': serializer}
+            proprietaire = Proprietaire.objects.filter(
+                user__id=request.user.id
+            ).first()
+            lessor_serializer = ProprietaireSerializers(proprietaire)
+            client = Client.objects.filter(user__id=request.user.id).first()
+            client_serializer = ClientSerializer(client)
+            profiles = {"user": serializer.data}
+            if proprietaire is not None:
+                profiles.update({"bailleur": lessor_serializer.data})
+            if client is not None:
+                profiles.update({"locataire": client_serializer.data})
+            return {"success": True, "profiles": profiles}
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+            serializer = UserSerializer(user)
+            return {"success": True, "user": serializer}
         else:
-            return {'success': False, 'msg': 'An error occured.'}
-
-    def get_serializer_class(self):
-        pass
+            return {"success": False, "msg": "An error occured."}

@@ -10,7 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 import os
-import datetime
+import environ
+from datetime import timedelta
+
+root = environ.Path(__file__) - 2
+env = environ.Env(DEBUG=(bool, False))
+environ.Env.read_env()
+
 AUTH_USER_MODEL = 'customuser.User'
 
 SITE_ID = 1
@@ -22,10 +28,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'sz)!59k=#curo2j+bjlpzkx)pg3!mv7_hky!*z(h+n0iujt#fn'
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
@@ -124,11 +130,11 @@ WSGI_APPLICATION = 'meslimmo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'tenancia_db',
-        'USER': 'postgres',
-        'PASSWORD': '1P@$$4PostGres',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USERNAME'),
+        'PASSWORD': env.str('DATABASE_PASSWORD'),
+        'HOST': env.str('DATABASE_HOST'),
+        'PORT': env.str('DATABASE_PORT'),
     }
 }
 # Password validatirest_registeron
@@ -307,24 +313,24 @@ OLD_PASSWORD_FIELD_ENABLED = True
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = False
-SENDGRID_API_KEY = \
-    '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'
+SENDGRID_API_KEY = env.str('SENDGRID_API_KEY')
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 DEFAULT_FROM_EMAIL = 'Tenancia'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
 REST_REGISTRATION = {
-    'REGISTER_VERIFICATION_URL': 'http://localhost:8080/verify-email',
-    'RESET_PASSWORD_VERIFICATION_URL': 'https://frontend-host/reset-password/',
-    'REGISTER_EMAIL_VERIFICATION_URL': 'http://localhost:8080/verify-email',
-    'VERIFICATION_FROM_EMAIL': 'noreply@tenancia.com',
+    'REGISTER_VERIFICATION_URL':
+        env.str('REGISTER_VERIFICATION_URL'),
+    'RESET_PASSWORD_VERIFICATION_URL':
+        env.str('RESET_PASSWORD_VERIFICATION_URL'),
+    'REGISTER_EMAIL_VERIFICATION_URL':
+        env.str('REGISTER_EMAIL_VERIFICATION_URL'),
+    'VERIFICATION_FROM_EMAIL': env.str('VERIFICATION_FROM_EMAIL'),
     'REGISTER_VERIFICATION_EMAIL_TEMPLATES': {
         'subject': 'c_rest_registration/register/subject.txt',
-        'html_body': 'c_rest_registration/register/body.html',
-    },
+        'html_body': 'c_rest_registration/register/body.html', },
 }
-from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
