@@ -14,7 +14,7 @@ class UserManager(BaseUserManager):
     def _create_user(self, email, password, **extra_fields):
         """Create User with the given email."""
         if not email:
-            raise ValueError('The given email must be set')
+            raise ValueError("The given email must be set")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -24,15 +24,15 @@ class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **extra_fields):
         """Create user."""
-        extra_fields.setdefault('is_superuser', False)
+        extra_fields.setdefault("is_superuser", False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
         """Create superuser."""
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault("is_superuser", True)
 
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
 
         return self._create_user(email, password, **extra_fields)
 
@@ -41,14 +41,14 @@ class User(AbstractUser):
     """Abtract user Model."""
 
     username = models.CharField(max_length=128, blank=True, null=True)
-    email = models.EmailField(_('adresse mail'), unique=True)
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    email = models.EmailField(_("adresse mail"), unique=True)
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "first_name", "last_name"]
     objects = UserManager()
 
     def __str__(self):
         """User representation."""
-        return '{}'.format(self.email)
+        return "{}".format(self.email)
 
 
 class UserProfile(models.Model):
@@ -56,14 +56,16 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE, related_name='profile')
+        on_delete=models.CASCADE,
+        related_name="profile",
+    )
     title = models.CharField(max_length=5)
     dob = models.DateField()
     address = models.CharField(max_length=255)
     country = models.CharField(max_length=50)
     city = models.CharField(max_length=50)
     zip = models.CharField(max_length=5)
-    photo = models.ImageField(upload_to='uploads', blank=True)
+    photo = models.ImageField(upload_to="uploads", blank=True)
 
     def create_user_profile(sender, instance, created, **kwargs):
         """Save create user profile."""

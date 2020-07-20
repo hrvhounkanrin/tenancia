@@ -2,6 +2,17 @@ from collections import OrderedDict
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework import serializers
 from rest_framework.fields import empty
+from countries_plus.models import Country
+
+class CountrySerialier(serializers.ModelSerializer):
+    """Country plus Model serializer."""
+
+    class Meta:
+        """Country model meta."""
+
+        model = Country
+        fields = '__all__'
+
 
 class DictSerializer(serializers.ListSerializer):
     """
@@ -76,8 +87,10 @@ class AsymetricRelatedField(serializers.PrimaryKeyRelatedField):
 
 
 
-#https://www.erol.si/2015/09/django-rest-framework-nestedserializer-with-relation-and-crud/
+# https://www.erol.si/2015/09/django-rest-framework-nestedserializer-with-relation-and-crud/
 class RelationModelSerializer(serializers.ModelSerializer):
+    """Manage models relationships"""
+
     def __init__(self, instance=None, data=empty, **kwargs):
         self.is_relation = kwargs.pop('is_relation', False)
         super(RelationModelSerializer, self).__init__(instance, data, **kwargs)

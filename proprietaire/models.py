@@ -8,6 +8,7 @@ from django.db import models
 class Proprietaire(models.Model):
     """Proprietaire model."""
 
+    #utiliser un json field
     mode_paiement = models.CharField(max_length=50, null=False)
     numcompte = models.CharField(max_length=50, null=True)
     user = models.OneToOneField(
