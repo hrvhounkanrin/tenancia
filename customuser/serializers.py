@@ -32,8 +32,9 @@ class UserSerializer(serializers.ModelSerializer):
     """Userserializer class."""
 
     def __init__(self, *args, **kwargs):
-        """Validate data."""
+        """Parse user serializer init."""
         super(UserSerializer, self).__init__(*args, **kwargs)
+        # Find UniqueValidator and set custom message
         for validator in self.fields["email"].validators:
             if isinstance(validator, UniqueValidator):
                 validator.message = _("A user with this email already exist.")
@@ -109,7 +110,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_email(self, value):
-        """Validate user email."""
+        """Validate email."""
         try:
             User.objects.get(email=value)
         except User.DoesNotExist:

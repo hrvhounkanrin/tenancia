@@ -105,9 +105,6 @@ urlpatterns = [
         name="accounts_action",
     ),
 ]
-# Gestion des utilisateurs
 api_urlpatterns = [path("accounts/", include("rest_registration.api.urls"))]
-
-
 urlpatterns += router.urls
 urlpatterns += api_urlpatterns
