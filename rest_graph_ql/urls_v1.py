@@ -96,15 +96,19 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(),
         name="rest_password_reset_confirm",
     ),
-    url(r"^countries/$", CountryListView.as_view(), name="countries_list"),
-    url("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    url("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    url(r"^countries/$", CountryListView.as_view(),
+        name="countries_list"),
+    url(r"^accounts/token/$", TokenObtainPairView.as_view(),
+        name="token_obtain_pair"),
+    url(r"^token/refresh/$", TokenRefreshView.as_view(),
+        name="token_refresh"),
     url(
         r"^accounts/(?P<action>[^/.]+)$",
         account_viewset.as_view(),
         name="accounts_action",
     ),
 ]
-api_urlpatterns = [path("accounts/", include("rest_registration.api.urls"))]
+api_urlpatterns = [path("accounts/",
+                        include("rest_registration.api.urls"))]
 urlpatterns += router.urls
 urlpatterns += api_urlpatterns

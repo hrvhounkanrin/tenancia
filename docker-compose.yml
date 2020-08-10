@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  web:
+    build: ./
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - tenancia_db:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=tenancia
+      - POSTGRES_DB=tenancia_db
+    expose:
+      - 5433 # Publishes 5433 to other containers but NOT to host machine
+    ports:
+      - 5433:5433
+    command: -p 5433
+
+volumes:
+  tenancia_db:

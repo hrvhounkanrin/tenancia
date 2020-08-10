@@ -10,12 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 import os
-import environ
 from datetime import timedelta
 
-root = environ.Path(__file__) - 2
-env = environ.Env(DEBUG=(bool, False))
-environ.Env.read_env()
 
 AUTH_USER_MODEL = 'customuser.User'
 
@@ -28,12 +24,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 # Application definition
 
@@ -129,12 +125,12 @@ WSGI_APPLICATION = 'meslimmo.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('DATABASE_NAME'),
-        'USER': env('DATABASE_USERNAME'),
-        'PASSWORD': env.str('DATABASE_PASSWORD'),
-        'HOST': env.str('DATABASE_HOST'),
-        'PORT': env.str('DATABASE_PORT'),
+        'ENGINE': os.environ.get("SQL_ENGINE"),
+        'NAME': os.environ.get("SQL_DATABASE"),
+        'USER': os.environ.get("SQL_USER"),
+        'PASSWORD': os.environ.get("SQL_PASSWORD"),
+        'HOST': os.environ.get("SQL_HOST"),
+        'PORT': os.environ.get("SQL_PORT"),
     }
 }
 # Password validatirest_registeron
@@ -313,7 +309,7 @@ OLD_PASSWORD_FIELD_ENABLED = True
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = False
-SENDGRID_API_KEY = env.str('SENDGRID_API_KEY')
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 DEFAULT_FROM_EMAIL = 'Tenancia'
 
@@ -321,12 +317,12 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 REST_REGISTRATION = {
     'REGISTER_VERIFICATION_URL':
-        env.str('REGISTER_VERIFICATION_URL'),
+        os.environ.get('REGISTER_VERIFICATION_URL'),
     'RESET_PASSWORD_VERIFICATION_URL':
-        env.str('RESET_PASSWORD_VERIFICATION_URL'),
+        os.environ.get('RESET_PASSWORD_VERIFICATION_URL'),
     'REGISTER_EMAIL_VERIFICATION_URL':
-        env.str('REGISTER_EMAIL_VERIFICATION_URL'),
-    'VERIFICATION_FROM_EMAIL': env.str('VERIFICATION_FROM_EMAIL'),
+        os.environ.get('REGISTER_EMAIL_VERIFICATION_URL'),
+    'VERIFICATION_FROM_EMAIL': os.environ.get('VERIFICATION_FROM_EMAIL'),
     'REGISTER_VERIFICATION_EMAIL_TEMPLATES': {
         'subject': 'c_rest_registration/register/subject.txt',
         'html_body': 'c_rest_registration/register/body.html', },
