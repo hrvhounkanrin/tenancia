@@ -186,7 +186,8 @@ STATICFILES_FINDERS = (
 )
 
 MEDIA_URL = '/media/'
-
+if not os.path.join('LOGS'):
+    os.mkdir('LOGS')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
