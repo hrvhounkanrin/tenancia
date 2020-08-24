@@ -11,10 +11,9 @@ from appartement.models import Appartement
 from appartement.serializers import AppartementSerializers
 from client.models import Client
 from client.serializers import ClientSerializer
-from tools.serializers import RelationModelSerializer
 
 
-class AccesoireloyerSerializers(RelationModelSerializer):
+class AccesoireloyerSerializers(serializers.ModelSerializer):
     """Serializers for model Accesoireloyer."""
 
     class Meta:

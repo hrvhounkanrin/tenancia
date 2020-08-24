@@ -32,6 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
     """Userserializer class."""
 
     def __init__(self, *args, **kwargs):
+        """Parse user serializer init."""
         super(UserSerializer, self).__init__(*args, **kwargs)
         # Find UniqueValidator and set custom message
         for validator in self.fields["email"].validators:
@@ -57,13 +58,11 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """User serializer create."""
         profile_data = validated_data.pop("profile")
-        # logging.debug(f'**Profile  data information', f'{profile_data}')
         password = validated_data.pop("password")
         user = User(**validated_data)
         user.set_password(password)
         user.save()
         UserProfile.objects.create(user=user, **profile_data)
-        # self.send_activation_mail(user)
         return user
 
     def send_activation_mail(self, user):
@@ -111,6 +110,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_email(self, value):
+        """Validate email."""
         try:
             User.objects.get(email=value)
         except User.DoesNotExist:

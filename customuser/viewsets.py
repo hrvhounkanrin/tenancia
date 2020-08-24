@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class CustomUserAction(ActionAPIView):
+    """Customuser actionview."""
+
     def get_profile(self, request, params={}, *args, **kwargs):
         """Get all user profile."""
         User = get_user_model()

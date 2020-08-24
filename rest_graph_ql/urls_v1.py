@@ -96,28 +96,19 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(),
         name="rest_password_reset_confirm",
     ),
-    url(r"^countries/$", CountryListView.as_view(), name="countries_list"),
-    url("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    url("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    url(r"^countries/$", CountryListView.as_view(),
+        name="countries_list"),
+    url(r"^accounts/token/$", TokenObtainPairView.as_view(),
+        name="token_obtain_pair"),
+    url(r"^token/refresh/$", TokenRefreshView.as_view(),
+        name="token_refresh"),
     url(
         r"^accounts/(?P<action>[^/.]+)$",
         account_viewset.as_view(),
         name="accounts_action",
     ),
 ]
-# Gestion des utilisateurs
-# url('^register/$', register, name='register'),
-# url('^verify-registration/$', verify_registration, name='verify-registration'),
-# url('^send-reset-password-link/$', send_reset_password_link,  name='send-reset-password-link'),
-# url('^reset-password/$', reset_password, name='reset-password'),
-# url('^login/$', login, name='login'),
-# url('^logout/$', logout, name='logout'),
-# url('^profile/$', profile, name='profile'),
-# url('^change-password/$', change_password, name='change-password'),
-# url('^register-email/$', register_email, name='register-email'),
-# url('^verify-email/$', verify_email, name='verify-email'),
-api_urlpatterns = [path("accounts/", include("rest_registration.api.urls"))]
-
-
+api_urlpatterns = [path("accounts/",
+                        include("rest_registration.api.urls"))]
 urlpatterns += router.urls
 urlpatterns += api_urlpatterns

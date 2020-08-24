@@ -1,3 +1,4 @@
+"""Misc views."""
 from countries_plus.models import Country
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
@@ -5,7 +6,7 @@ from tools.serializers import CountrySerialier
 
 
 class CountryListView(ListAPIView):
-    """Return allowed contries"""
+    """Return allowed contries."""
 
     permission_classes = (AllowAny,)
     serializer_class = CountrySerialier
