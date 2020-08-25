@@ -22,6 +22,7 @@ from societe.viewsets import MandatViewSetAction as mandat_viewset
 from societe.viewsets import SocieteViewSetAction as societe_views
 from rest_auth.views import PasswordResetConfirmView
 from customuser.viewsets import CustomUserAction as account_viewset
+from customuser.views import exchange_token
 from tools.views import CountryListView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -107,7 +108,13 @@ urlpatterns = [
         account_viewset.as_view(),
         name="accounts_action",
     ),
+    url(
+        r"^social/(?P<backend>[^/]+)/$",
+        exchange_token.as_view(),
+        name="exchange_token",
+    ),
 ]
+
 api_urlpatterns = [path("accounts/",
                         include("rest_registration.api.urls"))]
 urlpatterns += router.urls
