@@ -1,34 +1,42 @@
-"""Customuser viewset."""
+# -*- coding: UTF-8 -*-
+"""Customuser app viewsets."""
 import logging
 
-from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
+from proprietaire.serializers import ProprietaireSerializers
+from .serializers import UserSerializer
+from django.contrib.auth import get_user_model
+from tools.viewsets import ActionAPIView
+from proprietaire.models import Proprietaire
+from client.models import Client
+from client.serializers import ClientSerializer
 
-from customuser.models import User
-from customuser.permissions import IsAdminUser
-from customuser.permissions import IsLoggedInUserOrAdmin
-from customuser.serializers import UserSerializer
+logger = logging.getLogger(__name__)
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """User Serializer Class ViewSet."""
+class CustomUserAction(ActionAPIView):
+    """Customuser actionview."""
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    logging.debug(f'user serializer class, {serializer_class}')
-
-    def get_permissions(self):
-        """
-        Set up class permission.
-
-        :return:
-        """
-        permission_classes = []
-        if self.action == 'create':
-            permission_classes = [AllowAny]
-        elif self.action == 'retrieve' or\
-                self.action == 'update' or self.action == 'partial_update':
-            permission_classes = [IsLoggedInUserOrAdmin]
-        elif self.action == 'list' or self.action == 'destroy':
-            permission_classes = [IsAdminUser]
-        return [permission() for permission in permission_classes]
+    def get_profile(self, request, params={}, *args, **kwargs):
+        """Get all user profile."""
+        User = get_user_model()
+        try:
+            user = User.objects.get(pk=request.user.id)
+            serializer = UserSerializer(user)
+            proprietaire = Proprietaire.objects.filter(
+                user__id=request.user.id
+            ).first()
+            lessor_serializer = ProprietaireSerializers(proprietaire)
+            client = Client.objects.filter(user__id=request.user.id).first()
+            client_serializer = ClientSerializer(client)
+            profiles = {"user": serializer.data}
+            if proprietaire is not None:
+                profiles.update({"bailleur": lessor_serializer.data})
+            if client is not None:
+                profiles.update({"locataire": client_serializer.data})
+            return {"success": True, "profiles": profiles}
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+            serializer = UserSerializer(user)
+            return {"success": True, "user": serializer}
+        else:
+            return {"success": False, "msg": "An error occured."}

@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 """Quittance app models."""
+from django.conf import settings
 from django.db import models
 
 
@@ -29,6 +30,14 @@ class Quittance(models.Model):
     contrat = models.ForeignKey('contrat.Contrat',
                                 on_delete=models.SET_NULL, null=True, )
     motif_annulation = models.CharField(max_length=256, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='quittance_created_user')
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        editable=False, related_name='quittance_updated_user')
 
     def __str__(self):
         """Quittance str reprensentation."""

@@ -1,10 +1,9 @@
-from __future__ import (unicode_literals, print_function,
-                        absolute_import, division, with_statement,
-                        generator_stop, nested_scopes, )
 import os
 import sys
+from setup import main as project_setup_main
 
 if __name__ == '__main__':
+    project_setup_main()
     os.environ['DJANGO_SETTINGS_MODULE'] = 'meslimmo.settings'
     try:
         from django.core.management import execute_from_command_line

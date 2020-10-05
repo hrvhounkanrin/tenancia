@@ -1,18 +1,19 @@
 import os
-from setuptools import find_packages, setup
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.md')).read()
+def write_dot_env_file(env_file):
+    with open(env_file, 'r') as f:
+        for line in f:
+            k, v = line.partition("=")[::2]
+            # print(v.rstrip('\n'))
+            os.environ[k.strip()] = v.rstrip('\n')
 
-setup(
-    name='meslimmo',
-    version='1.0.0',
-    packages=['meslimmo'],
-    include_package_data=True,
-    description='Django data api for mesley immo app',
-    long_description=README,
-    author='Hervé HOUNKANRIN',
-    author_email='hrvhounkanrin@gmail.com',
-    url='',
-    license='MIT'
-)
+def main():
+    env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env-')
+    if os.path.isfile(env_file):
+        write_dot_env_file(env_file)
+    else:
+        pass
+
+
+if __name__ == '__main__':
+    main()

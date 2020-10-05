@@ -1,27 +1,34 @@
+"""Facture admin."""
 from django.contrib import admin
+from factures.models import \
+    (Currency, Item, Invoice, InvoiceItem)
 
-from factures.models import *
-
-
-# Register your models here.
 
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = '__all__'
-    search_fields = ('id',)
+    """Invoice admin class."""
+
+    list_display = "__all__"
+    search_fields = ("id",)
 
 
 class CurrencyAdmin(admin.ModelAdmin):
-    list_display = '__all__'
-    search_fields = ('id',)
+    """Currency admin class."""
+
+    list_display = "__all__"
+    search_fields = ("id",)
 
 
 class ItemAdmin(admin.ModelAdmin):
-    list_display = '__all__'
+    """Item admin class."""
+
+    list_display = "__all__"
 
 
 class InvoiceItemAdmin(admin.ModelAdmin):
-    list_display = '__all__'
-    search_fields = ('id',)
+    """Invoice item admin class."""
+
+    list_display = "__all__"
+    search_fields = ("id",)
 
 
 admin.register(Invoice, InvoiceAdmin)

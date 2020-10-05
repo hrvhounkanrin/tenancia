@@ -1,5 +1,8 @@
+"""Facture app config."""
 from django.apps import AppConfig
 
 
 class FacturesConfig(AppConfig):
-    name = 'factures'
+    """Facture app config."""
+
+    name = "factures"

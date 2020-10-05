@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Banque app Actions viewset."""
 import logging
-
+from django.shortcuts import get_object_or_404
 from .models import Banque
 from .serializers import BanqueSerializers
 from tools.viewsets import ActionAPIView
@@ -12,6 +12,17 @@ class BanqueViewSet(ActionAPIView):
     """Banque Actions viewsets."""
 
     def get_banque(self, request, params={}, *args, **kwargs):
+        """Retrive banks."""
+        serializer_context = {
+            'request': request,
+        }
+        if 'iso' in params:
+            queryset = Banque.objects.filter(
+                pays__id=params['iso'])
+            serializer = BanqueSerializers(
+                queryset, context=serializer_context, many=True)
+            logger.debug('**retrieving country banks **')
+            return {'success': True, 'banque': serializer.data}
         """Get all bank."""
         get_all_bank = Banque.objects.all()
         serialized_banque = BanqueSerializers(get_all_bank, many=True).data
@@ -71,8 +82,8 @@ class BanqueViewSet(ActionAPIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
                 return {'success': True, 'banque': serializer.data}
-        instance = Banque.objects.get(
-            pk=params.get('id', None))
+        instance = get_object_or_404(Banque,
+                                     pk=params.get('id', None))
         serializer = BanqueSerializers(
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
