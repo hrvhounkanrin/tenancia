@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 """Misc viewset."""
+import inspect
 from rest_framework.response import Response
 from django.http import HttpResponse, QueryDict
 from rest_framework.views import APIView
@@ -32,12 +33,19 @@ class ActionAPIView(APIView):
 
     def get(self, request, action, **kwargs):
         """I really don't what this func ain to."""
+
+
+
         params = self.normalize_params(request)
         kwargs['params'] = params
         self._last_action = params.get('action', action)
         try:
             lv_action = self.__getattribute__(self._last_action)
+            # print(callable(getattr(self, 'exchange_token', None)))
+            # print('self._last_action: {}'.format(type(self.__getattribute__(self._last_action))))
+            # print('self._last_action decorator: {}'.format(get_decorators(lv_action)))
         except AttributeError:
+            print('AttributeError tout de meme')
             lv_action = self.action_does_not_exist
         response = lv_action(request, **kwargs)
         if isinstance(response, (Response, )):
@@ -89,3 +97,13 @@ def is_exception_class(obj):
         return issubclass(obj, BaseException)
     except TypeError:
         return False
+
+def get_decorators(function):
+  # If we have no func_closure, it means we are not wrapping any other functions.
+  if not function.func_closure:
+    return [function]
+  decorators = []
+  # Otherwise, we want to collect all of the recursive results for every closure we have.
+  for closure in function.func_closure:
+    decorators.extend(get_decorators(closure.cell_contents))
+  return [function] + decorators

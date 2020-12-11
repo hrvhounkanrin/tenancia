@@ -1,12 +1,7 @@
 """Customuser urls."""
 from django.urls import path
-from .viewsets import AccountViewset
-
+from .views import exchange_token as SocialAuth
 app_name = "customuser"
 urlpatterns = [
-    path(
-        "users/activate$",
-        AccountViewset.as_view({"get": "activate_account"}),
-        name="activate",
-    )
+    path('social/google-oauth2/', SocialAuth.as_view(), name='google_oauth')
 ]

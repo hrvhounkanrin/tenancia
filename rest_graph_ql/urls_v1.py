@@ -22,6 +22,7 @@ from societe.viewsets import MandatViewSetAction as mandat_viewset
 from societe.viewsets import SocieteViewSetAction as societe_views
 from rest_auth.views import PasswordResetConfirmView
 from customuser.viewsets import CustomUserAction as account_viewset
+from customuser.views import AuthGoogleView
 from tools.views import CountryListView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -30,6 +31,7 @@ from rest_framework_simplejwt.views import (
 
 router = routers.SimpleRouter()
 urlpatterns = [
+
     url(r"^$", landing_view.index, name="index"),
     url(
         r"^banque_action/(?P<action>[^/.]+)$",
@@ -102,13 +104,14 @@ urlpatterns = [
         name="token_obtain_pair"),
     url(r"^token/refresh/$", TokenRefreshView.as_view(),
         name="token_refresh"),
+    # url(r'^accounts/googleauth/(?P<action>[^/.]+)$', AuthGoogleView.as_view(), name='googleauth'),
     url(
         r"^accounts/(?P<action>[^/.]+)$",
         account_viewset.as_view(),
         name="accounts_action",
     ),
+    path("accounts/", include("rest_registration.api.urls"))
 ]
-api_urlpatterns = [path("accounts/",
-                        include("rest_registration.api.urls"))]
+api_urlpatterns = []
 urlpatterns += router.urls
 urlpatterns += api_urlpatterns

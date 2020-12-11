@@ -7,12 +7,13 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from customuser.models import User
 from customuser.models import UserProfile
 from .token_generator import account_activation_token
-from rest_framework.validators import UniqueValidator
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -153,3 +154,14 @@ class PasswordResetSerializer(serializers.Serializer):
             "request": request,
         }
         self.reset_form.save(**opts)
+
+
+class SocialSerializer(serializers.Serializer):
+    """
+    Serializer which accepts an OAuth2 access token.
+    """
+    access_token = serializers.CharField(
+        allow_blank=False,
+        trim_whitespace=True,
+    )
+
