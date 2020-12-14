@@ -73,4 +73,4 @@ vobject==0.9.6.1
 zipp==0.6.0
 social-auth-core
 social-auth-app-django
-
+celery

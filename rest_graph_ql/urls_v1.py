@@ -100,17 +100,7 @@ urlpatterns = [
     ),
     url(r"^countries/$", CountryListView.as_view(),
         name="countries_list"),
-    url(r"^accounts/token/$", TokenObtainPairView.as_view(),
-        name="token_obtain_pair"),
-    url(r"^token/refresh/$", TokenRefreshView.as_view(),
-        name="token_refresh"),
-    # url(r'^accounts/googleauth/(?P<action>[^/.]+)$', AuthGoogleView.as_view(), name='googleauth'),
-    url(
-        r"^accounts/(?P<action>[^/.]+)$",
-        account_viewset.as_view(),
-        name="accounts_action",
-    ),
-    path("accounts/", include("rest_registration.api.urls"))
+    path('', include('customuser.urls'))
 ]
 api_urlpatterns = []
 urlpatterns += router.urls
