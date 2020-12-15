@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 import os
-import  datetime
+import datetime
 
 
 AUTH_USER_MODEL = 'customuser.User'
@@ -313,7 +313,7 @@ OLD_PASSWORD_FIELD_ENABLED = True
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = False
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+SENDGRID_API_KEY = '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'
 DEFAULT_FROM_EMAIL = 'Tenancia'
 
 

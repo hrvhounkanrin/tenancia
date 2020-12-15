@@ -9,7 +9,8 @@ from rest_framework.generics import CreateAPIView
 from requests.exceptions import HTTPError
 from social_django.utils import psa
 from django.utils.translation import gettext as _
-
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import (
     logout as django_logout
 )
@@ -21,10 +22,10 @@ from rest_framework import permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import status, APIView
+from rest_framework.views import status, APIView, View
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-
+from rest_framework_jwt.settings import api_settings
 from customuser.decorators import method_decorator
 from customuser.models import User
 from .permissions import (
@@ -38,6 +39,10 @@ from .serializers import (
     PasswordResetConfirmSerializer
 )
 
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+jwt_get_username_from_payload = api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 # Create your views here.
 
 sensitive_post_parameters_m = method_decorator(
@@ -47,7 +52,7 @@ sensitive_post_parameters_m = method_decorator(
 )
 
 from .serializers import SocialSerializer
-
+from .token_generator import TokenGenerator
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -191,6 +196,35 @@ class LogoutView(APIView):
                         status=status.HTTP_200_OK)
 
 
+class ActivateAccount(View):
+
+    def get(self, request, uidb64, token, *args, **kwargs):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        account_activation_token = TokenGenerator()
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            payload = jwt_payload_handler(user)
+            """
+                return Response({
+                    'token': jwt_encode_handler(payload),
+                    'user': user
+                })
+            """
+
+            return {
+                'success': True,
+                'token': jwt_encode_handler(payload),
+                'user': UserSerializer(user, context={'request': request}).data
+            }
+
+        else:
+            return {'success': False, 'payload': 'Une erreur est survenue. Merci de reessayer.'}
 
 
 # https://stackoverflow.com/questions/48460331/how-to-make-social-login-with-drf-as-backend-and-angularjs-as-frontend-and-drf-r

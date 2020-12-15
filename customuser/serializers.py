@@ -4,7 +4,10 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode as uid_decoder
+from django.utils.encoding import force_bytes
+
 from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_encode
 
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
@@ -21,6 +24,7 @@ from .utils import (
 from .models import (
     User,
 )
+from .token_generator import TokenGenerator
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -54,8 +58,16 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         email_sender = Email()
-        print(user.first_name)
-        email_sender.sign_up_email(dict(first_name=user.first_name, email=user.email))
+        token_generator = TokenGenerator()
+        mail_data = {
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': token_generator.make_token(user),
+            'first_name': user.first_name,
+            'email': user.email
+
+
+        }
+        email_sender.sign_up_email.delay(mail_data)
         # email_sender.sign_up_email(user=user)
         return user
 
@@ -226,6 +238,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         :return:
         """
         return self.set_password_form.save()
+
 
 
 class SocialSerializer(serializers.Serializer):

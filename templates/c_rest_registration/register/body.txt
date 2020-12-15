@@ -1,3 +1,0 @@
-Merci d'activer votre compte Tenancia en cliquant sur le lient suivant:
-
-{{ verification_url | safe }}
