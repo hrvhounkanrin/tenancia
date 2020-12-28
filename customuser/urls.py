@@ -10,6 +10,7 @@ from .views import (
     PasswordResetView,
     PasswordResetConfirmView,
     LogoutView,
+    ActivateAccount
 
 )
 
@@ -37,6 +38,14 @@ urlpatterns = [
     path('accounts/password/change/', PasswordChangeView.as_view(),
          name='rest_password_change'),
     path('accounts/logout/', LogoutView.as_view(), name='rest_logout'),
+    path(
+     "accounts/activate",
+        ActivateAccount.as_view({"get": "activate_account"}),
+        name="activate-account",
+    )
+
+
+
 
 ]
 urlpatterns += router.urls

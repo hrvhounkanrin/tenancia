@@ -22,10 +22,11 @@ from rest_framework import permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import status, APIView, View
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import status, APIView
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.settings import api_settings
+from rest_framework.decorators import action
 from customuser.decorators import method_decorator
 from customuser.models import User
 from .permissions import (
@@ -70,9 +71,7 @@ class UserViewSet(ModelViewSet):
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
-
 # Create your views here.
-
 def jwt_response_payload_handler(token, user=None, request=None):
     return {
         'token': token,
@@ -195,15 +194,16 @@ class LogoutView(APIView):
         return Response({"detail": _("Successfully logged out.")},
                         status=status.HTTP_200_OK)
 
+class ActivateAccount(GenericViewSet):
+    permission_classes = (AllowAny,)
 
-class ActivateAccount(View):
+    @action(methods=["post"], detail=False, permission_classes=(AllowAny,))
+    def activate_account(self, request, *args, **kwargs):
+        uidb64 = request.query_params['uidb64']
+        token = request.query_params['token']
+        uid = urlsafe_base64_decode(uidb64.strip()).decode()
+        user = User.objects.get(pk=uid)
 
-    def get(self, request, uidb64, token, *args, **kwargs):
-        try:
-            uid = force_text(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
 
         account_activation_token = TokenGenerator()
         if user is not None and account_activation_token.check_token(user, token):
@@ -216,16 +216,15 @@ class ActivateAccount(View):
                     'user': user
                 })
             """
-
-            return {
+            # Should be redirected to the frontend login page instead.
+            return Response({
                 'success': True,
                 'token': jwt_encode_handler(payload),
                 'user': UserSerializer(user, context={'request': request}).data
-            }
+            })
 
         else:
-            return {'success': False, 'payload': 'Une erreur est survenue. Merci de reessayer.'}
-
+            return Response({'success': False, 'payload': 'Une erreur est survenue. Merci de reessayer.'}, status=status.HTTP_400_BAD_REQUEST)
 
 # https://stackoverflow.com/questions/48460331/how-to-make-social-login-with-drf-as-backend-and-angularjs-as-frontend-and-drf-r
 class AuthGoogleView(CreateAPIView):

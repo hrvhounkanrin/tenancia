@@ -3,6 +3,7 @@ Module for sending emails
 make email async https://code.tutsplus.com/tutorials/using-celery-with-django-for-background-task-processing--cms-28732
 
 """
+import os
 import logging
 from django.template.loader import get_template, render_to_string
 from django.conf import settings
@@ -21,6 +22,7 @@ def sending_email(receiver, subject, template_name, key):
     send the email/ return error message
     """
     try:
+        logger.debug(key)
         message = get_template(template_name=template_name).render(key)
         send_mail(subject, 'Hello from tenancia', 'tenancia@tenancia.com', [receiver], html_message=message)
 
@@ -70,6 +72,7 @@ class Email():
         Accepts the following  parameters: user
         Create the customized signUp email for that user
         """
+        print('sign_up_email: {}', user)
         template_name = 'registration/activate_account.html'
         receiver = user['email']
         subject = 'Please Confirm Your E-mail Address'
@@ -77,7 +80,8 @@ class Email():
             'first_name': user['first_name'],
             'site_url': 'www.tenancia.com',
             'uid': user['uid'],
-            'token': user['token']
+            'token': user['token'],
+            'frontend': os.environ.get('FRONTEND')
         }
         sending_email(receiver, subject, template_name, key)
 

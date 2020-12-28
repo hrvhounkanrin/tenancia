@@ -56,15 +56,19 @@ class UserSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
+        user.is_active = False
         user.save()
         email_sender = Email()
         token_generator = TokenGenerator()
+        print('user.pk:{} '.format(urlsafe_base64_encode(force_bytes(str(user.pk)))))
         mail_data = {
+            # 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            # 'uid': force_text(urlsafe_base64_encode(force_bytes(user.pk))),
             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'token': token_generator.make_token(user),
+            'token': token_generator.make_token(user).strip(),
             'first_name': user.first_name,
-            'email': user.email
-
+            'email': user.email,
+            'domain': 'http://localhost:8000/api/v1/',
 
         }
         email_sender.sign_up_email.delay(mail_data)

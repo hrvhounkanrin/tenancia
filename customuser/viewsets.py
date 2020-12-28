@@ -4,11 +4,16 @@ import os
 import logging
 import requests
 import json
-from  django.conf import  settings
+
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from rest_framework_jwt.settings import api_settings
+from rest_framework import permissions
 from requests.exceptions import HTTPError
 from social_django.utils import psa
 from tools.viewsets import ActionAPIView
@@ -18,10 +23,22 @@ from customuser.models import User
 from client.serializers import ClientSerializer
 from proprietaire.serializers import ProprietaireSerializers
 from customuser.serializers import SocialSerializer, UserSerializer
+from .token_generator import TokenGenerator
 logger = logging.getLogger(__name__)
 
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+jwt_get_username_from_payload = api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 
 class CustomUserAction(ActionAPIView):
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        # return [permission() for permission in self.permission_classes]
+        return [permissions.AllowAny]
 
     """Customuser actionview."""
     def get_profile(self, request, params={}, *args, **kwargs):
@@ -131,3 +148,29 @@ class CustomUserAction(ActionAPIView):
             serializer.send_activation_mail(user)
             return Response({'token': token[0].key, 'user': serializer.data}, status.HTTP_201_CREATED)
 
+    def activate_account(self, request, params={}, *args, **kwargs):
+        uidb64 = request.data['uidb64']
+        token = request.data['token']
+        uid = urlsafe_base64_decode(uidb64.strip()).decode()
+        user = User.objects.get(pk=uid)
+
+        account_activation_token = TokenGenerator()
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            payload = jwt_payload_handler(user)
+            """
+                return Response({
+                    'token': jwt_encode_handler(payload),
+                    'user': user
+                })
+            """
+            # Should be redirected to the frontend login page instead.
+            return {
+                'success': True,
+                'token': jwt_encode_handler(payload),
+                'user': UserSerializer(user, context={'request': request}).data
+            }
+
+        else:
+            return {'success': False, 'payload': 'Une erreur est survenue. Merci de reessayer.'}

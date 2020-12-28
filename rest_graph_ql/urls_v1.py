@@ -94,6 +94,11 @@ urlpatterns = [
         name="mandat_action",
     ),
     url(
+        r"^account_action/(?P<action>[^/.]+)$",
+        account_viewset.as_view(),
+        name="account_action",
+    ),
+    url(
         r"^password/reset/confirm/$",
         PasswordResetConfirmView.as_view(),
         name="rest_password_reset_confirm",

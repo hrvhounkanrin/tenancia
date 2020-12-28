@@ -33,9 +33,6 @@ class ActionAPIView(APIView):
 
     def get(self, request, action, **kwargs):
         """I really don't what this func ain to."""
-
-
-
         params = self.normalize_params(request)
         kwargs['params'] = params
         self._last_action = params.get('action', action)
