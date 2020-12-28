@@ -1,155 +1,256 @@
 """Customuser serializer."""
 import logging
-from django.contrib.auth.forms import PasswordResetForm
 from django.conf import settings
-from django.utils.translation import gettext as _
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode as uid_decoder
 from django.utils.encoding import force_bytes
+
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_encode
+
 from rest_framework import serializers
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-from customuser.models import User
-from customuser.models import UserProfile
-from .token_generator import account_activation_token
-from rest_framework.validators import UniqueValidator
+from rest_framework_jwt.settings import api_settings
+from rest_framework.exceptions import ValidationError
+from rest_framework.serializers import (
+    HyperlinkedModelSerializer
+)
+from meslimmo import settings
+from tools.emails import Email
+from .utils import (
+    SetPasswordForm,
+    PasswordResetForm
+)
+from .models import (
+    User,
+)
+from .token_generator import TokenGenerator
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    """Userprofil serializer."""
+# Get the UserModel
 
-    class Meta:
-        """Userprofil serializer meta."""
+UserModel = get_user_model()
 
-        model = UserProfile
-        fields = ("dob", "title", "address", "country", "photo")
+User = get_user_model()
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
+jwt_get_username_from_payload = api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
+
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Userserializer class."""
-
-    def __init__(self, *args, **kwargs):
-        """Parse user serializer init."""
-        super(UserSerializer, self).__init__(*args, **kwargs)
-        # Find UniqueValidator and set custom message
-        for validator in self.fields["email"].validators:
-            if isinstance(validator, UniqueValidator):
-                validator.message = _("A user with this email already exist.")
-
-    profile = UserProfileSerializer(required=False)
+    """
+     user writable  serializer
+    """
 
     class Meta:
-        """Userserializer meta."""
-
         model = User
-        fields = (
-            "id",
-            "email",
-            "first_name",
-            "last_name",
-            "password",
-            "profile",
-        )
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = '__all__'
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        """User serializer create."""
-        profile_data = validated_data.pop("profile")
-        password = validated_data.pop("password")
+        password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
+        user.is_active = False
         user.save()
-        UserProfile.objects.create(user=user, **profile_data)
+        email_sender = Email()
+        token_generator = TokenGenerator()
+        print('user.pk:{} '.format(urlsafe_base64_encode(force_bytes(str(user.pk)))))
+        mail_data = {
+            # 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            # 'uid': force_text(urlsafe_base64_encode(force_bytes(user.pk))),
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': token_generator.make_token(user).strip(),
+            'first_name': user.first_name,
+            'email': user.email,
+            'domain': 'http://localhost:8000/api/v1/',
+
+        }
+        email_sender.sign_up_email.delay(mail_data)
+        # email_sender.sign_up_email(user=user)
         return user
 
-    def send_activation_mail(self, user):
-        """Send activation mail to user."""
-        token = account_activation_token.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        msg_content = render_to_string(
-            "registration/activate_account.html",
-            {
-                "user": user,
-                "domain": "https://tenancia.com",
-                "uid": uid,
-                "token": token,
-            },
-        )
-        to_email = user.email
-        message = Mail(
-            from_email="noreply@tenancia.com",
-            to_emails=to_email,
-            subject="Activation de votre compte",
-            html_content=msg_content,
-        )
-        try:
-            sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-            sg.send(message)
-            return True
-        except Exception as e:
-            logging.debug(f"**Profile  data information", f"{e}")
-            return False
 
-    def update(self, instance, validated_data):
-        """Customuser update."""
-        profile_data = validated_data.pop("profile")
-        profile = instance.profile
-        instance.email = validated_data.get("email", instance.email)
-        instance.save()
-        profile.title = profile_data.get("title", profile.title)
-        profile.dob = profile_data.get("dob", profile.dob)
-        profile.address = profile_data.get("address", profile.address)
-        profile.country = profile_data.get("country", profile.country)
-        profile.city = profile_data.get("city", profile.city)
-        profile.zip = profile_data.get("zip", profile.zip)
-        profile.photo = profile_data.get("photo", profile.photo)
-        profile.save()
-        return instance
+class PasswordChangeSerializer(serializers.Serializer):
+    """
+    Utility used during password change process
+    """
+    old_password = serializers.CharField(max_length=128)
+    new_password1 = serializers.CharField(max_length=128)
+    new_password2 = serializers.CharField(max_length=128)
 
-    def validate_email(self, value):
-        """Validate email."""
-        try:
-            User.objects.get(email=value)
-        except User.DoesNotExist:
-            pass
-        else:
-            raise serializers.ValidationError(
-                "A user with this email address already exists."
-            )
+    set_password_form_class = SetPasswordForm
+
+    def __init__(self, *args, **kwargs):
+        """
+        Setting for password related work
+        :param args:
+        :param kwargs:
+        """
+        self.old_password_field_enabled = getattr(
+            settings, 'OLD_PASSWORD_FIELD_ENABLED', False
+        )
+        self.logout_on_password_change = getattr(
+            settings, 'LOGOUT_ON_PASSWORD_CHANGE', False
+        )
+        super(PasswordChangeSerializer, self).__init__(*args, **kwargs)
+
+        if not self.old_password_field_enabled:
+            self.fields.pop('old_password')
+
+        self.request = self.context.get('request')
+        self.user = getattr(self.request, 'user', None)
+
+    def validate_old_password(self, value):
+        """
+        Used if validate  old password
+        :param value:
+        :return:
+        """
+        invalid_password_conditions = (
+            self.old_password_field_enabled,
+            self.user,
+            not self.user.check_password(value)
+        )
+
+        if all(invalid_password_conditions):
+            raise serializers.ValidationError('Invalid password')
         return value
+
+    def validate(self, attrs):
+        """
+        validate new password
+        :param attrs:
+        :return:
+        """
+        self.set_password_form = self.set_password_form_class(
+            user=self.user, data=attrs
+        )
+
+        if not self.set_password_form.is_valid():
+            raise serializers.ValidationError(self.set_password_form.errors)
+        return attrs
+
+    def save(self):
+        """
+        Change the password and send Password Change Email
+        """
+        self.set_password_form.save()
+        if not self.logout_on_password_change:
+            from django.contrib.auth import update_session_auth_hash
+            update_session_auth_hash(self.request, self.user)
+            email_sender = Email()
+            email_sender.password_change_email(self.user)
 
 
 class PasswordResetSerializer(serializers.Serializer):
-    """Custom password serializer."""
-
+    """
+    Serializer for requesting a password reset e-mail.
+    """
     email = serializers.EmailField()
+
     password_reset_form_class = PasswordResetForm
 
-    def validate_email(self, value):
-        """Validate user mail."""
-        self.reset_form = self.password_reset_form_class(
-            data=self.initial_data
-        )
-        if not self.reset_form.is_valid():
-            raise serializers.ValidationError(_("Error"))
+    def get_email_options(self):
+        """Override this method to change default e-mail options"""
+        return {}
 
-        if not User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(_("Invalid e-mail address"))
+    def validate_email(self, value):
+        """
+        Validate incoming email
+        :param value:
+        :return: return that email or rasie error
+        """
+        # Create PasswordResetForm with the serializer
+        self.reset_form = self.password_reset_form_class(data=self.initial_data)
+        if not self.reset_form.is_valid():
+            raise serializers.ValidationError(self.reset_form.errors)
+
         return value
 
     def save(self):
-        """Save."""
-        request = self.context.get("request")
-        register_path = "registration/password_reset_subject.txt"
-        reset_path = "registration/password_reset_email.html"
+        """
+        this will set values to trigger email
+        :return:
+        """
+        request = self.context.get('request')
+        # Set some values to trigger the send_email method.
         opts = {
-            "use_https": request.is_secure(),
-            "from_email": getattr(settings, "DEFAULT_FROM_EMAIL"),
-            "subject_template_name": register_path,
-            "html_email_template_name": reset_path,
-            "request": request,
+            'use_https': request.is_secure(),
+            # 'from_email': getattr(settings, 'DEFAULT_FROM_EMAIL'),
+            'request': request,
         }
+
+        opts.update(self.get_email_options())
         self.reset_form.save(**opts)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """
+    Serializer for requesting a password reset e-mail.
+    """
+    new_password1 = serializers.CharField(max_length=128)
+    new_password2 = serializers.CharField(max_length=128)
+    uid = serializers.CharField()
+    token = serializers.CharField()
+
+    set_password_form_class = SetPasswordForm
+
+    def custom_validation(self, attrs):
+        """
+
+        :param attrs:
+        :return:
+        """
+        pass
+
+    def validate(self, attrs):
+        """
+
+        :param attrs:
+        :return:
+        """
+        self._errors = {}
+
+        # Decode the uidb64 to uid to get User object
+        try:
+            uid = force_text(uid_decoder(attrs['uid']))
+            self.user = UserModel._default_manager.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, UserModel.DoesNotExist):
+            raise ValidationError({'uid': ['Invalid value']})
+
+        self.custom_validation(attrs)
+        # Construct SetPasswordForm instance
+        self.set_password_form = self.set_password_form_class(
+            user=self.user, data=attrs
+        )
+        if not self.set_password_form.is_valid():
+            raise serializers.ValidationError(self.set_password_form.errors)
+        if not default_token_generator.check_token(self.user, attrs['token']):
+            raise ValidationError({'token': ['Invalid value']})
+
+        return attrs
+
+    def save(self):
+        """
+
+        :return:
+        """
+        return self.set_password_form.save()
+
+
+
+class SocialSerializer(serializers.Serializer):
+    """
+    Serializer which accepts an OAuth2 access token.
+    """
+    access_token = serializers.CharField(
+        allow_blank=False,
+        trim_whitespace=True,
+    )
+

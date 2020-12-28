@@ -12,6 +12,8 @@ services:
       - ./.env.dev
     depends_on:
       - db
+    networks:
+      - tenancia
   db:
     image: postgres:12.0-alpine
     volumes:
@@ -25,6 +27,12 @@ services:
     ports:
       - 5433:5433
     command: -p 5433
-
+  rabbitmq:
+    image: 'bitnami/rabbitmq:latest'
+    networks:
+      - tenancia
+networks:
+  tenancia:
+    driver: bridge
 volumes:
   tenancia_db:

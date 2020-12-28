@@ -10,6 +10,8 @@ ENV PYTHONUNBUFFERED 1
 
 # install psycopg2 dependencies
 RUN apk update \
+    && apk --no-cache --update add build-base \
+    && apk add --no-cache libressl-dev musl-dev libffi-dev \
     && apk add postgresql-dev gcc python3-dev musl-dev
 RUN apk add --no-cache jpeg-dev zlib-dev
 RUN apk add --no-cache --virtual .build-depsbuild-base linux-headers

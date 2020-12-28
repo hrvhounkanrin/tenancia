@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 import os
-from datetime import timedelta
+import datetime
 
 
 AUTH_USER_MODEL = 'customuser.User'
@@ -24,12 +24,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = 'sz)!59k=#curo2j+bjlpzkx)pg3!mv7_hky!*z(h+n0iujt#fn'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 # Application definition
 
@@ -47,11 +47,12 @@ DJANGO_APPS = (
 
 THIRD_PARTY_APPS = (
     'rest_framework',
-    'rest_framework.authtoken',
     'corsheaders',
+    'social_django',
     'allauth',
     'allauth.account',
-    'rest_registration',
+    'rest_framework_jwt',
+    # 'rest_registration',
     'countries_plus'
 )
 
@@ -77,17 +78,18 @@ LOCAL_APPS = (
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 
-REST_USE_JWT = True
+
 
 MIDDLEWARE = [
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'meslimmo.urls'
@@ -267,10 +269,11 @@ LOGGING = {
             'propagate': True,
             'level': 'DEBUG',
         },
+        'asyncio': {
+            'level': 'WARNING'
+        }
     }
 }
-
-MEDIA_URL = '/media/'
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -280,19 +283,19 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAdminUser',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ),
     'PASSWORD_RESET_SERIALIZER':
         'customuser.serializers.PasswordResetSerializer1',
 }
 
 AUTHENTICATION_BACKENDS = (
-    # Needed to login by username in Django admin, regardless of `allauth`
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.google.GooglePlusAuth',
     'django.contrib.auth.backends.ModelBackend',
-    # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
@@ -310,46 +313,91 @@ OLD_PASSWORD_FIELD_ENABLED = True
 EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = False
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
+SENDGRID_API_KEY = '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'
 DEFAULT_FROM_EMAIL = 'Tenancia'
 
+
+# Load Social auth key in env
+for key in ['GOOGLE_OAUTH2_KEY',
+            'GOOGLE_OAUTH2_SECRET',
+            'FACEBOOK_KEY',
+            'FACEBOOK_SECRET']:
+    exec("SOCIAL_AUTH_{key} = os.environ.get('{key}', '')".format(key=key))
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile']
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'email']
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
+# See here for more details:
+# http://psa.matiasaguirre.net/docs/use_cases.html#associate-users-by-email
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',  # <- this line not included by default
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+REST_USE_JWT = True
+
+# http://getblimp.github.io/django-rest-framework-jwt/
+# JWT settings in setting.py file
+JWT_AUTH = {
+    'JWT_ENCODE_HANDLER':
+        'rest_framework_jwt.utils.jwt_encode_handler',
+
+    'JWT_DECODE_HANDLER':
+        'rest_framework_jwt.utils.jwt_decode_handler',
+
+    'JWT_PAYLOAD_HANDLER':
+        'rest_framework_jwt.utils.jwt_payload_handler',
+    # Specify a custom function to generate the token payload
+
+    'JWT_PAYLOAD_GET_USER_ID_HANDLER':
+        'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
+        'customuser.views.jwt_response_payload_handler',
+    # Responsible for controlling the response data returned after login or refresh.
+    # Override to return a custom response such as including the serialized representation of the User
+    # 'rest_framework_jwt.utils.jwt_response_payload_handler',
+
+    # 'rest_framework_jwt.utils.jwt_response_payload_handler',
+    # i have customize the response bkz i want user profile  and token as login
+
+    'JWT_SECRET_KEY': SECRET_KEY,
+    'JWT_GET_USER_SECRET_KEY': None,
+    'JWT_PUBLIC_KEY': None,
+    'JWT_PRIVATE_KEY': None,
+    'JWT_ALGORITHM': 'HS256',
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    # You can turn off expiration time verification by setting
+    # JWT_VERIFY_EXPIRATION to False. Without expiration verification,
+    # JWTs will last forever meaning a leaked token could be used by an attacker indefinitely'JWT_LEEWAY': 0,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
+    #  This will be added to datetime.utcnow() to set the expiration time.
+    # Default is datetime.timedelta(seconds=300)(5 minutes).
+    'JWT_AUDIENCE': None,
+    'JWT_ISSUER': None,
+
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    #  This is how much time after the original token that future tokens can be refreshed from.
+    # Default is datetime.timedelta(days=7) (7 days).
+
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_AUTH_COOKIE': None,
+}
+
+ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = False
 
-REST_REGISTRATION = {
-    'REGISTER_VERIFICATION_URL':
-        os.environ.get('REGISTER_VERIFICATION_URL'),
-    'RESET_PASSWORD_VERIFICATION_URL':
-        os.environ.get('RESET_PASSWORD_VERIFICATION_URL'),
-    'REGISTER_EMAIL_VERIFICATION_URL':
-        os.environ.get('REGISTER_EMAIL_VERIFICATION_URL'),
-    'VERIFICATION_FROM_EMAIL': os.environ.get('VERIFICATION_FROM_EMAIL'),
-    'REGISTER_VERIFICATION_EMAIL_TEMPLATES': {
-        'subject': 'c_rest_registration/register/subject.txt',
-        'html_body': 'c_rest_registration/register/body.html', },
-}
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
-    'VERIFYING_KEY': None,
-    'AUDIENCE': None,
-    'ISSUER': None,
-
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
-
-    'JTI_CLAIM': 'jti',
-
-    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-}
+RABBITMQ_HOST = 'localhost'
+CELERY_BROKER_URL = 'amqp://' + RABBITMQ_HOST
+# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '515214403352-dd3itjg2aequg8387650rr1b8aefpovf.apps.googleusercontent.com'
+# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'N8k7xSNPfjn4rJf5fvyVOAs7'
