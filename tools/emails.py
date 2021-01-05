@@ -85,7 +85,12 @@ class Email():
         }
         sending_email(receiver, subject, template_name, key)
 
-
+    @app.task(bind=True, name='emails.debug_celery')
+    def debug_celery(self):
+        a = 5
+        b = 6
+        res = 2*a + 5*b
+        print(res)
 
 
 '''
