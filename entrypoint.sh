@@ -13,7 +13,7 @@ fi
 echo "Start migration"
 python manage.py flush --no-input
 python manage.py migrate
-
+mkdir "LOGS"
 # Collect static files
 echo "Collect static files"
 python manage.py collectstatic --noinput
