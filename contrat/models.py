@@ -54,6 +54,8 @@ class Contrat(models.Model):
         related_name='accessoires', blank=False)
     mandat = models.ForeignKey('societe.Mandat',
                                null=True, on_delete=models.SET_NULL)
+    client_accord = models.BooleanField(default=True)
+    date_accord_client = models.DateField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
