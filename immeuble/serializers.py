@@ -10,10 +10,10 @@ from proprietaire.serializers import ProprietaireSerializers
 class ImmeubleSerializers(serializers.ModelSerializer):
     """Immeuble serializer."""
 
-    proprietaire = ProprietaireSerializers(read_only=True)
+    # proprietaire = ProprietaireSerializers(read_only=True)
     proprietaire_id = serializers.PrimaryKeyRelatedField(
         source='Proprietaire',
-        queryset=Proprietaire.objects.all(), write_only=True,)
+        queryset=Proprietaire.objects.all(), write_only=True)  # ,
 
     class Meta:
         """Immeuble serializer meta."""
@@ -22,8 +22,8 @@ class ImmeubleSerializers(serializers.ModelSerializer):
         fields = ('id', 'intitule', 'description', 'adresse',
                   'jour_emission_facture', 'jour_valeur_facture',
                   'ville', 'quartier', 'pays', 'longitude',
-                  'latitude', 'ref_immeuble', 'proprietaire',
-                  'proprietaire_id')
+                  'latitude', 'ref_immeuble',
+                  'proprietaire_id') #'proprietaire',
 
     def create(self, validated_data):
         """

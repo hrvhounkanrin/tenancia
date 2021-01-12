@@ -76,7 +76,7 @@ class ContratAccessoiresloyer(models.Model):
                                   decimal_places=10, default=0)
     is_peridic = models.BooleanField(default=False)
     devise = models.CharField(max_length=256, null=False, default='XOF')
-    statut = models.CharField(max_length=256, null=False, default='NON PAYE')
+    statut = models.CharField(max_length=256, null=False, default='NON REGLE')
     description = models.CharField(max_length=256)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)

@@ -41,7 +41,7 @@ class AccessoireloyerAction(ActionAPIView):
             saved_acc = [model.save() for model in acc___objects]
             serialized_acc = AccesoireloyerSerializers(
                 saved_acc, context=serializer_context, many=True)
-            return {'success': True, 'composant_apart': serialized_acc.data}
+            return {'success': True, 'accessoireloyer': serialized_acc.data}
         serializer = AccesoireloyerSerializers(
             data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
@@ -74,7 +74,7 @@ class AccessoireloyerAction(ActionAPIView):
             saved_components = [model.save() for model in acc_objects]
             serializer = AccesoireloyerSerializers(
                 saved_components, many=True, context=serializer_context)
-            return {'success': True, 'accessoire': serializer.data}
+            return {'success': True, 'accessoireloyer': serializer.data}
         instance = get_object_or_404(Accesoireloyer,
                                      pk=params.get('id', None))
         serializer = AccesoireloyerSerializers(

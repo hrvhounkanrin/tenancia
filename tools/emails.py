@@ -72,7 +72,6 @@ class Email():
         Accepts the following  parameters: user
         Create the customized signUp email for that user
         """
-        print('sign_up_email: {}', user)
         template_name = 'registration/activate_account.html'
         receiver = user['email']
         subject = 'Please Confirm Your E-mail Address'
@@ -85,12 +84,6 @@ class Email():
         }
         sending_email(receiver, subject, template_name, key)
 
-    @app.task(bind=True, name='emails.debug_celery')
-    def debug_celery(self):
-        a = 5
-        b = 6
-        res = 2*a + 5*b
-        print(res)
 
 
 '''

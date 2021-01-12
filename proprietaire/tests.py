@@ -3,7 +3,7 @@
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
-
+from django.urls import reverse
 from banque.models import Banque
 from customuser.models import User
 from proprietaire.models import Proprietaire
@@ -15,13 +15,11 @@ class ProprietaireAPITestCase(TestCase):
     def setUp(self):
         """Proprietaire api testcase setup."""
         self.client = APIClient()
-        user_data = {
-            'email': 'jdegboe@gmail.com',
-            'first_name': 'Joany',
-            'last_name': 'DEGBOE',
-            'password': 'joany'
-        }
-        self.user = User.objects.get_or_create(user_data)[0]
+        self.user, created = User.objects.get_or_create(first_name="HOUNKANRIN", last_name="Hervé",
+                                                   email="hrvhounkanrin@gmail.com")
+        if created:
+            self.user.set_password("herve2020")
+            self.user.save()
         banque_data = {
             'codebanque': '061',
             'libbanque': 'BANK OF ARFICA',

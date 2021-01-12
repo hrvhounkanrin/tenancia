@@ -67,14 +67,14 @@ class ContratSerializers(serializers.ModelSerializer):
         client_instance = validated_data.pop('Client', None)
         appartement_instance = validated_data.pop('Appartement', None)
         contrat = Contrat.objects.create(
-            client=client_instance, appartement=appartement_instance,
+            client=client_instance, appartement=appartement_instance, created_by=self.context['request'].user,
             **validated_data)
         if 'accessoires' in self.initial_data:
             accessoires = self.initial_data.get('accessoires')
             for accessoire in accessoires:
                 accessoire_instance = Accesoireloyer.objects.get(
-                    pk=accessoire.pop('accessoire_id', None))
-                accessoire.pop('contrat', None)
+                    pk=accessoire.get('accessoire_id', None))
+                accessoire.pop('accessoire_id', None)
                 ContratAccessoiresloyer(
                     contrat_id=contrat.id,
                     accesoireloyer_id=accessoire_instance.id,
@@ -91,6 +91,7 @@ class ContratSerializers(serializers.ModelSerializer):
                 field.set(value)
             else:
                 setattr(instance, attr, value)
+        instance['modified_by'] = self.context['request'].user
         instance.save()
         return instance
 

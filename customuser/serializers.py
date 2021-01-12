@@ -60,7 +60,6 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         email_sender = Email()
         token_generator = TokenGenerator()
-        print('user.pk:{} '.format(urlsafe_base64_encode(force_bytes(str(user.pk)))))
         mail_data = {
             # 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
             # 'uid': force_text(urlsafe_base64_encode(force_bytes(user.pk))),

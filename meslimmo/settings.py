@@ -378,7 +378,7 @@ JWT_AUTH = {
     # You can turn off expiration time verification by setting
     # JWT_VERIFY_EXPIRATION to False. Without expiration verification,
     # JWTs will last forever meaning a leaked token could be used by an attacker indefinitely'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=12),
     #  This will be added to datetime.utcnow() to set the expiration time.
     # Default is datetime.timedelta(seconds=300)(5 minutes).
     'JWT_AUDIENCE': None,

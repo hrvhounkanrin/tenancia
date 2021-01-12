@@ -24,7 +24,8 @@ app_name = 'rest_graph_ql'
 
 urlpatterns = [
     url(r'^$', landing_view.index, name='index'),
-    url(r'^api/', include(('rest_graph_ql.urls', 'restapi'))),
+    # url(r'^api/', include(('rest_graph_ql.urls', 'restapi'))),
+    url(r'^api/', include(('rest_graph_ql.urls', 'restapi'), namespace='restapi'), name='restapi'),
     url(r'^user_jwt/', obtain_jwt_token),
     url(r'^admin/', admin.site.urls),
 ]

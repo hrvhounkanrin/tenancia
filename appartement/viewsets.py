@@ -20,17 +20,18 @@ class AppartementViewSet(ActionAPIView):
         serializer_context = {
             'request': request,
         }
+        if len(params) == 0:
+            queryset = Appartement.objects.filter(created_by=self.request.user)
         if 'id' in params:
             queryset = Appartement.objects.filter(
-                id__in=params['id'].split(','))
-            serializer = AppartementSerializers(
-                queryset, context=serializer_context, many=True)
-            logger.debug('**retrieving housing **')
-            return serializer.data
-        get_all_appartment = Appartement.objects.all()
-        serialized_appartment = AppartementSerializers(
-            get_all_appartment, many=True, context={'request': request}).data
-        return {'success': True, 'appartements': serialized_appartment}
+                id__in=params['id'].split(','), created_by=self.request.user)
+        if 'immeuble_id' in params:
+            queryset = Appartement.objects.filter(
+                immeuble_id=params['immeuble_id'], created_by=self.request.user)
+        serializer = AppartementSerializers(
+            queryset, context=serializer_context, many=True)
+        logger.debug('**retrieving housing **')
+        return {'success': True, 'logement': serializer.data}
 
     def create_logement(self, request, params={}, *args, **kwargs):
         """
@@ -63,7 +64,7 @@ class AppartementViewSet(ActionAPIView):
             data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
-        return {'success': True, 'appartement': serializer.data}
+        return {'success': True, 'logement': serializer.data}
 
     def update_logement(self, request, params={}, *args, **kwargs):
         """
@@ -87,13 +88,13 @@ class AppartementViewSet(ActionAPIView):
                     instance, data=appart, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
                 serializer.save(modified_by=request.user)
-                return {'success': True, 'appartement': serializer.data}
+                return {'success': True, 'logement': serializer.data}
         instance = get_object_or_404(Appartement, pk=params.get('id', None))
         serializer = AppartementSerializers(
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save(modified_by=request.user)
-        return {'success': True, 'appartement': serializer.data}
+        return {'success': True, 'logement': serializer.data}
 
 
 class ComposantAppartementViewSet(ActionAPIView):

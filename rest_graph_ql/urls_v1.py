@@ -105,7 +105,7 @@ urlpatterns = [
     ),
     url(r"^countries/$", CountryListView.as_view(),
         name="countries_list"),
-    path('', include('customuser.urls'))
+    path(r'', include('customuser.urls', namespace='customuser'))
 ]
 api_urlpatterns = []
 urlpatterns += router.urls

@@ -27,7 +27,7 @@ class ImmeubleAction(ActionAPIView):
                 queryset, context=serializer_context, many=True)
             logger.debug('**retrieving immeubles **')
             return {'success': True, 'immeubles': serializer.data}
-        get_all_immeuble = Immeuble.objects.all(
+        get_all_immeuble = Immeuble.objects.filter(
             created_by=self.request.user)
         serialized_immeuble = ImmeubleSerializers(
             get_all_immeuble, context=serializer_context, many=True)

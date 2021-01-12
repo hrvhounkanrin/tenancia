@@ -22,6 +22,7 @@ python manage.py makemigrations
 # Apply database migrations
 echo "Apply database migrations"
 python manage.py migrate
+python manage.py update_countries_plus
 # celery -b rabbitmq -A meslimmo.celery worker --loglevel=debug
 # Start server
 echo "Starting server"

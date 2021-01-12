@@ -41,9 +41,10 @@ class ClientSerializer(serializers.ModelSerializer):
             pass
         else:
             raise serializers.ValidationError(
+
                 'Cet utilisateur est déjà un client')
         return Client.objects.create(user=user_instance,
-                                     banque=banque_instance, **validated_data)
+                                     banque=banque_instance,created_by=user_instance, **validated_data)
 
     def update(self, instance, validated_data):
         """Update client."""

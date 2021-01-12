@@ -44,7 +44,7 @@ class AppartementSerializers(serializers.ModelSerializer):
     """Housing serializer."""
 
     structures = serializers.SerializerMethodField()
-    immeuble = ImmeubleSerializers(read_only=True)
+    # immeuble = ImmeubleSerializers(read_only=True)
     immeuble_id = serializers.PrimaryKeyRelatedField(
         source='Immeuble', queryset=Immeuble.objects.all(), write_only=True, )
 
@@ -52,8 +52,7 @@ class AppartementSerializers(serializers.ModelSerializer):
         """Housing serializer meta."""
 
         model = Appartement
-        fields = ('id', 'intitule', 'level', 'autre_description', 'statut',
-                  'immeuble', 'immeuble_id', 'structures',)
+        fields = ('id', 'intitule', 'level', 'autre_description', 'statut', 'immeuble_id', 'structures',) # 'immeuble',
 
     def get_structures(self, appartement):
         """Get housing dependecies.
@@ -87,6 +86,8 @@ class AppartementSerializers(serializers.ModelSerializer):
                         ComposantAppartement.objects.get(id=dependency_id)
                 except ObjectDoesNotExist:
                     continue
+                structure.pop("appartement", None)
+                print(structure)
                 StructureAppartement(appartement=logement_instance,
                                      composantAppartement=dependency_instance,
                                      **structure).save()
@@ -107,5 +108,7 @@ class AppartementSerializers(serializers.ModelSerializer):
                 appartement__id=instance.id).delete()
             structures = self.initial_data.get('structures')
             for structure in structures:
-                StructureAppartement(appartement=instance, **structure).save()
+                structure.pop("appartement", None)
+                print(structure)
+                # StructureAppartement(appartement=instance, **structure).save()
         return instance

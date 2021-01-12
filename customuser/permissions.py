@@ -29,7 +29,6 @@ class IsLessor(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if user is lessor."""
-        return False
         lessor = Proprietaire.objects.filter(user__id=request.user.id).exists()
         return request.user and lessor
 
