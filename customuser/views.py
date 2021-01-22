@@ -250,30 +250,6 @@ class AuthGoogleView(CreateAPIView):
         print(token)
         headers = {'Authorization': 'Bearer {0}'.format(token['access_token'])}
         return Response({'token': token}, status.HTTP_201_CREATED)
-        # Obteniendo datos de perfil
-        """
-        r = requests.get(settings.PEOPLE_API_URL, headers=headers)
-        profile = json.loads(r.text)
-        print(profile['email'])
-        try:
-            user = User.objects.get(email=profile['email'])
-        except User.DoesNotExist:
-            user = None
-
-        if user:
-            payload = TokenObtainPairSerializer(user)
-            token = TokenObtainPairSerializer(payload)
-            return Response({'token': token}, status.HTTP_200_OK)
-
-        else:
-            user = User.objects.create_user(username=profile['given_name'], email=profile["email"], password="nexo2016")
-            # paciente = Paciente(user=user, pic_profile=profile['picture'], google_sub=profile['sub'])
-            # paciente.save()
-            # send_email_welcome(user)
-            payload = TokenObtainPairSerializer(user)
-            # token = JWT_ENCODE(payload)
-            return Response({'token': token}, status.HTTP_201_CREATED)
-        """
 
 
 @api_view(http_method_names=['POST'])

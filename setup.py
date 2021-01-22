@@ -4,7 +4,7 @@ def write_dot_env_file(env_file):
     with open(env_file, 'r') as f:
         for line in f:
             k, v = line.partition("=")[::2]
-            #print('{}:{}'.format(k, v))
+            # print('{}:{}'.format(k, v))
             os.environ[k.strip()] = v.rstrip('\n')
 
 def main():

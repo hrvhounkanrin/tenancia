@@ -398,8 +398,10 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False
 
 RABBITMQ_HOST = 'localhost'
-# CELERY_BROKER_URL = 'amqp://' + RABBITMQ_HOST
-CELERY_BROKER_URL = 'amqp://rabbitmq'
+CELERY_BROKER_URL = 'amqp://' + RABBITMQ_HOST
+TWILIO_ACCOUNT_SID = 'AC841b0c01be5608ad900f5fcd452a6172'
+TWILIO_AUTH_TOKEN = 'e08b2c59fe5a6c4c674e2fdacefd3963'
+# CELERY_BROKER_URL = 'amqp://rabbitmq'
 # CELERY_BROKER_URL = 'amqp://guest@localhost'
 # CELERY_BROKER_URL = "amqp://tenancia:tenancia@localhost:5672/"
 # SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '515214403352-dd3itjg2aequg8387650rr1b8aefpovf.apps.googleusercontent.com'

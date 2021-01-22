@@ -17,16 +17,17 @@ class Quittance(models.Model):
         (REGLEE, 'REGLEE'),
         (RETARD_REGLEMENT, 'RETARD DE REGLEMENT')
     )
+
     reference = models.CharField(max_length=20, null=False)
     date_emission = models.DateField()
     date_valeur = models.DateField()
     debut_periode = models.DateField()
     fin_periode = models.DateField()
     nature = models.CharField(max_length=50, null=False)
-    montant = models.DecimalField(max_digits=6, decimal_places=2)
-    statut = models.IntegerField(
+    montant = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    statut = models.CharField(max_length=64,
         choices=STATUT_QUITTANCE, default=EN_ATTENTE_REGLEMENT)
-    date_statut = models.DateField()
+    date_statut = models.DateField(auto_now_add=True)
     contrat = models.ForeignKey('contrat.Contrat',
                                 on_delete=models.SET_NULL, null=True, )
     motif_annulation = models.CharField(max_length=256, null=True)
