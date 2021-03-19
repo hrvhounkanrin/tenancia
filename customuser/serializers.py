@@ -61,17 +61,14 @@ class UserSerializer(serializers.ModelSerializer):
         email_sender = Email()
         token_generator = TokenGenerator()
         mail_data = {
-            # 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            # 'uid': force_text(urlsafe_base64_encode(force_bytes(user.pk))),
             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
             'token': token_generator.make_token(user).strip(),
             'first_name': user.first_name,
             'email': user.email,
-            'domain': 'http://localhost:8000/api/v1/',
+            'domain': settings.BASE_API_URL,
 
         }
         email_sender.sign_up_email.delay(mail_data)
-        # email_sender.sign_up_email(user=user)
         return user
 
 
@@ -241,7 +238,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         :return:
         """
         return self.set_password_form.save()
-
 
 
 class SocialSerializer(serializers.Serializer):

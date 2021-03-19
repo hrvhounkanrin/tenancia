@@ -194,10 +194,10 @@ class AgreementSerializer(serializers.Serializer):
                 'reference': instance.reference_bail,
                 'montant_global': montant_global,
                 'phone_number': instance.client.user.phone_number,
+                'client_accord': instance.client_accord,
             }
             sms_client.contrat_valide_client_sms.delay(quittance_data)
         return instance
-
 
 class ContratAccessoiresloyerSerializers(serializers.ModelSerializer):
     """ContratAccessoireloyer serializer."""

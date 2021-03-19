@@ -1,6 +1,6 @@
 """Quitance app viewset."""
 import logging
-import  datetime
+import datetime
 from contrat.models import ContratAccessoiresloyer, Contrat
 from .models import Quittance
 from quittance.serializers import QuittanceSerializers, FirstQuittanceSerializers

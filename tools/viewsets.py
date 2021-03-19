@@ -28,7 +28,6 @@ class ActionAPIView(APIView):
     RESPONSE_KEYS = ['user', 'action', 'token', 'subject', 'type', 'messageid']
 
     def post(self, request, action, **kwargs):
-        """I really don't what this func ain to."""
         return self.get(request, action, **kwargs)
 
     def get(self, request, action, **kwargs):

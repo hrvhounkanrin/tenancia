@@ -46,8 +46,8 @@ DJANGO_APPS = (
 )
 
 THIRD_PARTY_APPS = (
-    'rest_framework',
     'corsheaders',
+    'rest_framework',
     'social_django',
     'allauth',
     'allauth.account',
@@ -81,10 +81,10 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 
 MIDDLEWARE = [
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -135,6 +135,18 @@ DATABASES = {
         'PORT': os.environ.get("SQL_PORT"),
     }
 }
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'tenancia_db',
+        'USER': 'postgres',
+        'PASSWORD': 'tenancia',
+        'HOST': 'db',
+        'PORT': '5433',
+    }
+}
+"""
 # Password validatirest_registeron
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -392,11 +404,24 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_AUTH_COOKIE': None,
 }
-
-ALLOWED_HOSTS = ['*']
+BASE_API_URL = 'http://tenancia.com/api/v1/'
+BASE_FRONT_URL = 'http://localhost:8080'
+ALLOWED_HOSTS = ['http://localhost:8080', 'localhost']
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = False
-
+CORS_ALLOWED_ORIGINS = [
+    "http://tenancia.com",
+    'http://localhost:8080',
+    "http://127.0.0.1:8080"
+]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+APPEND_SLASH=False
 RABBITMQ_HOST = 'localhost'
 CELERY_BROKER_URL = 'amqp://' + RABBITMQ_HOST
 TWILIO_ACCOUNT_SID = 'AC841b0c01be5608ad900f5fcd452a6172'

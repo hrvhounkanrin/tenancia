@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from appartement.models import Appartement
 from appartement.models import ComposantAppartement
 from appartement.models import StructureAppartement
-from appartement.serializers import AppartementSerializers
+from appartement.serializers import AppartementSerializers, MultiplyAppartementSerializer
 from appartement.serializers import ComposantAppartmentSerializers
 from appartement.serializers import StructureAppartmentSerializers
 from tools.viewsets import ActionAPIView
@@ -96,6 +96,25 @@ class AppartementViewSet(ActionAPIView):
         serializer.save(modified_by=request.user)
         return {'success': True, 'logement': serializer.data}
 
+    def multiply_logement(self, request, params={}, *args, **kwargs):
+        """Multiplier un logement suivant un nombre et un id appartement"""
+        """
+                Create appartement.
+
+               :param request:
+               :param params:
+               :param args:
+               :param kwargs:
+               :return:
+               """
+        serializer_context = {
+            'request': request,
+        }
+        serializer = MultiplyAppartementSerializer(
+            data=request.data, context=serializer_context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=request.user)
+        return {'success': True, 'logement': 'serializer.data'}
 
 class ComposantAppartementViewSet(ActionAPIView):
     """Housing dependency Action Viewset."""

@@ -48,3 +48,14 @@ class Sms():
         message = client.messages.create(to=quittances_data['phone_number'], from_="+13052904936",
                                          body=body)
         logger.debug(message)
+
+    @app.task(bind=True, name='sms.contrat_quittance_cree_sms')
+    def contrat_quittance_cree_sms(self, quittances_data):
+        logger.debug(quittances_data)
+        client = Client(account_sid, account_token)
+        for quittance in quittances_data:
+            body = "Bonjour {}. Vous avez la quittance n° {} de votre contrat de location n° {}, d'un montant de {}, en attente de paiement. Veuillez vous connecter sur Tenancia pour le règlement".format(
+                quittance['first_name'], quittance['reference_quittance'], quittance['reference_contrat'], quittance['montant_global'])
+            message = client.messages.create(to=quittance['phone_number'], from_="+13052904936",
+                                             body=body)
+            logger.debug(message)

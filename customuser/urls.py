@@ -1,9 +1,7 @@
 """Customuser urls."""
 app_name = "customuser"
-from django.urls import path
 from django.urls import path, include
 from rest_framework import routers
-from .views import exchange_token as SocialAuth
 from .views import (
     UserViewSet,
     PasswordChangeView,
@@ -22,14 +20,11 @@ from rest_framework_jwt.views import (
     verify_jwt_token
 )
 
-
 urlpatterns = [
-    # path('social/google-oauth2/', SocialAuth.as_view(), name='google_oauth'),
     path('', include(router.urls)),
     path('accounts/login/', obtain_jwt_token, name="auth-login"),
     path('accounts/api-token-refresh/', refresh_jwt_token),
     path('api-token-verify/', verify_jwt_token),
-
     path('accounts/password/reset/', PasswordResetView.as_view(),
          name='rest_password_reset'),
     path('accounts/password/reset/confirm/', PasswordResetConfirmView.as_view(),
@@ -42,6 +37,7 @@ urlpatterns = [
         ActivateAccount.as_view({"get": "activate_account"}),
         name="activate-account",
     )
+
 
 
 

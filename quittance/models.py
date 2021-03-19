@@ -39,7 +39,9 @@ class Quittance(models.Model):
     modified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
         editable=False, related_name='quittance_updated_user')
-
+    class Meta:
+        ordering = ['-created_at', 'contrat'],
+        # permissions = [('is_lessor',)]
     def __str__(self):
         """Quittance str reprensentation."""
         return '%s %s' % (self.reference, self.contrat.reference_bail)

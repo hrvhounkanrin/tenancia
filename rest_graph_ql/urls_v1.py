@@ -22,12 +22,7 @@ from societe.viewsets import MandatViewSetAction as mandat_viewset
 from societe.viewsets import SocieteViewSetAction as societe_views
 from rest_auth.views import PasswordResetConfirmView
 from customuser.viewsets import CustomUserAction as account_viewset
-from customuser.views import AuthGoogleView
 from tools.views import CountryListView
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
 
 router = routers.SimpleRouter()
 urlpatterns = [

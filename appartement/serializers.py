@@ -3,7 +3,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from rest_framework import serializers
-
+from django.utils.crypto import get_random_string
 from .models import Appartement
 from .models import ComposantAppartement
 from .models import StructureAppartement
@@ -112,3 +112,32 @@ class AppartementSerializers(serializers.ModelSerializer):
                 print(structure)
                 # StructureAppartement(appartement=instance, **structure).save()
         return instance
+
+
+class MultiplyAppartementSerializer(serializers.Serializer):
+    nb = serializers.IntegerField(default=1)
+    appartement_id = serializers.IntegerField()
+
+    @transaction.atomic
+    def create(self, validated_data):
+
+        try:
+            appartement = Appartement.objects.get(validated_data['appartement_id'])
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError("L'appartement que vous voulez reproduire n'existe pas.")
+
+        user = self.context['request'].user
+        appartements = []
+        appartement = Appartement.objects.get(pk=validated_data['appartement_id'])
+        appartement_fields = list(appartement.__dict__.keys())
+        appartement_fields = [f for f in appartement_fields if f not in ['id', 'created_by_id', 'modified_by_id', '_state']]
+        for i in range(validated_data['nb']):
+            new_appartement = Appartement()
+            for field in list(appartement_fields):
+
+                field_name_val = getattr(appartement, field)
+                # print(f'field_value: {field_name_val}')
+                setattr(new_appartement, field, field_name_val)
+            appartements.append(new_appartement)
+        [m.save(intitule=get_random_string(8).upper(), created_by_id=user.id) for m in appartements]
+        return {'nb': validated_data['nb'], 'appartement_id': validated_data['appartement_id']}

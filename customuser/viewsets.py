@@ -29,16 +29,11 @@ logger = logging.getLogger(__name__)
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
-jwt_get_username_from_payload = api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 
 class CustomUserAction(ActionAPIView):
 
-    def get_permissions(self):
-        """
-        Instantiates and returns the list of permissions that this view requires.
-        """
-        # return [permission() for permission in self.permission_classes]
-        return [permissions.AllowAny]
+    def __init__(self):
+        self.permission_classes = [permissions.AllowAny]
 
     """Customuser actionview."""
     def get_profile(self, request, params={}, *args, **kwargs):
@@ -46,7 +41,6 @@ class CustomUserAction(ActionAPIView):
         User = get_user_model()
         try:
             user = User.objects.get(pk=request.user.id)
-            print(user)
             serializer = UserSerializer(user)
             proprietaire = Proprietaire.objects.filter(
                 user__id=request.user.id
@@ -69,7 +63,7 @@ class CustomUserAction(ActionAPIView):
 
     @psa()
     def exchange_token(self, request, params={}, *args, **kwargs):
-        print('start exchange ok')
+
         serializer = SocialSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             try:
@@ -100,6 +94,9 @@ class CustomUserAction(ActionAPIView):
                 return {'success': False, 'payload': payload}
 
     def googleauth(self, request, params={}, *args, **kwargs):
+        """Rigth func for google auth"""
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         """
         data = dict(client_id=request.data['clientId'],
                     redirect_uri=request.data['redirectUri'],
@@ -112,41 +109,30 @@ class CustomUserAction(ActionAPIView):
                     client_secret=os.environ.get("GOOGLE_SECRET"),
                     refresh_token=request.data['access_token'],
                     grant_type='refresh_token')
-        # print(data)
-        # print(os.environ.get("ACCESS_TOKEN_URL"))
-        # Obteniendo Access Token
         r = requests.post(os.environ.get("ACCESS_TOKEN_URL"), data=data)
         token = json.loads(r.text)
-        # print(token)
         headers = {'Authorization': 'Bearer {0}'.format(token['access_token']), 'Content-Type': 'application/json; UTF-8'}
         # return Response({'token': token}, status.HTTP_201_CREATED)
-        # Obteniendo datos de perfil
         settings.PEOPLE_API_URL = 'https://www.googleapis.com/oauth2/v3/userinfo?access_token={}'.format(token['access_token'])
         r = requests.get(settings.PEOPLE_API_URL, headers=headers)
         profile = json.loads(r.text)
-        # print(profile)
         try:
             user = User.objects.get(email=profile['email'])
         except User.DoesNotExist:
             user = None
 
-        if user:
-            token = Token.objects.get_or_create(user=user)
-            print('Type de payload: {}-{}'.format(token[0], token[1]))
-            print('Type de payload: {}-{}-{}'.format(token[0], type(token[0]), token[0].key))
-            serializer = UserSerializer(user)
-            # token = TokenObtainPairSerializer(payload.data)
-            return Response({'token': token[0].key, 'user': serializer.data}, status.HTTP_200_OK)
+        if user is None:
+            user = User.objects.create_user(username=profile['email'], first_name=profile['given_name'],
+                                            last_name=profile['family_name'], email=profile["email"],
+                                            password="teancia@2020", is_active=True)
 
-        else:
-            user = User.objects.create_user(username=profile['name'], first_name=profile['given_name'], last_name=profile['family_name'], email=profile["email"], password="teancia@2020")
-            # paciente = Paciente(user=user, pic_profile=profile['picture'], google_sub=profile['sub'])
-            # paciente.save()
-            # send_email_welcome(user)
-            token = Token.objects.get_or_create(user=user)
-            serializer = UserSerializer(user)
-            serializer.send_activation_mail(user)
-            return Response({'token': token[0].key, 'user': serializer.data}, status.HTTP_201_CREATED)
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        serializer = UserSerializer(user)
+        print(f'payload: {payload}')
+        print(f'token: {token}')
+        #serializer.send_activation_mail(user)
+        return Response({'token': token, 'user': serializer.data}, status.HTTP_200_OK)
 
     def activate_account(self, request, params={}, *args, **kwargs):
         uidb64 = request.data['uidb64']

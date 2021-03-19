@@ -76,6 +76,41 @@ paths:
       responses:
         default:
           description: "successful operation"
+  /accounts/activate/:
+    get:
+      tags:
+        - "user"
+      summary: "activate"
+      description: "Activate user account based on uid and token"
+      operationId: "activate"
+      produces:
+        - "application/json"
+      parameters:
+        - in: query
+          name: uidb64
+          schema:
+            type: string
+          description: A uid contains in the mail send to the user
+        - in: query
+          name: token
+          schema:
+            type: integer
+          description: A token contains in the mail send to the user
+      responses:
+        default:
+          description: "successful operation"
+  /account_action/get_profile:
+    get:
+      tags:
+        - "user"
+      summary: "user_profile"
+      description: "Get connected user profiles"
+      operationId: "user_profile"
+      produces:
+        - "application/json"
+      responses:
+        default:
+          description: "successful operation"
   /banque_action/create_banque:
     post:
       tags:
@@ -379,6 +414,27 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/Contrat"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ContratResponse"
+  /contrat_action/contrat_agreement:
+    post:
+      tags:
+        - "contrats"
+      summary: "Donner son avis ou son désaccord pour un contrat de bail"
+      description: ""
+      operationId: "contrat-agreement"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Contrat agreement"
+          required: true
+          schema:
+            $ref: "#/definitions/ContratAgreement"
       responses:
         200:
           description: "successful operation"
@@ -752,6 +808,10 @@ definitions:
         type: "integer"
       montant_bail:
         type: "integer"
+      nb_avance:
+        type: "integer"
+      nb_prepaye:
+        type: "integer"
       statut:
         type: "string"
       observation:
@@ -778,6 +838,20 @@ definitions:
             type: "array"
             items:
               $ref: '#/definitions/Contrat'
+  ContratAgreement:
+    type: "object"
+    properties:
+      contrat_id:
+        type: "string"
+      client_accord:
+        type: "string"
+  ContratAgreementResponse:
+    type: "object"
+    properties:
+      contrat_id:
+        type: "string"
+      client_accord:
+        type: "string"
   ApiResponse:
     type: "object"
     properties:
