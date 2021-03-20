@@ -27,5 +27,4 @@ python manage.py update_countries_plus
 # Start server
 echo "Starting server"
 # python manage.py runserver 0.0.0.0:8000
-
 exec "$@"
