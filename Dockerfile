@@ -22,11 +22,12 @@ RUN pip install -r requirements.txt
 
 # copy entrypoint.sh
 COPY ./entrypoint.sh .
+RUN chmod +x /entrypoint.sh
 
 # copy project
 COPY . .
 
 # run entrypoint.sh
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+# ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 CMD ["gunicorn", "--bind", ":8000", "--workers", "3",  "meslimmo.wsgi:application"]
 
