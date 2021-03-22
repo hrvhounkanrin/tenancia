@@ -124,7 +124,7 @@ WSGI_APPLICATION = 'meslimmo.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get("SQL_ENGINE"),
@@ -146,7 +146,6 @@ DATABASES = {
         'PORT': '5433',
     }
 }
-"""
 # Password validatirest_registeron
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
