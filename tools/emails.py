@@ -7,7 +7,7 @@ import os
 import logging
 from django.template.loader import get_template, render_to_string
 from django.conf import settings
-
+from celery.decorators import task
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from django.template import TemplateDoesNotExist
@@ -51,7 +51,7 @@ class Email():
         }
         sending_email(receiver, subject, template_name, key)
 
-    @app.task(name='emails.activate_clipped_asset')
+    @task(name='emails.activate_clipped_asset')
     def password_change_email(self, user):
         """
         Accepts the following  parameters: user
@@ -66,7 +66,7 @@ class Email():
         }
         sending_email(receiver, subject, template_name, key)
 
-    @app.task(bind=True, name='emails.signup_email')
+    @task(bind=True, name='emails.signup_email')
     def sign_up_email(self, user):
         """
         Accepts the following  parameters: user
@@ -80,12 +80,13 @@ class Email():
             'site_url': 'www.tenancia.com',
             'uid': user['uid'],
             'token': user['token'],
-            'frontend': os.environ.get('FRONTEND')
+            'front_url': os.environ.get('FRONTEND')
         }
         sending_email(receiver, subject, template_name, key)
 
-
-
+    @task(name="sum_two_numbers")
+    def add(x, y):
+        return x + y
 '''
 https://code.tutsplus.com/tutorials/using-celery-with-django-for-background-task-processing--cms-28732
 '''

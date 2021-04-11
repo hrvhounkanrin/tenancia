@@ -41,7 +41,7 @@ services:
     networks:
       - tenancia-nt
   web:
-    build: ./
+    build: .
     volumes:
       - ./:/usr/src/app/
     entrypoint: ./entrypoint.sh

@@ -124,7 +124,7 @@ class CustomUserAction(ActionAPIView):
         if user is None:
             user = User.objects.create_user(username=profile['email'], first_name=profile['given_name'],
                                             last_name=profile['family_name'], email=profile["email"],
-                                            password="teancia@2020", is_active=True)
+                                            password="teancia@2020")
 
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)

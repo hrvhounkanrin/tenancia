@@ -1,5 +1,6 @@
 """Customuser serializer."""
 import logging
+import os
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -66,9 +67,11 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name': user.first_name,
             'email': user.email,
             'domain': settings.BASE_API_URL,
+            'front_url': os.environ.get('FRONTEND')
 
         }
         email_sender.sign_up_email.delay(mail_data)
+        # email_sender.add.delay(23, 6766)
         return user
 
 
