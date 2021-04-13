@@ -8,7 +8,7 @@ def write_dot_env_file(env_file):
             os.environ[k.strip()] = v.rstrip('\n')
 
 def main():
-    env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+    env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env.dev')
     if os.path.isfile(env_file):
         write_dot_env_file(env_file)
     else:

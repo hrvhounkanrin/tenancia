@@ -16,7 +16,9 @@ from rest_framework.response import Response
 from rest_framework.views import status, APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_jwt.views import (ObtainJSONWebToken, jwt_response_payload_handler)
 from rest_framework_jwt.settings import api_settings
+
 from rest_framework.decorators import action
 from customuser.decorators import method_decorator
 from customuser.models import User
@@ -42,6 +44,13 @@ sensitive_post_parameters_m = method_decorator(
     )
 )
 
+def jwt_response_payload_handler(token, user=None, request=None):
+    return {
+        'token': token,
+        'user': UserSerializer(user, context={'request': request}).data
+    }
+
+
 from .token_generator import TokenGenerator
 
 class UserViewSet(ModelViewSet):
@@ -61,11 +70,19 @@ class UserViewSet(ModelViewSet):
         return [permission() for permission in permission_classes]
 
 # Create your views here.
-def jwt_response_payload_handler(token, user=None, request=None):
-    return {
-        'token': token,
-        'user': UserSerializer(user, context={'request': request}).data
-    }
+
+class CustomObtainJSONWebToken(ObtainJSONWebToken):
+
+    def post(self, request):
+        serializer = self.get_serializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True) # pass the 'raise_exception' flag
+        user = serializer.object.get('user') or request.user
+        token = serializer.object.get('token')
+        response_data = jwt_response_payload_handler(token, user, request)
+        return Response(response_data)
+
 
 class PasswordResetView(GenericAPIView):
     """

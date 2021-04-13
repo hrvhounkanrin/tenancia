@@ -99,7 +99,7 @@ paths:
       responses:
         default:
           description: "successful operation"
-  /account_action/get_profile:
+  /profile_action/get_profile:
     get:
       tags:
         - "user"

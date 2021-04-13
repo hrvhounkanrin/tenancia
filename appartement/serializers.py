@@ -22,7 +22,7 @@ class ComposantAppartmentSerializers(serializers.ModelSerializer):
 
 
 class StructureAppartmentSerializers(serializers.ModelSerializer):
-    """Housing dependecies of specfic housing."""
+    """Housing decustom_exception_handlerpendecies of specfic housing."""
 
     composantAppartement =\
         ComposantAppartmentSerializers(read_only=True)

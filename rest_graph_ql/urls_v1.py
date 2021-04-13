@@ -22,6 +22,7 @@ from societe.viewsets import MandatViewSetAction as mandat_viewset
 from societe.viewsets import SocieteViewSetAction as societe_views
 from rest_auth.views import PasswordResetConfirmView
 from customuser.viewsets import CustomUserAction as account_viewset
+from customuser.viewsets import ProfileAction as profile_viewset
 from tools.views import CountryListView
 
 router = routers.SimpleRouter()
@@ -92,6 +93,11 @@ urlpatterns = [
         r"^account_action/(?P<action>[^/.]+)$",
         account_viewset.as_view(),
         name="account_action",
+    ),
+    url(
+        r"^profile_action/(?P<action>[^/.]+)$",
+        profile_viewset.as_view(),
+        name="profile_action",
     ),
     url(
         r"^password/reset/confirm/$",

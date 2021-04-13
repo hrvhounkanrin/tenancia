@@ -9,7 +9,7 @@ from django.utils.encoding import force_bytes
 
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_encode
-
+from rest_framework_jwt import serializers as jwt_serializers
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 from rest_framework.exceptions import ValidationError
@@ -50,7 +50,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'address', 'country', 'city', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -251,4 +251,18 @@ class SocialSerializer(serializers.Serializer):
         allow_blank=False,
         trim_whitespace=True,
     )
+
+
+
+class JSONWebTokenSerializer(jwt_serializers.JSONWebTokenSerializer):
+    """
+    Override rest_framework_jwt's ObtainJSONWebToken serializer to
+    force it to raise ValidationError exception if validation fails.
+    """
+    def is_valid(self, raise_exception=None):
+        """
+        If raise_exception is unset, set it to True by default
+        """
+        return super().is_valid(
+            raise_exception=raise_exception if raise_exception is not None else True)
 

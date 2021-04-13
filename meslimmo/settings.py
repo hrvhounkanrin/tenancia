@@ -90,6 +90,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    'tools.custom_exception_handler.ExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'meslimmo.urls'
@@ -124,7 +125,6 @@ WSGI_APPLICATION = 'meslimmo.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-"""
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get("SQL_ENGINE"),
@@ -146,6 +146,7 @@ DATABASES = {
         'PORT': '5433',
     }
 }
+"""
 # Password validatirest_registeron
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -300,6 +301,7 @@ REST_FRAMEWORK = {
     ),
     'PASSWORD_RESET_SERIALIZER':
         'customuser.serializers.PasswordResetSerializer1',
+    'EXCEPTION_HANDLER': 'tools.custom_exception_handler.handle_exception'
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -370,8 +372,7 @@ JWT_AUTH = {
     'JWT_PAYLOAD_GET_USER_ID_HANDLER':
         'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
 
-    'JWT_RESPONSE_PAYLOAD_HANDLER':
-        'customuser.views.jwt_response_payload_handler',
+    #'JWT_RESPONSE_PAYLOAD_HANDLER': 'customuser.views.jwt_response_payload_handler',
     # Responsible for controlling the response data returned after login or refresh.
     # Override to return a custom response such as including the serialized representation of the User
     # 'rest_framework_jwt.utils.jwt_response_payload_handler',

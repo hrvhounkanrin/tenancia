@@ -40,7 +40,9 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     """Abtract user Model."""
     username = models.CharField(max_length=255,  null=True)
-    email = models.EmailField(max_length=255, unique=True)
+    email = models.EmailField(max_length=255, unique=True,  error_messages={
+                    "unique": "Un utilisateur avec ce mail existe déjà."
+                    })
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
     phone_number = models.CharField(max_length=56,  null=True)

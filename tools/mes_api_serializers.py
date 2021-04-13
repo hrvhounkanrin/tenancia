@@ -7,7 +7,7 @@ from rest_framework import serializers
 """ READY LET US GO """
 class APISerializer(serializers.BaseSerializer):
     """ Notre class APi Serializer herite de la baseSerializer classe"""
-
+    
     def to_representation(self, data):
         success = True
         payload = data

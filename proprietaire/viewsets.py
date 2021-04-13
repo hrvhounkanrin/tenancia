@@ -68,6 +68,7 @@ class ProprietairAction(ActionAPIView):
                 saved_proprio, many=True, context=serializer_context)
             return {'success': True, 'proprietaire': serialized_proprio.data}
         """
+        print(request.user.id)
         request.data['user_id'] = request.user.id
         serializer = ProprietaireSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)

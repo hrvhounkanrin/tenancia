@@ -8,7 +8,8 @@ from .views import (
     PasswordResetView,
     PasswordResetConfirmView,
     LogoutView,
-    ActivateAccount
+    ActivateAccount,
+    CustomObtainJSONWebToken
 
 )
 
@@ -22,7 +23,7 @@ from rest_framework_jwt.views import (
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('accounts/login/', obtain_jwt_token, name="auth-login"),
+    path('accounts/login/', CustomObtainJSONWebToken.as_view(), name="auth-login"),
     path('accounts/api-token-refresh/', refresh_jwt_token),
     path('api-token-verify/', verify_jwt_token),
     path('accounts/password/reset/', PasswordResetView.as_view(),
