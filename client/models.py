@@ -12,6 +12,7 @@ class Client(models.Model):
     ice_contact = models.CharField(max_length=128, null=True, blank=False)
     ice_number = models.CharField(max_length=28, null=True, blank=False)
     ice_relation = models.CharField(max_length=64, null=True, blank=True)
+    phone_number = models.CharField(max_length=56,  null=True,blank=False)
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE, null=True, )
     banque = models.ForeignKey('banque.Banque',

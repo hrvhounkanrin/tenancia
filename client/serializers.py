@@ -13,9 +13,8 @@ from customuser.serializers import UserSerializer
 class ClientSerializer(serializers.ModelSerializer):
     """Client serializer."""
 
-    banque = BanqueSerializers(read_only=True)
-    banque_id = serializers.PrimaryKeyRelatedField(
-        source='Banque', queryset=Banque.objects.all(), write_only=True, )
+    # banque = BanqueSerializers(read_only=True)
+    # banque_id = serializers.PrimaryKeyRelatedField(  source='Banque', queryset=Banque.objects.all(), write_only=True, )
     user = UserSerializer(read_only=True)
     user_id = serializers.PrimaryKeyRelatedField(
         source='User', queryset=User.objects.all(), write_only=True, )
@@ -24,9 +23,7 @@ class ClientSerializer(serializers.ModelSerializer):
         """Client serializer meta."""
 
         model = Client
-        fields = ('id', 'profession', 'mode_paiement', 'ice_contact',
-                  'ice_number', 'ice_relation', 'user', 'user_id',
-                  'banque', 'banque_id',)
+        fields = ('id', 'profession', 'ice_contact', 'ice_number', 'ice_relation', 'user', 'user_id', 'phone_number')
 
     def create(self, validated_data):
         """Create a client.
@@ -34,17 +31,14 @@ class ClientSerializer(serializers.ModelSerializer):
         :rtype:
         """
         user_instance = validated_data.pop('User', None)
-        banque_instance = validated_data.pop('Banque', None)
+        # banque_instance = validated_data.pop('Banque', None)
         try:
             Client.objects.get(user=user_instance)
         except Client.DoesNotExist:
             pass
         else:
-            raise serializers.ValidationError(
-
-                'Cet utilisateur est déjà un client')
-        return Client.objects.create(user=user_instance,
-                                     banque=banque_instance,created_by=user_instance, **validated_data)
+            raise serializers.ValidationError('Cet utilisateur est déjà un client')
+        return Client.objects.create(user=user_instance, created_by=user_instance, **validated_data)
 
     def update(self, instance, validated_data):
         """Update client."""
