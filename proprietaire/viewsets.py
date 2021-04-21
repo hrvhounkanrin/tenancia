@@ -73,7 +73,7 @@ class ProprietairAction(ActionAPIView):
         serializer = ProprietaireSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
-        return {'success': True, 'proprietaire': serializer.data}
+        return {'success': True, 'payload': serializer.data}
 
     def update_proprio(self, request, params={}, *args, **kwargs):
         """
@@ -88,6 +88,7 @@ class ProprietairAction(ActionAPIView):
         serializer_context = {
             'request': request,
         }
+        """
         if isinstance(request.data.get('proprietaire', None), list):
             proprietaires = request.data.pop('proprietaire')
             proprietaire_objects = []
@@ -103,10 +104,14 @@ class ProprietairAction(ActionAPIView):
                  for model in proprietaire_objects]
             serializer = ProprietaireSerializers(
                 saved_proprio, many=True, context=serializer_context)
-            return {'success': True, 'proprietaire': serializer.data}
+            return {'success': True, 'payload': serializer.data}
+        """
         instance = get_object_or_404(Proprietaire, pk=params.get('id', None))
+        data = request.data
+        data['user_id'] = request.user.id
+
         serializer = ProprietaireSerializers(
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save(modified_by=request.user)
-        return {'success': True, 'proprietaire': serializer.data}
+        return {'success': True, 'payload': serializer.data}

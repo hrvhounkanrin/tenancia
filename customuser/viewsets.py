@@ -151,15 +151,15 @@ class ProfileAction(ActionAPIView):
             lessor_serializer = ProprietaireSerializers(proprietaire)
             client = Client.objects.filter(user__id=request.user.id).first()
             client_serializer = ClientSerializer(client)
-            profiles = {"user": serializer.data}
+            profiles = {}
             if proprietaire is not None:
                 profiles.update({"lessor": lessor_serializer.data})
             if client is not None:
                 profiles.update({"tenant": client_serializer.data})
-            return {"success": True, "profiles": profiles}
+            return {"success": True, "payload": profiles}
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
             serializer = UserSerializer(user)
-            return {"success": True, "user": serializer.data}
+            return {"success": True, "payload": serializer.data}
         else:
             return {"success": False, "msg": "An error occured."}

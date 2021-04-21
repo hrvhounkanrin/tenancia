@@ -374,13 +374,6 @@ JWT_AUTH = {
         'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
 
     #'JWT_RESPONSE_PAYLOAD_HANDLER': 'customuser.views.jwt_response_payload_handler',
-    # Responsible for controlling the response data returned after login or refresh.
-    # Override to return a custom response such as including the serialized representation of the User
-    # 'rest_framework_jwt.utils.jwt_response_payload_handler',
-
-    # 'rest_framework_jwt.utils.jwt_response_payload_handler',
-    # i have customize the response bkz i want user profile  and token as login
-
     'JWT_SECRET_KEY': SECRET_KEY,
     'JWT_GET_USER_SECRET_KEY': None,
     'JWT_PUBLIC_KEY': None,
@@ -391,7 +384,7 @@ JWT_AUTH = {
     # You can turn off expiration time verification by setting
     # JWT_VERIFY_EXPIRATION to False. Without expiration verification,
     # JWTs will last forever meaning a leaked token could be used by an attacker indefinitely'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=12),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=24),
     #  This will be added to datetime.utcnow() to set the expiration time.
     # Default is datetime.timedelta(seconds=300)(5 minutes).
     'JWT_AUDIENCE': None,

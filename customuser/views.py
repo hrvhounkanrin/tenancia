@@ -1,5 +1,7 @@
 
 import os
+from datetime import  datetime
+from django.conf import settings
 from django.utils.translation import gettext as _
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import (
@@ -48,6 +50,7 @@ def jwt_response_payload_handler(token, user=None, request=None):
     return {
         'token': token,
         'user': UserSerializer(user, context={'request': request}).data
+        # 'token_validty':timedelta(seconds=settings.TOKEN_EXPIRED_AFTER_SECONDS) - time_elapsed
     }
 
 
@@ -74,13 +77,30 @@ class UserViewSet(ModelViewSet):
 class CustomObtainJSONWebToken(ObtainJSONWebToken):
 
     def post(self, request):
+
         serializer = self.get_serializer(
             data=request.data
         )
+        serializer.is_valid(raise_exception=True)  # pass the 'raise_exception' flag
+        user = serializer.object.get('user') or request.user
+        print('CustomObtainJSONWebToken Ok')
+
+        """
         serializer.is_valid(raise_exception=True) # pass the 'raise_exception' flag
         user = serializer.object.get('user') or request.user
         token = serializer.object.get('token')
         response_data = jwt_response_payload_handler(token, user, request)
+        """
+        # Should be redirected to the frontend login page instead.
+        payload = jwt_payload_handler(user)
+        ini_time_for_now = datetime.now()
+        now = datetime.now()
+        timestamp = datetime.timestamp(now)
+        return Response({
+            'expire_in': datetime.utcnow() + settings.JWT_AUTH['JWT_EXPIRATION_DELTA'],
+            'token': jwt_encode_handler(payload),
+            'user': UserSerializer(user, context={'request': request}).data
+        })
         return Response(response_data)
 
 
@@ -232,6 +252,7 @@ class ActivateAccount(GenericViewSet):
             # Should be redirected to the frontend login page instead.
             return Response({
                 'success': True,
+                'expire_in': settings.JWT_AUTH['JWT_EXPIRATION_DELTA'],
                 'token': jwt_encode_handler(payload),
                 'user': UserSerializer(user, context={'request': request}).data
             })

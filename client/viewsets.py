@@ -64,7 +64,7 @@ class ClientAction(ActionAPIView):
             data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'client': serializer.data}
+        return {'success': True, 'payload': serializer.data}
 
     def update_client(self, request, params={}, *args, **kwargs):
         """
@@ -101,4 +101,4 @@ class ClientAction(ActionAPIView):
             instance, data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'client': serializer.data}
+        return {'success': True, 'payload': serializer.data}
