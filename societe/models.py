@@ -4,19 +4,20 @@ from django.conf import settings
 from django.db import models
 
 
-class Societe(models.Model):
-    """Societe model."""
+class RealEstate(models.Model):
+    """RealEstate model."""
 
     raison_social = models.CharField(max_length=150, null=False)
     num_telephone = models.CharField(max_length=50, null=False)
     adresse = models.CharField(max_length=150, null=True)
-    logo = models.CharField(max_length=150)
+    logo = models.CharField(max_length=150, null=True)
     num_carte_professionnel = models.CharField(max_length=150, null=True)
+    numero_ifu = models.CharField(max_length=150, null=True)
     date_delivrance = models.DateField(null=True)
     carte_professionnel = models.FileField(upload_to="documents/", null=True)
     users = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        through="SocieteUsers",
+        through="RealEstateUsers",
         related_name="users",
         blank=True,
     )
@@ -24,16 +25,14 @@ class Societe(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL,
-        editable=False,
+        null=False,
+        on_delete=models.CASCADE,
         related_name="societe_created_user",
     )
     modified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL,
-        editable=False,
+        null=False,
+        on_delete=models.CASCADE,
         related_name="societe_updated_user",
     )
 
@@ -42,14 +41,14 @@ class Societe(models.Model):
         return "Raison social: %s" % (self.raison_social)
 
 
-class SocieteUsers(models.Model):
+class RealEstateUsers(models.Model):
     """Mandataire users."""
 
     MASTER = "MASTER"
     USER = "USER"
     USER_PROFIL = ((MASTER, "MASTER"), (USER, "USER"))
     societe = models.ForeignKey(
-        "Societe",
+        "RealEstate",
         related_name="societe_users",
         on_delete=models.SET_NULL,
         null=True,
@@ -83,7 +82,7 @@ class Mandat(models.Model):
         "immeuble.Immeuble", null=True, on_delete=models.SET_NULL
     )
     societe = models.ForeignKey(
-        "Societe", null=True, on_delete=models.SET_NULL
+        "RealEstate", null=True, on_delete=models.SET_NULL
     )
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)

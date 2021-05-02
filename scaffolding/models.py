@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import models
 
-from appartement.models import ComposantAppartement
+from appartement.models import TypeDependence
 
 
 class Immeuble(models.Model):
@@ -53,7 +53,7 @@ class Appartement(models.Model):
     immeuble = models.ForeignKey('scaffolding.Immeuble',
                                  null=True, on_delete=models.SET_NULL)
     structure = models.ManyToManyField(
-        ComposantAppartement, through='StructureAppartement',
+        TypeDependence, through='StructureAppartement',
         blank=False, related_name='scaffolding_structure')
     statut = models.CharField(max_length=50,
                               choices=STATUT_APPARTEMENT, default='LIBRE')
@@ -78,7 +78,7 @@ class StructureAppartement(models.Model):
         'Appartement', related_name='scaffolding_appartement',
         on_delete=models.SET_NULL, null=True)
     composantAppartement = models.ForeignKey(
-        'appartement.ComposantAppartement',
+        'appartement.TypeDependence',
         related_name='scaffolding_composant_appartement',
         on_delete=models.SET_NULL, null=True)
     nbre = models.IntegerField(default=1)

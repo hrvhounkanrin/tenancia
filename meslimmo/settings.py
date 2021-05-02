@@ -46,6 +46,7 @@ DJANGO_APPS = (
 )
 
 THIRD_PARTY_APPS = (
+    'django_extensions',
     'corsheaders',
     'rest_framework',
     'social_django',
@@ -400,7 +401,7 @@ JWT_AUTH = {
 }
 BASE_API_URL = 'http://tenancia.com/api/v1/'
 BASE_FRONT_URL = 'http://localhost:8080'
-ALLOWED_HOSTS = ['http://localhost:8080', 'localhost']
+ALLOWED_HOSTS = ['http://localhost:8080', 'localhost', 'tenancia.com']
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
     "http://tenancia.com",

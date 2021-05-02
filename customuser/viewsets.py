@@ -20,6 +20,8 @@ from tools.viewsets import ActionAPIView
 from proprietaire.models import Proprietaire
 from client.models import Client
 from customuser.models import User
+from societe.models import RealEstate
+from societe.serializers import SocieteSerializer
 from client.serializers import ClientSerializer
 from proprietaire.serializers import ProprietaireSerializers
 from customuser.serializers import SocialSerializer, UserSerializer
@@ -150,12 +152,16 @@ class ProfileAction(ActionAPIView):
             ).first()
             lessor_serializer = ProprietaireSerializers(proprietaire)
             client = Client.objects.filter(user__id=request.user.id).first()
+            real_estate = RealEstate.objects.filter(created_by=request.user.id).first()
             client_serializer = ClientSerializer(client)
             profiles = {}
             if proprietaire is not None:
                 profiles.update({"lessor": lessor_serializer.data})
             if client is not None:
                 profiles.update({"tenant": client_serializer.data})
+            if real_estate is not None:
+                real_estate_serialiser = SocieteSerializer(real_estate)
+                profiles.update({"real_estate": real_estate_serialiser.data})
             return {"success": True, "payload": profiles}
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None

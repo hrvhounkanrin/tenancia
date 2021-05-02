@@ -4,7 +4,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from appartement.models import ComposantAppartement
+from appartement.models import TypeDependence
 from banque.models import Banque
 from customuser.models import User
 from immeuble.models import Immeuble
@@ -52,11 +52,11 @@ class AppartementAPITestCase(TestCase):
         }
         self.immeuble = Immeuble.objects.get_or_create(immeuble_data)[0]
         """Composant appartement"""
-        self.composant1 = ComposantAppartement.objects.get_or_create(
+        self.composant1 = TypeDependence.objects.get_or_create(
             libelle='LIVING ROOM', utilite='salon')[0]
-        self.composant2 = ComposantAppartement.objects.get_or_create(
+        self.composant2 = TypeDependence.objects.get_or_create(
             libelle='BED ROOMS', utilite='Chambre à coucher')[0]
-        self.composant3 = ComposantAppartement.objects.get_or_create(
+        self.composant3 = TypeDependence.objects.get_or_create(
             libelle='KITCHEN', utilite='Cuisine')[0]
 
     def test_logement_can_create(self):

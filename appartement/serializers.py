@@ -5,38 +5,38 @@ from django.db import transaction
 from rest_framework import serializers
 from django.utils.crypto import get_random_string
 from .models import Appartement
-from .models import ComposantAppartement
+from .models import TypeDependence
 from .models import StructureAppartement
 from immeuble.models import Immeuble
 from immeuble.serializers import ImmeubleSerializers
 
 
-class ComposantAppartmentSerializers(serializers.ModelSerializer):
-    """ComposantApapartement(Housing dependecy type) serializer."""
+class TypeDependenceSerializers(serializers.ModelSerializer):
+    """TypeDependence(Housing dependecy type) serializer."""
 
     class Meta:
-        """ComposantApapartement serializer meta."""
+        """TypeDependence serializer meta."""
 
-        model = ComposantAppartement
+        model = TypeDependence
         fields = '__all__'
 
 
 class StructureAppartmentSerializers(serializers.ModelSerializer):
     """Housing decustom_exception_handlerpendecies of specfic housing."""
 
-    composantAppartement =\
-        ComposantAppartmentSerializers(read_only=True)
-    composantAppartement_id = serializers.PrimaryKeyRelatedField(
-        source='ComposantAppartement',
-        queryset=ComposantAppartement.objects.all(),
+    typeDependence =\
+        TypeDependenceSerializers(read_only=True)
+    typeDependence_id = serializers.PrimaryKeyRelatedField(
+        source='TypeDependence',
+        queryset=TypeDependence.objects.all(),
         write_only=True, )
 
     class Meta:
         """StructureAppartement meta."""
 
         model = StructureAppartement
-        fields = ['appartement', 'composantAppartement',
-                  'composantAppartement_id', 'nbre',
+        fields = ['appartement', 'TypeDependence',
+                  'typeDependence_id', 'nbre',
                   'description', 'is_periodic']
 
 
@@ -83,7 +83,7 @@ class AppartementSerializers(serializers.ModelSerializer):
                 dependency_id = structure.pop('composantAppartement', None)
                 try:
                     dependency_instance = \
-                        ComposantAppartement.objects.get(id=dependency_id)
+                        TypeDependence.objects.get(id=dependency_id)
                 except ObjectDoesNotExist:
                     continue
                 structure.pop("appartement", None)

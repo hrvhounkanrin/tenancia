@@ -80,7 +80,7 @@ urlpatterns = [
         name="contrat_action",
     ),
     url(
-        r"^mandataire_action/(?P<action>[^/.]+)$",
+        r"^realestate_action/(?P<action>[^/.]+)$",
         societe_views.as_view(),
         name="mandataire_action",
     ),

@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 from banque.models import Banque
 from customuser.models import User
-from societe.models import Societe
+from societe.models import RealEstate
 
 
 class MandataireAPITestCase(TestCase):
@@ -55,7 +55,7 @@ class MandataireAPITestCase(TestCase):
     def test_mandataire_can_update(self):
         """Test mandataire can update."""
         url = "/api/v1/mandataire_action/update_mandataire/"
-        mandataire_instance = Societe.objects.get_or_create(
+        mandataire_instance = RealEstate.objects.get_or_create(
             raison_social="GRC IMMOBILIER",
             num_telephone="95415263",
             adresse="Calavi",

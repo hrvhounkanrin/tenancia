@@ -6,8 +6,8 @@ from rest_framework import serializers
 from .models import Appartement
 from .models import Immeuble
 from .models import StructureAppartement
-from appartement.models import ComposantAppartement
-from appartement.serializers import ComposantAppartmentSerializers
+from appartement.models import TypeDependence
+from appartement.serializers import TypeDependenceSerializers
 
 
 class ImmeubleSerializers(serializers.ModelSerializer):
@@ -23,10 +23,10 @@ class ImmeubleSerializers(serializers.ModelSerializer):
 class StructureAppartmentSerializers(serializers.ModelSerializer):
     """StructureApparement serializer."""
 
-    composantAppartement = ComposantAppartmentSerializers(read_only=True)
+    composantAppartement = TypeDependenceSerializers(read_only=True)
     composantAppartement_id = serializers.PrimaryKeyRelatedField(
-        source='ComposantAppartement',
-        queryset=ComposantAppartement.objects.all(), write_only=True,)
+        source='TypeDependence',
+        queryset=TypeDependence.objects.all(), write_only=True,)
 
     class Meta:
         """Structure appatement serializer meta."""

@@ -1,10 +1,10 @@
 # -*- coding: UTF-8 -*-
-"""Societe app viewsets."""
+"""RealEstate app viewsets."""
 import logging
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from .models import Mandat
-from .models import Societe, SocieteUsers
+from .models import RealEstate, RealEstateUsers
 from .serializers import MandatSerializer
 from .serializers import SocieteSerializer
 from tools.viewsets import ActionAPIView
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class SocieteViewSetAction(ActionAPIView):
-    """Societe action viewset."""
+    """RealEstate action viewset."""
 
     def get_mandataire(self, request, params={}, *args, **kwargs):
         """
@@ -27,14 +27,14 @@ class SocieteViewSetAction(ActionAPIView):
         """
         serializer_context = {"request": request}
         if "id" in params:
-            queryset = Societe.objects.filter(id__in=params["id"].split(","))
+            queryset = RealEstate.objects.filter(id__in=params["id"].split(","))
             serializer = SocieteSerializer(
                 queryset, context=serializer_context, many=True
             )
             logger.debug("**retrieving mandataire **")
             return serializer.data
 
-        queryset = Societe.objects.all()
+        queryset = RealEstate.objects.all()
         serializer = SocieteSerializer(
             queryset, context=serializer_context, many=True
         )
@@ -64,7 +64,7 @@ class SocieteViewSetAction(ActionAPIView):
                 mandataire_objects.append(serializer)
             saved_mandataire = [model.save() for model in mandataire_objects]
             [
-                SocieteUsers(
+                RealEstateUsers(
                     societe=sc, user=current_user, profil="MASTER"
                 ).save()
                 for sc in saved_mandataire
@@ -72,11 +72,11 @@ class SocieteViewSetAction(ActionAPIView):
             serialized_mandataire = SocieteSerializer(
                 saved_mandataire, many=True, context=serializer_context
             )
-            return {'success"': True, "societe": serialized_mandataire.data}
-        serializer = SocieteSerializer(data=request.data)
+            return {'success"': True, "payload": serialized_mandataire.data}
+        serializer = SocieteSerializer(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "societe": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def update_mandataire(self, request, params={}, *args, **kwargs):
         """
@@ -93,7 +93,7 @@ class SocieteViewSetAction(ActionAPIView):
             mandataires = request.data.pop("societe")
             mandataire_objects = []
             for mandataire in mandataires:
-                instance = Societe.objects.get(pk=params.get("id", None))
+                instance = RealEstate.objects.get(pk=params.get("id", None))
                 serializer = SocieteSerializer(
                     instance, data=mandataire, context=serializer_context
                 )
@@ -103,14 +103,14 @@ class SocieteViewSetAction(ActionAPIView):
             serializer = SocieteSerializer(
                 saved_mandataire, many=True, context=serializer_context
             )
-            return {"success": True, "societe": serializer.data}
-        instance = get_object_or_404(Societe, pk=params.get("id", None))
+            return {"success": True, "payload": serializer.data}
+        instance = get_object_or_404(RealEstate, pk=params.get("id", None))
         serializer = SocieteSerializer(
             instance, data=request.data, context=serializer_context
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "societe": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
 
 class MandatViewSetAction(ActionAPIView):
@@ -164,11 +164,11 @@ class MandatViewSetAction(ActionAPIView):
             serialized_mandat = MandatSerializer(
                 saved_mandat, many=True, context=serializer_context
             )
-            return {"success": True, "mandat": serialized_mandat.data}
+            return {"success": True, "payload": serialized_mandat.data}
         serializer = MandatSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "mandat": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def update_mandat(self, request, params={}, *args, **kwargs):
         """
@@ -195,7 +195,7 @@ class MandatViewSetAction(ActionAPIView):
             serializer = MandatSerializer(
                 saved_mandat, many=True, context=serializer_context
             )
-            return {"success": True, "mandat": serializer.data}
+            return {"success": True, "payload": serializer.data}
 
         instance = Mandat.objects.get(pk=params.get("id", None))
         serializer = MandatSerializer(
@@ -203,4 +203,4 @@ class MandatViewSetAction(ActionAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "mandat": serializer.data}
+        return {"success": True, "payload": serializer.data}

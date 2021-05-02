@@ -562,8 +562,6 @@ definitions:
         type: "integer"
       pays_residence:
         type: "string"
-      user_id:
-        type: "integer"
 
   ProprietaireOutput:
     type: "object"
@@ -722,13 +720,13 @@ definitions:
         type: "integer"
       profession:
         type: "string"
-      mode_paiement:
-        type: "string"
       ice_contact:
         type: "string"
       ice_number:
         type: "string"
       ice_relation:
+        type: "string"
+      phone_number:
         type: "string"
       user_id:
         type: "integer"
@@ -747,16 +745,14 @@ definitions:
                 type: "integer"
               profession:
                 type: "string"
-              mode_paiement:
-                type: "string"
               ice_contact:
                 type: "string"
               ice_number:
                 type: "string"
               ice_relation:
                 type: "string"
-              banque:
-                $ref: '#/definitions/CreatedBanque'
+              phone_number:
+                type: "string"
               user:
                 $ref: '#/definitions/CreatedUser'
   AccessoireLoyer:

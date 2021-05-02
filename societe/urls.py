@@ -1,2 +1,2 @@
 # -*- coding: UTF-8 -*-
-"""Societe app urls."""
+"""RealEstate app urls."""
