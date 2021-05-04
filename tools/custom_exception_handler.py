@@ -13,6 +13,7 @@ def get_response(message="", result={}, status=False, status_code=200):
 
 
 def get_error_message(error_dict):
+    print(error_dict)
     field = next(iter(error_dict))
     response = error_dict[next(iter(error_dict))]
     if isinstance(response, dict):

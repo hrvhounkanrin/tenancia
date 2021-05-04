@@ -1,7 +1,9 @@
 # -*- coding: UTF-8 -*-
 """Immeuble app models."""
+from random import randint
 from django.conf import settings
 from django.db import models
+from django.db.models import Count
 from countries_plus.models import Country
 
 
@@ -41,3 +43,23 @@ class Immeuble(models.Model):
 
         verbose_name = 'Immeuble'
         verbose_name_plural = 'Immeubles'
+
+class AutoNameManager(models.Manager):
+    def random(self):
+        count = self.aggregate(ids=Count('id'))['ids']
+        random_index = randint(0, count - 1)
+        return self.all()[random_index]
+
+    def random_naive(self):
+        return self.all().order_by('?')[0]
+
+class AutoName(models.Model):
+    libelle = models.CharField(max_length=50, null=False)
+    observation = models.CharField(max_length=50, default='city')
+
+    objects = AutoNameManager()
+
+    def __str__(self):
+        """Random autoname."""
+        return '%s' % (self.libelle)
+

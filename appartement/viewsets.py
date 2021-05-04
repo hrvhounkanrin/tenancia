@@ -5,10 +5,11 @@ from django.shortcuts import get_object_or_404
 from appartement.models import Appartement
 from appartement.models import TypeDependence
 from appartement.models import StructureAppartement
-from appartement.serializers import AppartementSerializers, MultiplyAppartementSerializer
+from appartement.serializers import AppartementSerializers, ClonerAppartementSerializer
 from appartement.serializers import TypeDependenceSerializers
 from appartement.serializers import StructureAppartmentSerializers
 from tools.viewsets import ActionAPIView
+
 logger = logging.getLogger(__name__)
 
 
@@ -96,7 +97,7 @@ class AppartementViewSet(ActionAPIView):
         serializer.save(modified_by=request.user)
         return {'success': True, 'payload': serializer.data}
 
-    def multiply_logement(self, request, params={}, *args, **kwargs):
+    def cloner_logement(self, request, params={}, *args, **kwargs):
         """Multiplier un logement suivant un nombre et un id appartement"""
         """
                 Create appartement.
@@ -110,16 +111,17 @@ class AppartementViewSet(ActionAPIView):
         serializer_context = {
             'request': request,
         }
-        serializer = MultiplyAppartementSerializer(
+
+        serializer = ClonerAppartementSerializer(
             data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
-        return {'success': True, 'payload': 'serializer.data'}
+        return {'success': True, 'payload': serializer.data}
 
 class ComposantAppartementViewSet(ActionAPIView):
     """Housing dependency Action Viewset."""
 
-    def get_dependency(self, request, params={}, *args, **kwargs):
+    def get_dependancies(self, request, params={}, *args, **kwargs):
         """Get all housing dependencies."""
         serializer_context = {
             'request': request,

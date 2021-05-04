@@ -23,6 +23,10 @@ python manage.py makemigrations
 echo "Apply database migrations"
 python manage.py migrate
 python manage.py update_countries_plus
+python manage.py loaddata autoname.json
+python manage.py loaddata banque.json
+python manage.py loaddata typedependence.json
+
 # celery -b rabbitmq -A meslimmo.celery worker --loglevel=debug
 # Start server
 echo "Starting server"

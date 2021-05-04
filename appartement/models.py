@@ -79,3 +79,8 @@ class StructureAppartement(models.Model):
     modified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
         editable=False, related_name='structure_updated_user')
+
+    def __str__(self):
+        """Housing reprensentation."""
+        return 'Dépendence: {} | {}'.format(self.typedependence.libelle, self.nbre)
+
