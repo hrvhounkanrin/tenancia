@@ -70,7 +70,7 @@ class UserSerializer(serializers.ModelSerializer):
             'front_url': os.environ.get('FRONTEND')
 
         }
-        email_sender.sign_up_email.delay(mail_data)
+        #email_sender.sign_up_email.delay(mail_data)
         # email_sender.add.delay(23, 6766)
         return user
 

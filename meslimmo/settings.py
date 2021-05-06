@@ -53,33 +53,25 @@ THIRD_PARTY_APPS = (
     'allauth',
     'allauth.account',
     'rest_framework_jwt',
-    # 'rest_registration',
-    'countries_plus'
+    'countries_plus',
 )
 
 LOCAL_APPS = (
     'customuser',
-    'proprietaire',
     'banque',
-    'contrat',
+    'client',
+    'proprietaire',
+    'societe',
     'immeuble',
-    # 'mauth',
     'appartement',
-    # 'mcore',
+    'contrat',
     'quittance',
     'reglement',
-    'societe',
     'tools',
-    'client',
     'rest_graph_ql',
-    # 'client' ,
-    # 'rest_graph_ql',
 )
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
-
-
-
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -148,6 +140,7 @@ DATABASES = {
         'PORT': '5433',
     }
 }
+
 
 # Password validatirest_registeron
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
