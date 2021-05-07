@@ -33,42 +33,28 @@ class ClientAPITestCase(TestCase):
         self.client.force_authenticate(user=self.user)
         url = '/api/v1/client_action/create_client'
         client_data = {
-            'client': [
-                {
-                    'nom': 'BOCOVO',
-                    'prenom': 'MARCELLINE',
-                    'mode_paiement': 'VIREMENT BANCAIRE',
-                    'profession': 'Financiere',
-                    'ice_contact': 'BOCOVO Ghislaine',
-                    'ice_number': '97819436',
-                    'ice_relation': 'GRANDE SOEUR',
-                    'banque_id': self.banque.id,
-                    'user_id': self.user.id
-                }
-            ]
+            "phone_number": "9834434",
+            "profession": "Financiere",
+            "ice_contact": "BOCOVO Ghislaine",
+            "ice_number": "97819436",
+            "ice_relation": "GRANDE SOEUR"
         }
         response = self.client.post(url, client_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert response.status_code == 200, \
-            'Expect 201 OK. got: {}' . format(response.status_code)
+            'Expect 200 OK. got: {}' . format(response.status_code)
         assert '97819436' == \
-               response.json()['payload']['client'][0]['ice_number']
+               response.json()['payload']['ice_number']
 
     def test_client_cannot_create_if_not_login(self):
         """Client client can not test if not log in."""
         url = '/api/v1/client_action/create_client'
         client_data = {
-            'client': [
-                {
-                    'mode_paiement': 'VIREMENT BANCAIRE',
-                    'profession': 'Financiere',
-                    'ice_contact': 'BOCOVO Ghislaine',
-                    'ice_number': '97819436',
-                    'ice_relation': 'GRANDE SOEUR',
-                    'banque_id': self.banque.id,
-                    'user_id': self.user.id
-                }
-            ]
+            "phone_number": "9834434",
+            "profession": "Financiere",
+            "ice_contact": "BOCOVO Ghislaine",
+            "ice_number": "97819436",
+            "ice_relation": "GRANDE SOEUR"
         }
         response = self.client.post(url, client_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -78,21 +64,19 @@ class ClientAPITestCase(TestCase):
         self.client.force_authenticate(user=self.user)
         url = '/api/v1/client_action/create_client'
         client_data = {
-            'client': [
-                {
-                    'mode_paiement': 'VIREMENT BANCAIRE',
-                    'profession': 'Financiere',
-                    'ice_contact': 'BOCOVO Ghislaine',
-                    'ice_number': '97819436',
-                    'ice_relation': 'GRANDE SOEUR',
-                    'banque_id': self.banque.id,
-                    'user_id': self.user.id
-                }
-            ]
+            "phone_number": "9834434",
+            "profession": "Financiere",
+            "ice_contact": "BOCOVO Ghislaine",
+            "ice_number": "97819436",
+            "ice_relation": "GRANDE SOEUR"
         }
-        Client.objects.get_or_create(client_data['client'][0])[0]
-        response = self.client.post(url, client_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response_1 = self.client.post(url, client_data, format='json')
+        assert response_1.status_code == 200, \
+            'Expect 200 OK. got: {}'.format(response_1.status_code)
+        response_2 = self.client.post(url, client_data, format='json')
+        assert response_2.status_code == 400, \
+            'Expect 400 OK. got: {}'.format(response_2.status_code)
 
     def test_client_list(self):
         """Test client api list."""
