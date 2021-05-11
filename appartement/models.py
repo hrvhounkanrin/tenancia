@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 
 
-class ComposantAppartement(models.Model):
+class TypeDependence(models.Model):
     """Housing depenency type."""
 
     libelle = models.CharField(max_length=50)
@@ -40,7 +40,7 @@ class Appartement(models.Model):
     immeuble = models.ForeignKey(
         'immeuble.Immeuble', null=True, on_delete=models.SET_NULL)
     structure = models.ManyToManyField(
-        ComposantAppartement,
+        TypeDependence,
         through='StructureAppartement',
         related_name='structure', blank=False)
     statut = models.CharField(max_length=50,
@@ -65,8 +65,8 @@ class StructureAppartement(models.Model):
     appartement = models.ForeignKey(
         'Appartement', related_name='appartement',
         on_delete=models.SET_NULL, null=True)
-    composantAppartement = models.ForeignKey(
-        'ComposantAppartement', related_name='composant_appartement',
+    typedependence = models.ForeignKey(
+        'TypeDependence', related_name='appartement_typedependence',
         on_delete=models.SET_NULL, null=True)
     nbre = models.IntegerField(default=1)
     description = models.CharField(max_length=256)
@@ -79,3 +79,8 @@ class StructureAppartement(models.Model):
     modified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
         editable=False, related_name='structure_updated_user')
+
+    def __str__(self):
+        """Housing reprensentation."""
+        return 'Dépendence: {} | {}'.format(self.typedependence.libelle, self.nbre)
+

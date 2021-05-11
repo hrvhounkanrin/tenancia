@@ -28,7 +28,7 @@ class ProprietaireSerializers(serializers.ModelSerializer):
 
         model = Proprietaire
         fields = ['id', 'mode_paiement', 'numcompte', 'pays_residence',
-                  'user', 'user_id', 'banque', 'banque_id']
+                  'user', 'user_id', 'banque', 'banque_id', 'phone_number']
 
     def get_user(self, proprietaire):
         """Get user model of proprietaire."""

@@ -1,0 +1,863 @@
+swagger: "2.0"
+info:
+  description: "Tenancia (Rental management platform) API Doc."
+  version: "1.0.0"
+  title: "Tenancia"
+  termsOfService: ""
+  contact:
+    email: "hrvhounkanrin@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "tenancia.com"
+basePath: "/api/v1"
+tags:
+- name: "user"
+  description: "Operations about user"
+  externalDocs:
+    description: ""
+    url: "http://swagger.io"
+- name: "lessor"
+  description: "Lessor object operations"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+- name: "bank"
+  description: "Operations about banks"
+- name: "buildings"
+  description: "Operations about building, house and it's dependencies"
+- name: "clients"
+  description: "Operations about clients."
+- name: "contrats"
+  description: "Operations about contrats."
+
+schemes:
+- "https"
+- "http"
+paths:
+  /accounts/users/:
+    post:
+      tags:
+      - "user"
+      summary: "Signup"
+      description: "Anyone can signup to Tenancia services."
+      operationId: "signinup"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        201:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/CreatedUser"
+  /accounts/login/:
+    post:
+      tags:
+      - "user"
+      summary: "signin"
+      description: "Get token from email and password"
+      operationId: "signin"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Toke and user detail"
+        required: true
+        schema:
+          items:
+            $ref: "#/definitions/Token"
+      responses:
+        default:
+          description: "successful operation"
+  /accounts/activate/:
+    get:
+      tags:
+        - "user"
+      summary: "activate"
+      description: "Activate user account based on uid and token"
+      operationId: "activate"
+      produces:
+        - "application/json"
+      parameters:
+        - in: query
+          name: uidb64
+          schema:
+            type: string
+          description: A uid contains in the mail send to the user
+        - in: query
+          name: token
+          schema:
+            type: integer
+          description: A token contains in the mail send to the user
+      responses:
+        default:
+          description: "successful operation"
+  /profile_action/get_profile:
+    get:
+      tags:
+        - "user"
+      summary: "user_profile"
+      description: "Get connected user profiles"
+      operationId: "user_profile"
+      produces:
+        - "application/json"
+      responses:
+        default:
+          description: "successful operation"
+  /banque_action/create_banque:
+    post:
+      tags:
+      - "bank"
+      summary: "Creates list of banks with given input array"
+      description: ""
+      operationId: "create-bank"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "List of banks object"
+        required: true
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/Banque"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/BanqueResponse"
+  /banque_action/get_banque:
+    get:
+      tags:
+      - "bank"
+      summary: "Get list of banks with given input array"
+      description: ""
+      operationId: "get-bank"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/BanqueResponse"
+  /proprietaire_action/create_proprio:
+    post:
+      tags:
+      - "lessor"
+      summary: "Create a lessor based on connected user"
+      description: ""
+      operationId: "create-lessor"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "List of lessor object"
+        required: true
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/ProprietaireInput"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProprietaireResponse"
+  /proprietaire_action/update_proprio:
+    post:
+      tags:
+      - "lessor"
+      summary: "Update a lessor detail based on connected user"
+      description: ""
+      operationId: "update-lessor"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "List of lessor object"
+        required: true
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/ProprietaireInput"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProprietaireResponse"
+  /proprietaire_action/get_proprio:
+    get:
+      tags:
+      - "lessor"
+      summary: "Get connected user lessor detail based on his token"
+      description: ""
+      operationId: "get-lessor"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProprietaireResponse"
+  /immeuble_action/create_immeuble:
+    post:
+      tags:
+      - "buildings"
+      summary: "Create list of house/buildings with given input array"
+      operationId: "create-immeuble"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Create list of dependencies house/buildings"
+        required: true
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/ImmeubleInput"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ImmeubleResponse"
+  /immeuble_action/get_immeuble:
+    get:
+      tags:
+      - "buildings"
+      summary: "Get list of house/building"
+      operationId: "get-immeuble"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ImmeubleResponse"
+  /dependency_action/create_dependency:
+    post:
+      tags:
+      - "buildings"
+      summary: "Create list of dependencies with given input array"
+      operationId: "create-dependencies"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Create list of dependencies object"
+        required: true
+        schema:
+          type: "array"
+          items:
+            $ref: "#/definitions/DependencyInput"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/DependencyResponse"
+  /dependency_action/get_dependency:
+    get:
+      tags:
+      - "buildings"
+      summary: "Get list of dependencies"
+      operationId: "get-dependencies"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/DependencyResponse"
+  /logement_action/create_logement:
+    post:
+      tags:
+        - "buildings"
+      summary: "Créer un logement dans une maison/immeuble"
+      operationId: "create-logement"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Créer un logement dans une maison/immeuble"
+          required: true
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/LogementInput"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LogementResponse"
+  /logement_action/get_logement:
+    get:
+      tags:
+        - "buildings"
+      summary: "Récupérer la liste des appartements d'un immeuble ou d'une maison"
+      operationId: "get-logement"
+      produces:
+        - "application/json"
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+          description: Id logement
+        - in: query
+          name: immeuble_id
+          schema:
+            type: integer
+          description: Id immeuble
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LogementResponse"
+  /client_action/create_client:
+    post:
+      tags:
+        - "clients"
+      summary: "Create a client object"
+      description: ""
+      operationId: "create-client"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "List of client object"
+          required: true
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/ClientResponse"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ClientResponse"
+  /client_action/get_client:
+    get:
+      tags:
+        - "clients"
+      summary: "Get client details"
+      description: ""
+      operationId: "get-client"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ClientResponse"
+  /accessoire_action/create_accessoire:
+    post:
+      tags:
+        - "contrats"
+      summary: "Créer les couts accessoires sur le loyer"
+      description: ""
+      operationId: "create-accessoire"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "List of accesoire object"
+          required: true
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/AccessoireLoyer"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AccessoireLoyerResponse"
+  /accessoire_action/get_accessoire:
+    get:
+      tags:
+        - "contrats"
+      summary: "Get list of accessoires loyer"
+      description: ""
+      operationId: "get-accessoires"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AccessoireLoyerResponse"
+  /contrat_action/create_contrat:
+    post:
+      tags:
+        - "contrats"
+      summary: "Créer un contrat de bail"
+      description: ""
+      operationId: "create-contrat"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "List of contrats object"
+          required: true
+          schema:
+            $ref: "#/definitions/Contrat"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ContratResponse"
+  /contrat_action/contrat_agreement:
+    post:
+      tags:
+        - "contrats"
+      summary: "Donner son avis ou son désaccord pour un contrat de bail"
+      description: ""
+      operationId: "contrat-agreement"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Contrat agreement"
+          required: true
+          schema:
+            $ref: "#/definitions/ContratAgreement"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ContratResponse"
+securityDefinitions:
+  petstore_auth:
+    type: "oauth2"
+    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:pets: "modify pets in your account"
+      read:pets: "read your pets"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  User:
+    type: "object"
+    properties:
+      first_name:
+        type: "string"
+      last_name:
+        type: "string"
+      email:
+        type: "string"
+      password:
+        type: "string"
+      phone_number:
+        type: "string"
+      address:
+        type: "string"
+      city:
+        type: "string"
+      country:
+        type: "string"
+      zip:
+        type: "string"
+  CreatedUser:
+    type: "object"
+    properties:
+      first_name:
+        type: "string"
+      last_name:
+        type: "string"
+      email:
+        type: "string"
+      password:
+        type: "string"
+      phone_number:
+        type: "string"
+      address:
+        type: "string"
+      city:
+        type: "string"
+      country:
+        type: "string"
+      zip:
+        type: "string"
+      is_active:
+        type: "boolean"
+      is_admin:
+        type: "boolean"
+      date_joined":
+        type: "string"
+      dob":
+        type: "string"
+      address":
+        type: "string"
+  Token:
+    type: "object"
+    properties:
+      token:
+        type: "string"
+      user:
+        $ref: '#/definitions/CreatedUser'
+  Banque:
+    type: "object"
+    properties:
+      codebanque:
+        type: "string"
+      libbanque:
+        type: "string"
+      pays:
+          type: "string"
+  CreatedBanque:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      codebanque:
+        type: "string"
+      libbanque:
+        type: "string"
+      pays:
+          type: "string"
+      created_at:
+        type: "string"
+      modified_at":
+        type: "string"
+      created_by:
+        type: "string"
+      modified_by":
+        type: "string"
+  BanqueResponse:
+    type: "object"
+    properties:
+      success:
+        type: "string"
+      payload:
+        type: "array"
+        items:
+          $ref: '#/definitions/CreatedBanque'
+  ProprietaireInput:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      mode_paiement:
+        type: "string"
+      numcompte:
+        type: "string"
+      banque_id:
+        type: "integer"
+      pays_residence:
+        type: "string"
+
+  ProprietaireOutput:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      mode_paiement:
+        type: "string"
+      numcompte:
+        type: "string"
+      pays_residence:
+        type: "string"
+      user:
+        $ref: '#/definitions/CreatedUser'
+      banque:
+        $ref: '#/definitions/CreatedBanque'
+  ProprietaireResponse:
+    type: "object"
+    properties:
+      success:
+        type: "string"
+      payload:
+        type: "array"
+        items:
+          $ref: '#/definitions/ProprietaireOutput'
+  Dependency:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      libelle:
+        type: "string"
+      utilite:
+        type: "string"
+  DependencyInput:
+    type: "object"
+    properties:
+      housing_dependency:
+        type: "array"
+        items:
+          $ref: '#/definitions/Dependency'
+  DependencyResponse:
+    type: "object"
+    properties:
+      success:
+        type: "string"
+      payload:
+        type: "array"
+        items:
+          $ref: '#/definitions/Dependency'
+  Immeuble:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      intitule:
+        type: "string"
+      description:
+        type: "string"
+      adresse:
+        type: "string"
+      jour_emission_facture:
+          type: "integer"
+      jour_valeur_facture:
+          type: "integer"
+      ville:
+          type: "string"
+      quartier:
+          type: "string"
+      pays:
+          type: "string"
+      longitude:
+          type: "integer"
+      latitude:
+          type: "integer"
+  ImmeubleInput:
+    type: "object"
+    properties:
+      immeuble:
+          type: "array"
+          items:
+            $ref: '#/definitions/Immeuble'
+  ImmeubleResponse:
+    type: "object"
+    properties:
+      success:
+        type: "string"
+      payload:
+        type: "object"
+        properties:
+          immeubles:
+            type: "array"
+            items:
+              $ref: '#/definitions/Immeuble'
+  StructureAppartement:
+    type: "object"
+    properties:
+      appartement:
+        type: "integer"
+      composantAppartement:
+        type: "integer"
+      nbre:
+        type: "integer"
+      description:
+        type: "string"
+  LogementInput:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      intitule:
+        type: "string"
+      level:
+        type: "integer"
+      autre_description:
+        type: "string"
+      statut:
+        type: "string"
+      immeuble_id:
+        type: "integer"
+      structure:
+        type: "array"
+        items:
+          $ref: '#/definitions/StructureAppartement'
+  LogementResponse:
+    type: "object"
+    properties:
+      success:
+        type: "string"
+      payload:
+        type: "object"
+        properties:
+          appartement:
+            type: "object"
+            properties:
+              id:
+                type: "integer"
+              intitule:
+                type: "string"
+              level:
+                type: "integer"
+              autre_description:
+                type: "string"
+              statut:
+                type: "string"
+              immeuble_id:
+                type: "integer"
+              structure:
+                type: "array"
+                items:
+                  $ref: '#/definitions/StructureAppartement'
+  ClientInput:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      profession:
+        type: "string"
+      ice_contact:
+        type: "string"
+      ice_number:
+        type: "string"
+      ice_relation:
+        type: "string"
+      phone_number:
+        type: "string"
+      user_id:
+        type: "integer"
+  ClientResponse:
+    type: "object"
+    properties:
+      success:
+        type: "string"
+      payload:
+        type: "object"
+        properties:
+          client:
+            type: "object"
+            properties:
+              id:
+                type: "integer"
+              profession:
+                type: "string"
+              ice_contact:
+                type: "string"
+              ice_number:
+                type: "string"
+              ice_relation:
+                type: "string"
+              phone_number:
+                type: "string"
+              user:
+                $ref: '#/definitions/CreatedUser'
+  AccessoireLoyer:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      libelle:
+        type: "string"
+      utilite:
+        type: "string"
+  AccessoireLoyerContrat:
+    type: "object"
+    properties:
+      accessoire_id:
+        type: "integer"
+      montant:
+        type: "integer"
+      devise:
+        type: "string"
+      statut:
+        type: "string"
+      description:
+        type: "string"
+  AccessoireLoyerResponse:
+    type: "object"
+    properties:
+      success:
+        type: "string"
+      payload:
+        type: "object"
+        properties:
+          accessoireloyer:
+            type: "array"
+            items:
+              $ref: '#/definitions/AccessoireLoyer'
+  Contrat:
+    type: "object"
+    properties:
+      reference_bail:
+        type: "string"
+      date_signature:
+        type: "string"
+      date_effet:
+        type: "string"
+      periodicite:
+        type: "integer"
+      duree:
+        type: "integer"
+      montant_bail:
+        type: "integer"
+      nb_avance:
+        type: "integer"
+      nb_prepaye:
+        type: "integer"
+      statut:
+        type: "string"
+      observation:
+        type: "string"
+      tacite_reconduction:
+        type: "string"
+      client_id:
+        type: "integer"
+      appartement_id:
+        type: "integer"
+      accessoires:
+        type: array
+        items:
+          $ref: '#/definitions/AccessoireLoyerContrat'
+  ContratResponse:
+    type: "object"
+    properties:
+      success:
+        type: "string"
+      payload:
+        type: "object"
+        properties:
+          contrat:
+            type: "array"
+            items:
+              $ref: '#/definitions/Contrat'
+  ContratAgreement:
+    type: "object"
+    properties:
+      contrat_id:
+        type: "string"
+      client_accord:
+        type: "string"
+  ContratAgreementResponse:
+    type: "object"
+    properties:
+      contrat_id:
+        type: "string"
+      client_accord:
+        type: "string"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"

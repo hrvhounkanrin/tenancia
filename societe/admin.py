@@ -1,12 +1,12 @@
-"""Societe app admin.py."""
+"""RealEstate app admin.py."""
 from django.contrib import admin
 
 from .models import Mandat
-from .models import Societe
+from .models import RealEstate
 
 
 class SocieteAdmin(admin.ModelAdmin):
-    """Societe admin class."""
+    """RealEstate admin class."""
 
     pass
 
@@ -17,5 +17,5 @@ class MandatAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(Societe, SocieteAdmin)
+admin.site.register(RealEstate, SocieteAdmin)
 admin.site.register(Mandat, MandatAdmin)

@@ -24,6 +24,7 @@ class Contrat(models.Model):
 
     ANNULE = 'ANNULE'
     PROPOSITION = 'PROPOSITION'
+    ACCORD_CLIENT = 'CONTRAT ACCEPTE'
     EN_COURS = 'EN COURS'
     RESILIE = 'RESILIE'
     TERME = 'TERME'
@@ -39,8 +40,9 @@ class Contrat(models.Model):
     date_effet = models.DateField(null=False)
     periodicite = models.IntegerField()
     duree = models.IntegerField()
-    montant_bail = models.DecimalField(
-        max_digits=19, decimal_places=10, default=0)
+    montant_bail = models.DecimalField(max_digits=9, decimal_places=2)
+    nb_avance = models.IntegerField(default=0)
+    nb_prepaye = models.IntegerField(default=0)
     statut = models.CharField(max_length=64,
                               choices=STATUT_CONTRAT, default=PROPOSITION)
     observation = models.CharField(max_length=256, null=True)
@@ -54,6 +56,11 @@ class Contrat(models.Model):
         related_name='accessoires', blank=False)
     mandat = models.ForeignKey('societe.Mandat',
                                null=True, on_delete=models.SET_NULL)
+    prochaine_echeance = models.DateField(null=True)
+
+    jour_emission = models.IntegerField(null=False, default=5)
+    client_accord = models.BooleanField(default=False)
+    date_accord_client = models.DateField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
@@ -72,11 +79,10 @@ class ContratAccessoiresloyer(models.Model):
     accesoireloyer = models.ForeignKey(
         'Accesoireloyer', related_name='accesoireloyer',
         on_delete=models.SET_NULL, null=True)
-    montant = models.DecimalField(max_digits=19,
-                                  decimal_places=10, default=0)
+    montant = models.DecimalField(max_digits=9, decimal_places=2, default=0)
     is_peridic = models.BooleanField(default=False)
     devise = models.CharField(max_length=256, null=False, default='XOF')
-    statut = models.CharField(max_length=256, null=False, default='NON PAYE')
+    statut = models.CharField(max_length=256, null=False, default='NON REGLE')
     description = models.CharField(max_length=256)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)

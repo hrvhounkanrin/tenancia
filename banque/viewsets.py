@@ -12,6 +12,17 @@ class BanqueViewSet(ActionAPIView):
     """Banque Actions viewsets."""
 
     def get_banque(self, request, params={}, *args, **kwargs):
+        """Retrive banks."""
+        serializer_context = {
+            'request': request,
+        }
+        if 'iso' in params:
+            queryset = Banque.objects.filter(
+                pays__id=params['iso'])
+            serializer = BanqueSerializers(
+                queryset, context=serializer_context, many=True)
+            logger.debug('**retrieving country banks **')
+            return {'success': True, 'banque': serializer.data}
         """Get all bank."""
         get_all_bank = Banque.objects.all()
         serialized_banque = BanqueSerializers(get_all_bank, many=True).data

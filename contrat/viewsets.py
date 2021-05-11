@@ -1,14 +1,19 @@
 # -*- coding: UTF-8 -*-
 """Contrat Actions viewsets."""
 import logging
+import datetime
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from .models import Accesoireloyer
 from .models import Contrat
 from .models import ContratAccessoiresloyer
 from .serializers import AccesoireloyerSerializers
 from .serializers import ContratAccessoiresloyerSerializers
-from .serializers import ContratSerializers
+from .serializers import ContratSerializers, AgreementSerializer
+from quittance.serializers import QuittanceSerializers, FirstQuittanceSerializers
+from quittance.models import Quittance
 from tools.viewsets import ActionAPIView
+from customuser.permissions import IsLessor, IsTenant
 logger = logging.getLogger(__name__)
 
 
@@ -41,7 +46,7 @@ class AccessoireloyerAction(ActionAPIView):
             saved_acc = [model.save() for model in acc___objects]
             serialized_acc = AccesoireloyerSerializers(
                 saved_acc, context=serializer_context, many=True)
-            return {'success': True, 'composant_apart': serialized_acc.data}
+            return {'success': True, 'accessoireloyer': serialized_acc.data}
         serializer = AccesoireloyerSerializers(
             data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
@@ -74,7 +79,7 @@ class AccessoireloyerAction(ActionAPIView):
             saved_components = [model.save() for model in acc_objects]
             serializer = AccesoireloyerSerializers(
                 saved_components, many=True, context=serializer_context)
-            return {'success': True, 'accessoire': serializer.data}
+            return {'success': True, 'accessoireloyer': serializer.data}
         instance = get_object_or_404(Accesoireloyer,
                                      pk=params.get('id', None))
         serializer = AccesoireloyerSerializers(
@@ -93,17 +98,19 @@ class ContratAccessoiresloyerAction(ActionAPIView):
 
 class ContratAction(ActionAPIView):
     """Contrat Action viewset."""
+    permission_classes = [IsLessor, IsTenant]
 
     def get_contrat(self, request, params={}, *args, **kwargs):
         """Get contrat."""
         if 'id' in params:
             queryset = Contrat.objects.filter(
-                id__in=params['id'].split(','))
+                id__in=params['id'].split(','))\
+                .filter(Q(created_by=request.user) | Q(client=request.user))
             serializer = ContratSerializers(
                 queryset, context={'request': request}, many=True)
             logger.debug('**retrieving Contrat **')
             return {'success': True, 'contrat': serializer.data}
-        queryset = Contrat.objects.all()
+        queryset = Contrat.objects.filter(Q(created_by=request.user) | Q(client__user=request.user))
         serializer = ContratSerializers(
             queryset, many=True, context={'request': request})
         return {'success': True, 'contrat': serializer.data}
@@ -153,3 +160,25 @@ class ContratAction(ActionAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return {'success': True, 'contrat': serializer.data}
+
+    def contrat_agreement(self, request, params={}, **kwargs):
+        serializer_context = {
+            'request': request,
+        }
+        instance = get_object_or_404(Contrat, pk=params.get('contrat_id', None))
+        serializer = AgreementSerializer(
+            instance, data=params, context=serializer_context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        if params.get('client_accord', None) in [False, None]:
+            return {'success': True, 'contrat': serializer.data}
+        created_quittances = Quittance.objects.filter(contrat=instance)
+        queryset = Quittance.objects.filter(contrat=instance, date_valeur=instance.date_effet)
+        serializer = QuittanceSerializers(
+            queryset, many=True, context={'request': request})
+
+
+        return {'success': True, 'quittances': serializer.data}
+
+
+

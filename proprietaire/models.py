@@ -8,6 +8,7 @@ from django.db import models
 class Proprietaire(models.Model):
     """Proprietaire model."""
 
+    #utiliser un json field
     mode_paiement = models.CharField(max_length=50, null=False)
     numcompte = models.CharField(max_length=50, null=True)
     user = models.OneToOneField(
@@ -21,6 +22,7 @@ class Proprietaire(models.Model):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
         editable=False, related_name='proprietaire_created_user')
+    phone_number = models.CharField(max_length=56, null=True)
     modified_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
         editable=False, related_name='proprietaire_updated_user')

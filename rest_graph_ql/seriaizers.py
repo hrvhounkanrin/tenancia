@@ -10,6 +10,7 @@ class GenericModelSerializer(serializers.ModelSerializer):
      'fields' and 'model_class' arguments that
     controls which fields should be displayed.
     """
+
     class Meta:
         """GenericModelSerializer meta."""
 
@@ -18,8 +19,8 @@ class GenericModelSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         """Model serializer  init."""
-        fields = kwargs.pop('fields', None)
-        model = kwargs.pop('model_class', None)
+        fields = kwargs.pop("fields", None)
+        model = kwargs.pop("model_class", None)
         if fields is not None:
             self.Meta.fields = fields
         if model is not None:
@@ -47,7 +48,7 @@ class FieldMixin(object):
         :param kwargs:
         :return:
         """
-        fields_names = self.context.get('fields', None)
+        fields_names = self.context.get("fields", None)
         if fields_names:
             return fields_names
         return super(FieldMixin, self).get_fields_names(*args, **kwargs)
@@ -61,14 +62,13 @@ class APISerializer(serializers.BaseSerializer):
         success = True
         payload = data
         if isinstance(data, dict):
-            if 'success' in data:
-                success = data.pop('success')
-            if 'payload' in data:
-                payload = data.pop('payload')
-            if 'reason' in data:
-                reason = data.get('reason')
-                self.context['reason'] = reason
-        self.context['success'] = success
+            if "success" in data:
+                success = data.pop("success")
+            if "payload" in data:
+                payload = data.pop("payload")
+            if "reason" in data:
+                reason = data.get("reason")
+                self.context["reason"] = reason
+        self.context["success"] = success
 
-        return dict(self.context, **{
-            'payload': payload})
+        return dict(self.context, **{"payload": payload})

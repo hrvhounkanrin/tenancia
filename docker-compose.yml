@@ -1,0 +1,62 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:12.0-alpine
+    restart: always
+    volumes:
+      - tenancia_db:/var/lib/postgresql/data/
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=tenancia'
+      - 'POSTGRES_DB=tenancia_db'
+    expose:
+      - 5433 # Publishes 5433 to other containers but NOT to host machine
+    ports:
+      - 5433:5433
+    command: -p 5433
+    networks:
+      - tenancia-nt
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: "rabbitmq"
+    labels:
+      NAME: "rabbitmq"
+    ports:
+        - 5672:5672
+        - 15672:15672
+    expose:
+      - 5672
+      - 15672
+    networks:
+      - tenancia-nt
+  celery:
+    build: .
+    command: celery -b rabbitmq -A meslimmo.celery worker --loglevel=debug
+    depends_on:
+      - rabbitmq
+      - web
+    env_file:
+    - ./.env
+    networks:
+      - tenancia-nt
+  web:
+    build: .
+    volumes:
+      - ./:/usr/src/app/
+    entrypoint: ./entrypoint.sh
+    command: gunicorn meslimmo.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    ports:
+      - 8081:8000
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - rabbitmq
+    networks:
+      - tenancia-nt
+networks:
+  tenancia-nt:
+    driver: bridge
+volumes:
+  tenancia_db:

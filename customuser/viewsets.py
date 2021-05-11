@@ -1,61 +1,171 @@
-"""Customuser viewset."""
+# -*- coding: UTF-8 -*-
+"""Customuser app viewsets."""
+import os
 import logging
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_bytes
-from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import GenericViewSet
-from customuser.models import User
-from customuser.permissions import IsAdminUser
-from customuser.permissions import IsLoggedInUserOrAdmin
-from customuser.serializers import UserSerializer
+import requests
+import json
+
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from .token_generator import account_activation_token
+from django.utils.http import urlsafe_base64_decode
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework_jwt.settings import api_settings
+from rest_framework import permissions
+from requests.exceptions import HTTPError
+from social_django.utils import psa
+from tools.viewsets import ActionAPIView
+from proprietaire.models import Proprietaire
+from client.models import Client
+from customuser.models import User
+from societe.models import RealEstate
+from societe.serializers import SocieteSerializer
+from client.serializers import ClientSerializer
+from proprietaire.serializers import ProprietaireSerializers
+from customuser.serializers import SocialSerializer, UserSerializer
+from .token_generator import TokenGenerator
+logger = logging.getLogger(__name__)
 
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
-class UserViewSet(viewsets.ModelViewSet):
-    """User Serializer Class ViewSet."""
+class CustomUserAction(ActionAPIView):
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    logging.debug(f'user serializer class, {serializer_class}')
+    def __init__(self):
+        self.permission_classes = [permissions.AllowAny]
 
-    def get_permissions(self):
+    @psa()
+    def exchange_token(self, request, params={}, *args, **kwargs):
+
+        serializer = SocialSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            try:
+                nfe = settings.NON_FIELD_ERRORS_KEY
+            except AttributeError:
+                nfe = 'non_field_errors'
+
+            try:
+                user = request.backend.do_auth(serializer.validated_data['access_token'])
+            except HTTPError as e:
+                payload = {'errors': {
+                        'token': 'Invalid token',
+                        'detail': str(e),
+                }}
+                return {'success': False, 'payload': payload}
+
+            if user:
+                if user.is_active:
+                    token, _ = Token.objects.get_or_create(user=user)
+                    payload = {'token': token.key}
+                    return {'success': True, 'payload': payload}
+                else:
+                    payload = {'errors': {nfe: 'This user account is inactive'}}
+                    return {'success': False, 'payload': payload}
+
+            else:
+                payload = {'errors': {nfe: "Authentication Failed"}}
+                return {'success': False, 'payload': payload}
+
+    def googleauth(self, request, params={}, *args, **kwargs):
+        """Rigth func for google auth"""
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         """
-        Set up class permission.
-
-        :return:
+        data = dict(client_id=request.data['clientId'],
+                    redirect_uri=request.data['redirectUri'],
+                    client_secret=settings.GOOGLE_SECRET,
+                    code=request.data['code'],
+                    grant_type='authorization_code')
         """
-        permission_classes = []
-        if self.action == 'create':
-            permission_classes = [AllowAny]
-        elif self.action == 'retrieve' or\
-                self.action == 'update' or self.action == 'partial_update':
-            permission_classes = [IsLoggedInUserOrAdmin]
-        elif self.action == 'list' or self.action == 'destroy':
-            permission_classes = [IsAdminUser]
-        return [permission() for permission in permission_classes]
-
-
-class AccountViewset(GenericViewSet):
-    """Account activation viewset."""
-
-    permission_classes = (AllowAny,)
-    @action(methods=["get"], detail=False, permission_classes=(AllowAny,))
-    def activate_account(self, request, uidb64, token):
-        """Account activation."""
-        User = get_user_model()
+        data = dict(client_id=os.environ.get("CLIENT_ID"),
+                    redirect_uri=request.data['redirectUri'],
+                    client_secret=os.environ.get("GOOGLE_SECRET"),
+                    refresh_token=request.data['access_token'],
+                    grant_type='refresh_token')
+        r = requests.post(os.environ.get("ACCESS_TOKEN_URL"), data=data)
+        token = json.loads(r.text)
+        headers = {'Authorization': 'Bearer {0}'.format(token['access_token']), 'Content-Type': 'application/json; UTF-8'}
+        # return Response({'token': token}, status.HTTP_201_CREATED)
+        settings.PEOPLE_API_URL = 'https://www.googleapis.com/oauth2/v3/userinfo?access_token={}'.format(token['access_token'])
+        r = requests.get(settings.PEOPLE_API_URL, headers=headers)
+        profile = json.loads(r.text)
         try:
-            uid = force_bytes(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = User.objects.get(email=profile['email'])
+        except User.DoesNotExist:
             user = None
-        if user is not None and \
-                account_activation_token.check_token(user, token):
+
+        if user is None:
+            user = User.objects.create_user(username=profile['email'], first_name=profile['given_name'],
+                                            last_name=profile['family_name'], email=profile["email"],
+                                            password="teancia@2020")
+
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        serializer = UserSerializer(user)
+        print(f'payload: {payload}')
+        print(f'token: {token}')
+        #serializer.send_activation_mail(user)
+        return Response({'token': token, 'user': serializer.data}, status.HTTP_200_OK)
+
+    def activate_account(self, request, params={}, *args, **kwargs):
+        uidb64 = request.data['uidb64']
+        token = request.data['token']
+        uid = urlsafe_base64_decode(uidb64.strip()).decode()
+        user = User.objects.get(pk=uid)
+
+        account_activation_token = TokenGenerator()
+        if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save()
-            serializer = UserSerializer(user)
-            return {'success': True, 'user': serializer}
+            payload = jwt_payload_handler(user)
+            """
+                return Response({
+                    'token': jwt_encode_handler(payload),
+                    'user': user
+                })
+            """
+            # Should be redirected to the frontend login page instead.
+            return {
+                'success': True,
+                'token': jwt_encode_handler(payload),
+                'user': UserSerializer(user, context={'request': request}).data
+            }
+
         else:
-            return {'success': False, 'msg': 'An error occured.'}
+            return {'success': False, 'payload': 'Une erreur est survenue. Merci de reessayer.'}
+
+
+"""Get connected user profiles"""
+class ProfileAction(ActionAPIView):
+
+    def get_profile(self, request, params={}, *args, **kwargs):
+        """Get all user profile."""
+        User = get_user_model()
+        try:
+            user = User.objects.get(pk=request.user.id)
+            serializer = UserSerializer(user)
+            proprietaire = Proprietaire.objects.filter(
+                user__id=request.user.id
+            ).first()
+            lessor_serializer = ProprietaireSerializers(proprietaire)
+            client = Client.objects.filter(user__id=request.user.id).first()
+            real_estate = RealEstate.objects.filter(created_by=request.user.id).first()
+            client_serializer = ClientSerializer(client)
+            profiles = {}
+            if proprietaire is not None:
+                profiles.update({"lessor": lessor_serializer.data})
+            if client is not None:
+                profiles.update({"tenant": client_serializer.data})
+            if real_estate is not None:
+                real_estate_serialiser = SocieteSerializer(real_estate)
+                profiles.update({"real_estate": real_estate_serialiser.data})
+            return {"success": True, "payload": profiles}
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+            serializer = UserSerializer(user)
+            return {"success": True, "payload": serializer.data}
+        else:
+            return {"success": False, "msg": "An error occured."}

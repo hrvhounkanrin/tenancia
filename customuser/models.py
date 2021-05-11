@@ -1,75 +1,101 @@
 """Customuser models."""
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 
-class UserManager(BaseUserManager):
-    """Custom user manager class."""
 
+class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email, password, **extra_fields):
-        """Create User with the given email."""
+    def _create_user(self, email, password, first_name, last_name, username):
+        """
+        Creates and saves a User with the given email and password.
+        :param email:
+        :param password:
+        :param extra_fields:
+        :return:
+        """
         if not email:
-            raise ValueError('The given email must be set')
+            raise ValueError('User may have an email')
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(username=username, email=email, first_name=first_name,
+                          last_name=last_name)
         user.set_password(password)
-        user.is_active = False
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
-        """Create user."""
-        extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email, password, **extra_fields)
+    def create_user(self, email, password, first_name, last_name, username):
+        return self._create_user(email, password, first_name, last_name, username)
 
-    def create_superuser(self, email, password, **extra_fields):
-        """Create superuser."""
-        extra_fields.setdefault('is_superuser', True)
-
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-
-        return self._create_user(email, password, **extra_fields)
+    def create_superuser(self, email, password, first_name, last_name, username):
+        user = self._create_user(email, password, first_name, last_name, username)
+        user.is_admin = True
+        user.save()
+        return user
 
 
-class User(AbstractUser):
+class User(AbstractBaseUser):
     """Abtract user Model."""
+    username = models.CharField(max_length=255,  null=True)
+    email = models.EmailField(max_length=255, unique=True,  error_messages={
+                    "unique": "Un utilisateur avec ce mail existe déjà."
+                    })
+    first_name = models.CharField(max_length=255, blank=True)
+    last_name = models.CharField(max_length=255, blank=True)
+    phone_number = models.CharField(max_length=56,  null=True)
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(auto_now_add=True)
+    dob = models.DateField(null=True, blank=True)
+    address = models.CharField(null=True, blank=True, max_length=255)
+    country = models.CharField(max_length=50, null=True, blank=True)
+    city = models.CharField(max_length=50, null=True, blank=True)
+    zip = models.CharField(max_length=5, null=True, blank=True)
+    photo = models.ImageField(upload_to='profile-logo/%Y/%m/%d',
+                              blank=True,
+                              null=True
+                              )
 
-    username = models.CharField(max_length=128, blank=True, null=True)
-    email = models.EmailField(_('email address'), unique=True)
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
     objects = UserManager()
+    # USERNAME_FIELD = 'username'
+    '''
+    The name of the field on the User model that is used as the unique identifier.
+    The field must be unique (i.e., have unique=True set in its definition);
+    '''
+    USERNAME_FIELD = 'email'
+    '''
+    A list of the field names that will be prompted for when 
+    creating a user via the createsuperuser management command
+    '''
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number']
+
+    def get_full_name(self):
+        """
+        :return:Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s' % (self.first_name, self.last_name)
+        return full_name.strip()
+
+    def get_short_name(self):
+        """
+        :return:Returns the short name for the user.
+        """
+        return self.first_name
 
     def __str__(self):
-        """User representation."""
-        return '{}'.format(self.email)
+        return self.username
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.is_admin
 
 
-class UserProfile(models.Model):
-    """User Profile."""
-
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE, related_name='profile')
-    title = models.CharField(max_length=5)
-    dob = models.DateField()
-    address = models.CharField(max_length=255)
-    country = models.CharField(max_length=50)
-    city = models.CharField(max_length=50)
-    zip = models.CharField(max_length=5)
-    photo = models.ImageField(upload_to='uploads', blank=True)
-
-    def create_user_profile(sender, instance, created, **kwargs):
-        """Save create user profile."""
-        if created:
-            UserProfile.objects.create(user=instance)
-
-    def save_user_profile(sender, instance, **kwargs):
-        """Save user profile."""
-        instance.userProfile.save()

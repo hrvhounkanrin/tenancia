@@ -1,21 +1,18 @@
-from django.shortcuts import render
+"""Misc views."""
+import requests
+import json
+from rest_framework.views import APIView
+from django.conf import settings
+from countries_plus.models import Country
+from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.permissions import AllowAny
+from tools.serializers import CountrySerialier
 
-# Create your views here.
+# https://medium.com/@pratique/social-login-with-react-and-django-i-c380fe8982e2
+class CountryListView(ListAPIView):
+    """Return allowed contries."""
+    permission_classes = (AllowAny,)
+    serializer_class = CountrySerialier
+    allowed_country = ['BF', 'BJ', 'CM', 'BJ', 'TG', 'FR', 'NER']
+    queryset = Country.objects.filter(iso__in=allowed_country)
 
-
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
-from factures.models import Invoice
-from factures.pdf import draw_pdf
-from tools import pdf_response
-
-
-def pdf_view(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
-    return pdf_response(draw_pdf, invoice.file_name(), invoice)
-
-
-@login_required
-def pdf_user_view(request, invoice_id):
-    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, user=request.user)
-    return pdf_response(draw_pdf, invoice.file_name(), invoice)
