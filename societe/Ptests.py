@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 """Mandataire app test case."""
 import json
 

@@ -1,13 +1,12 @@
-# -*- coding: UTF-8 -*-
 """Housing app serializers."""
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from rest_framework import serializers
 from django.utils.crypto import get_random_string
-from .models import Appartement
-from .models import TypeDependence
-from .models import StructureAppartement
+from rest_framework import serializers
+
 from immeuble.models import Immeuble
+
+from .models import Appartement, StructureAppartement, TypeDependence
 
 
 class TypeDependenceSerializers(serializers.ModelSerializer):
@@ -17,7 +16,7 @@ class TypeDependenceSerializers(serializers.ModelSerializer):
         """TypeDependence serializer meta."""
 
         model = TypeDependence
-        fields = '__all__'
+        fields = "__all__"
 
 
 class StructureAppartmentSerializers(serializers.ModelSerializer):
@@ -26,17 +25,22 @@ class StructureAppartmentSerializers(serializers.ModelSerializer):
     # typedependence = TypeDependenceSerializers(read_only=True)
     typedependence = serializers.SerializerMethodField()
     typeDependence_id = serializers.PrimaryKeyRelatedField(
-        source='TypeDependence',
+        source="TypeDependence",
         queryset=TypeDependence.objects.all(),
-        write_only=True, )
+        write_only=True,
+    )
 
     class Meta:
         """StructureAppartement meta."""
 
         model = StructureAppartement
-        fields = ['appartement', 'typedependence',
-                  'typeDependence_id', 'nbre',
-                  'description']
+        fields = [
+            "appartement",
+            "typedependence",
+            "typeDependence_id",
+            "nbre",
+            "description",
+        ]
 
     def get_typedependence(self, structureAppart):
         return structureAppart.typedependence.libelle
@@ -48,13 +52,24 @@ class AppartementSerializers(serializers.ModelSerializer):
     structures = serializers.SerializerMethodField()
     # immeuble = ImmeubleSerializers(read_only=True)
     immeuble_id = serializers.PrimaryKeyRelatedField(
-        source='Immeuble', queryset=Immeuble.objects.all(), write_only=True, )
+        source="Immeuble",
+        queryset=Immeuble.objects.all(),
+        write_only=True,
+    )
 
     class Meta:
         """Housing serializer meta."""
 
         model = Appartement
-        fields = ('id', 'intitule', 'level', 'autre_description', 'statut', 'immeuble_id', 'structures',) # 'immeuble',
+        fields = (
+            "id",
+            "intitule",
+            "level",
+            "autre_description",
+            "statut",
+            "immeuble_id",
+            "structures",
+        )  # 'immeuble',
 
     def get_structures(self, appartement):
         """Get housing dependecies.
@@ -78,22 +93,26 @@ class AppartementSerializers(serializers.ModelSerializer):
 
         :rtype: Appartement
         """
-        immeuble = validated_data.pop('Immeuble', None)
+        immeuble = validated_data.pop("Immeuble", None)
         logement_instance = Appartement.objects.create(
-            immeuble=immeuble, **validated_data)
-        if 'structures' in self.initial_data:
-            structures = self.initial_data.get('structures')
+            immeuble=immeuble, **validated_data
+        )
+        if "structures" in self.initial_data:
+            structures = self.initial_data.get("structures")
             for structure in structures:
-                dependency_id = structure.pop('typeDependence_id', None)
+                dependency_id = structure.pop("typeDependence_id", None)
                 try:
-                    dependency_instance = \
-                        TypeDependence.objects.get(id=dependency_id)
+                    dependency_instance = TypeDependence.objects.get(id=dependency_id)
                 except ObjectDoesNotExist:
-                    raise serializers.ValidationError("Il y a une dépendence qui n'existe pas.")
+                    raise serializers.ValidationError(
+                        "Il y a une dépendence qui n'existe pas."
+                    )
                 structure.pop("appartement", None)
-                StructureAppartement(appartement=logement_instance,
-                                     typedependence=dependency_instance,
-                                     **structure).save()
+                StructureAppartement(
+                    appartement=logement_instance,
+                    typedependence=dependency_instance,
+                    **structure,
+                ).save()
             logement_instance.save()
         return logement_instance
 
@@ -101,15 +120,14 @@ class AppartementSerializers(serializers.ModelSerializer):
     @transaction.atomic
     def update(self, instance, validated_data):
         """Update housing."""
-        instance.intitule = validated_data['intitule']
-        instance.level = validated_data['level']
-        instance.autre_description = validated_data['autre_description']
-        instance.statut = validated_data['statut']
+        instance.intitule = validated_data["intitule"]
+        instance.level = validated_data["level"]
+        instance.autre_description = validated_data["autre_description"]
+        instance.statut = validated_data["statut"]
         instance.save()
-        if 'structures' in self.initial_data:
-            StructureAppartement.objects.filter(
-                appartement__id=instance.id).delete()
-            structures = self.initial_data.get('structures')
+        if "structures" in self.initial_data:
+            StructureAppartement.objects.filter(appartement__id=instance.id).delete()
+            structures = self.initial_data.get("structures")
             for structure in structures:
                 structure.pop("appartement", None)
                 print(structure)
@@ -126,18 +144,24 @@ class ClonerAppartementSerializer(serializers.Serializer):
     @transaction.atomic
     def create(self, validated_data):
         try:
-            appartement = Appartement.objects.get(pk=validated_data['appartement_id'])
-            print('appartement: {}'.format(appartement))
-            immeuble = Immeuble.objects.get(pk=validated_data['immeuble_id'])
-            print('immeuble: {}'.format(immeuble))
+            appartement = Appartement.objects.get(pk=validated_data["appartement_id"])
+            print(f"appartement: {appartement}")
+            immeuble = Immeuble.objects.get(pk=validated_data["immeuble_id"])
+            print(f"immeuble: {immeuble}")
         except ObjectDoesNotExist:
-            raise serializers.ValidationError("L'appartement que vous voulez reproduire n'existe pas.")
+            raise serializers.ValidationError(
+                "L'appartement que vous voulez reproduire n'existe pas."
+            )
 
-        user = self.context['request'].user
+        user = self.context["request"].user
         appartements = []
         appartement_fields = list(appartement.__dict__.keys())
-        appartement_fields = [f for f in appartement_fields if f not in ['id', 'created_by_id', 'modified_by_id', '_state']]
-        for i in range(validated_data['nb']):
+        appartement_fields = [
+            f
+            for f in appartement_fields
+            if f not in ["id", "created_by_id", "modified_by_id", "_state"]
+        ]
+        for i in range(validated_data["nb"]):
             new_appartement = Appartement()
             for field in list(appartement_fields):
 
@@ -151,11 +175,18 @@ class ClonerAppartementSerializer(serializers.Serializer):
         [m.save() for m in appartements]
         structures = StructureAppartement.objects.filter(appartement=appartement)
         for m in appartements:
-            [StructureAppartement(appartement=m,
-                                 typedependence=s.typedependence,
-                                  nbre=s.nbre,
-                                  description=s.description
-                                 ).save() for s in structures]
+            [
+                StructureAppartement(
+                    appartement=m,
+                    typedependence=s.typedependence,
+                    nbre=s.nbre,
+                    description=s.description,
+                ).save()
+                for s in structures
+            ]
 
-        return {'nb': validated_data['nb'], 'appartement_id': validated_data['appartement_id'],
-                'appartements': appartements}
+        return {
+            "nb": validated_data["nb"],
+            "appartement_id": validated_data["appartement_id"],
+            "appartements": appartements,
+        }

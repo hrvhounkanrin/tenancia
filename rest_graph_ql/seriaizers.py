@@ -27,7 +27,7 @@ class GenericModelSerializer(serializers.ModelSerializer):
             self.Meta.model = model
             if fields is None:
                 fields = [item.name for item in model._meta.fields]
-        super(GenericModelSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if fields is not None:
             self.Meta.fields = fields
             allowed = set(fields)
@@ -36,7 +36,7 @@ class GenericModelSerializer(serializers.ModelSerializer):
                 self.fields.pop(field_name)
 
 
-class FieldMixin(object):
+class FieldMixin:
     """Turning to mixin / This class maybe extended."""
 
     # TODO : TO be customized fully---> then make it more usable
@@ -51,7 +51,7 @@ class FieldMixin(object):
         fields_names = self.context.get("fields", None)
         if fields_names:
             return fields_names
-        return super(FieldMixin, self).get_fields_names(*args, **kwargs)
+        return super().get_fields_names(*args, **kwargs)
 
 
 class APISerializer(serializers.BaseSerializer):

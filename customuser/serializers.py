@@ -1,31 +1,25 @@
 """Customuser serializer."""
 import logging
 import os
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_decode as uid_decoder
-from django.utils.encoding import force_bytes
-
-from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_encode
-from rest_framework_jwt import serializers as jwt_serializers
 from rest_framework import serializers
-from rest_framework_jwt.settings import api_settings
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import (
-    HyperlinkedModelSerializer
-)
+from rest_framework.serializers import HyperlinkedModelSerializer
+from rest_framework_jwt import serializers as jwt_serializers
+from rest_framework_jwt.settings import api_settings
+
 from meslimmo import settings
 from tools.emails import Email
-from .utils import (
-    SetPasswordForm,
-    PasswordResetForm
-)
-from .models import (
-    User,
-)
+
+from .models import User
 from .token_generator import TokenGenerator
+from .utils import PasswordResetForm, SetPasswordForm
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -42,19 +36,28 @@ jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 jwt_get_username_from_payload = api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     """
-     user writable  serializer
+    user writable  serializer
     """
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'address', 'country', 'city', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "address",
+            "country",
+            "city",
+            "password",
+        ]
+        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
+        password = validated_data.pop("password")
         user = User(**validated_data)
         user.set_password(password)
         user.is_active = False
@@ -62,15 +65,14 @@ class UserSerializer(serializers.ModelSerializer):
         email_sender = Email()
         token_generator = TokenGenerator()
         mail_data = {
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'token': token_generator.make_token(user).strip(),
-            'first_name': user.first_name,
-            'email': user.email,
-            'domain': settings.BASE_API_URL,
-            'front_url': os.environ.get('FRONTEND')
-
+            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+            "token": token_generator.make_token(user).strip(),
+            "first_name": user.first_name,
+            "email": user.email,
+            "domain": settings.BASE_API_URL,
+            "front_url": os.environ.get("FRONTEND"),
         }
-        #email_sender.sign_up_email.delay(mail_data)
+        # email_sender.sign_up_email.delay(mail_data)
         # email_sender.add.delay(23, 6766)
         return user
 
@@ -79,6 +81,7 @@ class PasswordChangeSerializer(serializers.Serializer):
     """
     Utility used during password change process
     """
+
     old_password = serializers.CharField(max_length=128)
     new_password1 = serializers.CharField(max_length=128)
     new_password2 = serializers.CharField(max_length=128)
@@ -92,18 +95,18 @@ class PasswordChangeSerializer(serializers.Serializer):
         :param kwargs:
         """
         self.old_password_field_enabled = getattr(
-            settings, 'OLD_PASSWORD_FIELD_ENABLED', False
+            settings, "OLD_PASSWORD_FIELD_ENABLED", False
         )
         self.logout_on_password_change = getattr(
-            settings, 'LOGOUT_ON_PASSWORD_CHANGE', False
+            settings, "LOGOUT_ON_PASSWORD_CHANGE", False
         )
-        super(PasswordChangeSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if not self.old_password_field_enabled:
-            self.fields.pop('old_password')
+            self.fields.pop("old_password")
 
-        self.request = self.context.get('request')
-        self.user = getattr(self.request, 'user', None)
+        self.request = self.context.get("request")
+        self.user = getattr(self.request, "user", None)
 
     def validate_old_password(self, value):
         """
@@ -114,11 +117,11 @@ class PasswordChangeSerializer(serializers.Serializer):
         invalid_password_conditions = (
             self.old_password_field_enabled,
             self.user,
-            not self.user.check_password(value)
+            not self.user.check_password(value),
         )
 
         if all(invalid_password_conditions):
-            raise serializers.ValidationError('Invalid password')
+            raise serializers.ValidationError("Invalid password")
         return value
 
     def validate(self, attrs):
@@ -142,6 +145,7 @@ class PasswordChangeSerializer(serializers.Serializer):
         self.set_password_form.save()
         if not self.logout_on_password_change:
             from django.contrib.auth import update_session_auth_hash
+
             update_session_auth_hash(self.request, self.user)
             email_sender = Email()
             email_sender.password_change_email(self.user)
@@ -151,6 +155,7 @@ class PasswordResetSerializer(serializers.Serializer):
     """
     Serializer for requesting a password reset e-mail.
     """
+
     email = serializers.EmailField()
 
     password_reset_form_class = PasswordResetForm
@@ -177,12 +182,12 @@ class PasswordResetSerializer(serializers.Serializer):
         this will set values to trigger email
         :return:
         """
-        request = self.context.get('request')
+        request = self.context.get("request")
         # Set some values to trigger the send_email method.
         opts = {
-            'use_https': request.is_secure(),
+            "use_https": request.is_secure(),
             # 'from_email': getattr(settings, 'DEFAULT_FROM_EMAIL'),
-            'request': request,
+            "request": request,
         }
 
         opts.update(self.get_email_options())
@@ -193,6 +198,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     """
     Serializer for requesting a password reset e-mail.
     """
+
     new_password1 = serializers.CharField(max_length=128)
     new_password2 = serializers.CharField(max_length=128)
     uid = serializers.CharField()
@@ -218,10 +224,10 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
         # Decode the uidb64 to uid to get User object
         try:
-            uid = force_text(uid_decoder(attrs['uid']))
+            uid = force_text(uid_decoder(attrs["uid"]))
             self.user = UserModel._default_manager.get(pk=uid)
         except (TypeError, ValueError, OverflowError, UserModel.DoesNotExist):
-            raise ValidationError({'uid': ['Invalid value']})
+            raise ValidationError({"uid": ["Invalid value"]})
 
         self.custom_validation(attrs)
         # Construct SetPasswordForm instance
@@ -230,8 +236,8 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         )
         if not self.set_password_form.is_valid():
             raise serializers.ValidationError(self.set_password_form.errors)
-        if not default_token_generator.check_token(self.user, attrs['token']):
-            raise ValidationError({'token': ['Invalid value']})
+        if not default_token_generator.check_token(self.user, attrs["token"]):
+            raise ValidationError({"token": ["Invalid value"]})
 
         return attrs
 
@@ -247,11 +253,11 @@ class SocialSerializer(serializers.Serializer):
     """
     Serializer which accepts an OAuth2 access token.
     """
+
     access_token = serializers.CharField(
         allow_blank=False,
         trim_whitespace=True,
     )
-
 
 
 class JSONWebTokenSerializer(jwt_serializers.JSONWebTokenSerializer):
@@ -259,10 +265,11 @@ class JSONWebTokenSerializer(jwt_serializers.JSONWebTokenSerializer):
     Override rest_framework_jwt's ObtainJSONWebToken serializer to
     force it to raise ValidationError exception if validation fails.
     """
+
     def is_valid(self, raise_exception=None):
         """
         If raise_exception is unset, set it to True by default
         """
         return super().is_valid(
-            raise_exception=raise_exception if raise_exception is not None else True)
-
+            raise_exception=raise_exception if raise_exception is not None else True
+        )

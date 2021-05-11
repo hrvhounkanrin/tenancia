@@ -2,7 +2,7 @@
 from functools import update_wrapper
 
 
-def method_decorator(decorator, name=''):
+def method_decorator(decorator, name=""):
     """
     Convert a function decorator into a method decorator
     """
@@ -17,14 +17,15 @@ def method_decorator(decorator, name=''):
                 func = getattr(obj, name)
                 if not callable(func):
                     raise TypeError(
-                        "Cannot decorate '{0}' as it isn't a callable "
-                        "attribute of {1} ({2})".format(name, obj, func)
+                        "Cannot decorate '{}' as it isn't a callable "
+                        "attribute of {} ({})".format(name, obj, func)
                     )
             else:
                 raise ValueError(
                     "The keyword argument `name` must be the name of a method "
-                    "of the decorated class: {0}. Got '{1}' instead".format(
-                        obj, name,
+                    "of the decorated class: {}. Got '{}' instead".format(
+                        obj,
+                        name,
                     )
                 )
         else:
@@ -36,7 +37,7 @@ def method_decorator(decorator, name=''):
             functions are applied so that the call order is the same as the
             order in which they appear in the iterable.
             """
-            if hasattr(decorator, '__iter__'):
+            if hasattr(decorator, "__iter__"):
                 for dec in decorator[::-1]:
                     function = dec(function)
                 return function
@@ -46,10 +47,12 @@ def method_decorator(decorator, name=''):
             @decorate
             def bound_func(*args2, **kwargs2):
                 return func.__get__(self, type(self))(*args2, **kwargs2)
+
             # bound_func has the signature that 'decorator' expects i.e.  no
             # 'self' argument, but it is a closure over self so it can call
             # 'func' correctly.
             return bound_func(*args, **kwargs)
+
         # In case 'decorator' adds attributes to the function it decorates, we
         # want to copy those. We don't have access to bound_func in this scope,
         # but we can cheat by using it on a dummy function.
@@ -57,6 +60,7 @@ def method_decorator(decorator, name=''):
         @decorate
         def dummy():
             pass
+
         update_wrapper(_wrapper, dummy)
         # Need to preserve any existing attributes of 'func', including the name.
         update_wrapper(_wrapper, func)
@@ -66,13 +70,14 @@ def method_decorator(decorator, name=''):
             return obj
 
         return _wrapper
+
     # Don't worry about making _dec look similar to a list/tuple as it's rather
     # meaningless.
-    if not hasattr(decorator, '__iter__'):
+    if not hasattr(decorator, "__iter__"):
         update_wrapper(_dec, decorator)
     # Change the name to aid debugging.
-    if hasattr(decorator, '__name__'):
-        _dec.__name__ = 'method_decorator(%s)' % decorator.__name__
+    if hasattr(decorator, "__name__"):
+        _dec.__name__ = "method_decorator(%s)" % decorator.__name__
     else:
-        _dec.__name__ = 'method_decorator(%s)' % decorator.__class__.__name__
+        _dec.__name__ = "method_decorator(%s)" % decorator.__class__.__name__
     return _dec

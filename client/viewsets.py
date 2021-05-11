@@ -1,10 +1,13 @@
-# -*- coding: UTF-8 -*-
 """Client app Actions Viewset."""
 import logging
+
 from django.shortcuts import get_object_or_404
-from .serializers import ClientSerializer
-from client.models import (Client,)
+
+from client.models import Client
 from tools.viewsets import ActionAPIView
+
+from .serializers import ClientSerializer
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,18 +24,19 @@ class ClientAction(ActionAPIView):
         :param kwargs:
         :return:
         """
-        if 'id' in params:
-            queryset = Client.objects.filter(id__in=params['id'].split(','), created_by=request.user
-                                             )
+        if "id" in params:
+            queryset = Client.objects.filter(
+                id__in=params["id"].split(","), created_by=request.user
+            )
             serializer = ClientSerializer(
-                queryset, context={'request': request}, many=True)
-            logger.debug('**retrieving client **')
+                queryset, context={"request": request}, many=True
+            )
+            logger.debug("**retrieving client **")
             return serializer.data
 
         queryset = Client.objects.filter(user_id=request.user)
-        serializer = ClientSerializer(
-            queryset, context={'request': request}, many=True)
-        return {'success': True, 'payload': serializer.data}
+        serializer = ClientSerializer(queryset, context={"request": request}, many=True)
+        return {"success": True, "payload": serializer.data}
 
     def create_client(self, request, params={}, *args, **kwargs):
         """
@@ -59,12 +63,11 @@ class ClientAction(ActionAPIView):
                 saved_clients, many=True, context={'request': request})
             return {'success': True, 'client': serrialized_client.data}
         """
-        request.data['user_id'] = request.user.id
-        serializer = ClientSerializer(
-            data=request.data, context={'request': request})
+        request.data["user_id"] = request.user.id
+        serializer = ClientSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'payload': serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def update_client(self, request, params={}, *args, **kwargs):
         """
@@ -77,7 +80,7 @@ class ClientAction(ActionAPIView):
         :return:
         """
         serializer_context = {
-            'request': request,
+            "request": request,
         }
         """
         if isinstance(request.data.get('client', None), list):
@@ -94,11 +97,11 @@ class ClientAction(ActionAPIView):
                 saved_client, many=True, context=serializer_context)
             return {'success': True, 'client': serializer.data}
         """
-        request.data['user_id'] = request.user.id
-        instance = get_object_or_404(Client,
-                                     pk=params.get('id', None))
+        request.data["user_id"] = request.user.id
+        instance = get_object_or_404(Client, pk=params.get("id", None))
         serializer = ClientSerializer(
-            instance, data=request.data, context=serializer_context)
+            instance, data=request.data, context=serializer_context
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'payload': serializer.data}
+        return {"success": True, "payload": serializer.data}

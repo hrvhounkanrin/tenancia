@@ -1,19 +1,23 @@
-# -*- coding: UTF-8 -*-
 """Contrat Actions viewsets."""
-import logging
 import datetime
-from django.shortcuts import get_object_or_404
+import logging
+
 from django.db.models import Q
-from .models import Accesoireloyer
-from .models import Contrat
-from .models import ContratAccessoiresloyer
-from .serializers import AccesoireloyerSerializers
-from .serializers import ContratAccessoiresloyerSerializers
-from .serializers import ContratSerializers, AgreementSerializer
-from quittance.serializers import QuittanceSerializers, FirstQuittanceSerializers
-from quittance.models import Quittance
-from tools.viewsets import ActionAPIView
+from django.shortcuts import get_object_or_404
+
 from customuser.permissions import IsLessor, IsTenant
+from quittance.models import Quittance
+from quittance.serializers import FirstQuittanceSerializers, QuittanceSerializers
+from tools.viewsets import ActionAPIView
+
+from .models import Accesoireloyer, Contrat, ContratAccessoiresloyer
+from .serializers import (
+    AccesoireloyerSerializers,
+    AgreementSerializer,
+    ContratAccessoiresloyerSerializers,
+    ContratSerializers,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,35 +27,39 @@ class AccessoireloyerAction(ActionAPIView):
     def get_accessoire(self, request, params={}, *args, **kwargs):
         """Get acessoires loyer."""
         serializer_context = {
-            'request': request,
+            "request": request,
         }
         queryset = Accesoireloyer.objects.all()
-        serializer = AccesoireloyerSerializers(queryset, many=True,
-                                               context=serializer_context)
-        return {'success': True, 'accessoireloyer': serializer.data}
+        serializer = AccesoireloyerSerializers(
+            queryset, many=True, context=serializer_context
+        )
+        return {"success": True, "accessoireloyer": serializer.data}
 
     def create_accessoire(self, request, params={}, *args, **kwargs):
         """Create accessoireloyer."""
         serializer_context = {
-            'request': request,
+            "request": request,
         }
-        if isinstance(request.data.get('accessoire', None), list):
-            accesoires = request.data.pop('accessoire')
+        if isinstance(request.data.get("accessoire", None), list):
+            accesoires = request.data.pop("accessoire")
             acc___objects = []
             for acc in accesoires:
                 serializer = AccesoireloyerSerializers(
-                    data=acc, context=serializer_context)
+                    data=acc, context=serializer_context
+                )
                 serializer.is_valid(raise_exception=True)
                 acc___objects.append(serializer)
             saved_acc = [model.save() for model in acc___objects]
             serialized_acc = AccesoireloyerSerializers(
-                saved_acc, context=serializer_context, many=True)
-            return {'success': True, 'accessoireloyer': serialized_acc.data}
+                saved_acc, context=serializer_context, many=True
+            )
+            return {"success": True, "accessoireloyer": serialized_acc.data}
         serializer = AccesoireloyerSerializers(
-            data=request.data, context=serializer_context)
+            data=request.data, context=serializer_context
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'accessoire': serializer.data}
+        return {"success": True, "accessoire": serializer.data}
 
     def update_accessoire(self, request, params={}, *args, **kwargs):
         """
@@ -64,29 +72,30 @@ class AccessoireloyerAction(ActionAPIView):
         :return:
         """
         serializer_context = {
-            'request': request,
+            "request": request,
         }
-        if isinstance(request.data.get('accessoire', None), list):
-            accessoires = request.data.pop('accessoire')
+        if isinstance(request.data.get("accessoire", None), list):
+            accessoires = request.data.pop("accessoire")
             acc_objects = []
             for acc in accessoires:
-                instance = Accesoireloyer.objects.get(
-                    pk=params.get('id', None))
+                instance = Accesoireloyer.objects.get(pk=params.get("id", None))
                 serializer = AccesoireloyerSerializers(
-                    instance, data=acc, context=serializer_context)
+                    instance, data=acc, context=serializer_context
+                )
                 serializer.is_valid(raise_exception=True)
                 acc_objects.append(serializer)
             saved_components = [model.save() for model in acc_objects]
             serializer = AccesoireloyerSerializers(
-                saved_components, many=True, context=serializer_context)
-            return {'success': True, 'accessoireloyer': serializer.data}
-        instance = get_object_or_404(Accesoireloyer,
-                                     pk=params.get('id', None))
+                saved_components, many=True, context=serializer_context
+            )
+            return {"success": True, "accessoireloyer": serializer.data}
+        instance = get_object_or_404(Accesoireloyer, pk=params.get("id", None))
         serializer = AccesoireloyerSerializers(
-            instance, data=request.data, context=serializer_context)
+            instance, data=request.data, context=serializer_context
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'accessoire': serializer.data}
+        return {"success": True, "accessoire": serializer.data}
 
 
 class ContratAccessoiresloyerAction(ActionAPIView):
@@ -98,87 +107,94 @@ class ContratAccessoiresloyerAction(ActionAPIView):
 
 class ContratAction(ActionAPIView):
     """Contrat Action viewset."""
+
     permission_classes = [IsLessor, IsTenant]
 
     def get_contrat(self, request, params={}, *args, **kwargs):
         """Get contrat."""
-        if 'id' in params:
-            queryset = Contrat.objects.filter(
-                id__in=params['id'].split(','))\
-                .filter(Q(created_by=request.user) | Q(client=request.user))
+        if "id" in params:
+            queryset = Contrat.objects.filter(id__in=params["id"].split(",")).filter(
+                Q(created_by=request.user) | Q(client=request.user)
+            )
             serializer = ContratSerializers(
-                queryset, context={'request': request}, many=True)
-            logger.debug('**retrieving Contrat **')
-            return {'success': True, 'contrat': serializer.data}
-        queryset = Contrat.objects.filter(Q(created_by=request.user) | Q(client__user=request.user))
+                queryset, context={"request": request}, many=True
+            )
+            logger.debug("**retrieving Contrat **")
+            return {"success": True, "contrat": serializer.data}
+        queryset = Contrat.objects.filter(
+            Q(created_by=request.user) | Q(client__user=request.user)
+        )
         serializer = ContratSerializers(
-            queryset, many=True, context={'request': request})
-        return {'success': True, 'contrat': serializer.data}
+            queryset, many=True, context={"request": request}
+        )
+        return {"success": True, "contrat": serializer.data}
 
     def create_contrat(self, request, params={}, *args, **kwargs):
         """Create contract."""
         serializer_context = {
-            'request': request,
+            "request": request,
         }
-        if isinstance(request.data.get('contrat', None), list):
-            contrats = request.data.pop('contrat')
+        if isinstance(request.data.get("contrat", None), list):
+            contrats = request.data.pop("contrat")
             contrat_objects = []
             for contrat in contrats:
                 serializer = ContratSerializers(
-                    data=contrat, context=serializer_context)
+                    data=contrat, context=serializer_context
+                )
                 serializer.is_valid(raise_exception=True)
                 contrat_objects.append(serializer)
             saved_contrat = [model.save() for model in contrat_objects]
             serialized_contrat = ContratSerializers(
-                saved_contrat, context=serializer_context, many=True)
-            return {'success': True, 'contrat': serialized_contrat.data}
-        serializer = ContratSerializers(
-            data=request.data, context=serializer_context)
+                saved_contrat, context=serializer_context, many=True
+            )
+            return {"success": True, "contrat": serialized_contrat.data}
+        serializer = ContratSerializers(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'contrat': serializer.data}
+        return {"success": True, "contrat": serializer.data}
 
     def update_contrat(self, request, params={}, *args, **kwargs):
         """Update contract."""
         serializer_context = {
-            'request': request,
+            "request": request,
         }
-        if isinstance(request.data.get('contrat', None), list):
-            contrats = request.data.pop('contrat')
+        if isinstance(request.data.get("contrat", None), list):
+            contrats = request.data.pop("contrat")
             contrat_objects = []
             for contrat in contrats:
                 serializer = ContratSerializers(
-                    data=contrat, context=serializer_context)
+                    data=contrat, context=serializer_context
+                )
                 serializer.is_valid(raise_exception=True)
                 contrat_objects.append(serializer)
             saved_contrat = [model.save() for model in contrat_objects]
             serialized_contrat = ContratSerializers(
-                saved_contrat, context=serializer_context, many=True)
-            return {'success': True, 'contrat': serialized_contrat.data}
-        serializer = ContratSerializers(data=request.data,
-                                        context=serializer_context)
+                saved_contrat, context=serializer_context, many=True
+            )
+            return {"success": True, "contrat": serialized_contrat.data}
+        serializer = ContratSerializers(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'contrat': serializer.data}
+        return {"success": True, "contrat": serializer.data}
 
     def contrat_agreement(self, request, params={}, **kwargs):
         serializer_context = {
-            'request': request,
+            "request": request,
         }
-        instance = get_object_or_404(Contrat, pk=params.get('contrat_id', None))
+        instance = get_object_or_404(Contrat, pk=params.get("contrat_id", None))
         serializer = AgreementSerializer(
-            instance, data=params, context=serializer_context)
+            instance, data=params, context=serializer_context
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        if params.get('client_accord', None) in [False, None]:
-            return {'success': True, 'contrat': serializer.data}
+        if params.get("client_accord", None) in [False, None]:
+            return {"success": True, "contrat": serializer.data}
         created_quittances = Quittance.objects.filter(contrat=instance)
-        queryset = Quittance.objects.filter(contrat=instance, date_valeur=instance.date_effet)
+        queryset = Quittance.objects.filter(
+            contrat=instance, date_valeur=instance.date_effet
+        )
         serializer = QuittanceSerializers(
-            queryset, many=True, context={'request': request})
+            queryset, many=True, context={"request": request}
+        )
 
-
-        return {'success': True, 'quittances': serializer.data}
-
-
-
+        return {"success": True, "quittances": serializer.data}

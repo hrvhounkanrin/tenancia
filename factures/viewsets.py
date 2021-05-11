@@ -1,12 +1,12 @@
 """Facture viewsets."""
 import logging
 
-from factures.models import Invoice
-from factures.models import InvoiceItem
-from factures.models import Item
-from factures.serializers import InvoiceItemSerializer
-from factures.serializers import InvoiceSerializer
-from factures.serializers import ItemSerializer
+from factures.models import Invoice, InvoiceItem, Item
+from factures.serializers import (
+    InvoiceItemSerializer,
+    InvoiceSerializer,
+    ItemSerializer,
+)
 from tools.viewsets import ActionAPIView
 
 LOGGER = logging.getLogger(__name__)
@@ -29,10 +29,8 @@ class InvoicingActionViewSet(ActionAPIView):
         try:
             queryset = Invoice.objects.all()
             invoice_serialiazed_data = InvoiceSerializer(queryset, many=True)
-            logger.debug(f"**retrieving invoice**"
-                         f" --{invoice_serialiazed_data} ")
-            logger.info(f"**retrieving invoice** --"
-                        f"{invoice_serialiazed_data} ")
+            logger.debug(f"**retrieving invoice**" f" --{invoice_serialiazed_data} ")
+            logger.info(f"**retrieving invoice** --" f"{invoice_serialiazed_data} ")
             return {"success": True, "response": invoice_serialiazed_data.data}
         except Exception as e:
             return {"success": False, "reason": "%s" % e}
@@ -49,18 +47,14 @@ class InvoicingActionViewSet(ActionAPIView):
         """
         try:
             queryset = InvoiceItem.objects.all()
-            invoice_item_serialiazed_data = \
-                InvoiceItemSerializer(queryset, many=True)
+            invoice_item_serialiazed_data = InvoiceItemSerializer(queryset, many=True)
             logger.debug(
-                f"**retrieving invoicing items** "
-                f"--{invoice_item_serialiazed_data} "
+                f"**retrieving invoicing items** " f"--{invoice_item_serialiazed_data} "
             )
             logger.info(
-                f"**retrieving invoicing items** "
-                f"--{invoice_item_serialiazed_data} "
+                f"**retrieving invoicing items** " f"--{invoice_item_serialiazed_data} "
             )
-            return {"success": True,
-                    "response": invoice_item_serialiazed_data.data}
+            return {"success": True, "response": invoice_item_serialiazed_data.data}
         except Exception as e:
             return {"success": False, "reason": "%s" % e}
 

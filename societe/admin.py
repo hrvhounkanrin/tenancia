@@ -1,8 +1,7 @@
 """RealEstate app admin.py."""
 from django.contrib import admin
 
-from .models import Mandat
-from .models import RealEstate
+from .models import Mandat, RealEstate
 
 
 class SocieteAdmin(admin.ModelAdmin):

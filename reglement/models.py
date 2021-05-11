@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 """Reglement app models."""
 from django.db import models
 
@@ -7,8 +6,8 @@ class Reglement(models.Model):
     """Reglement model."""
 
     STATUT_REGLEMENT = (
-        (0, 'ANNULE'),
-        (1, 'REGLE'),
+        (0, "ANNULE"),
+        (1, "REGLE"),
     )
     reference = models.CharField(max_length=50, null=False)
     date_reglement = models.DateField()
@@ -20,14 +19,17 @@ class Reglement(models.Model):
     num_telephone = models.CharField(max_length=50, null=False)
     mode_reglement = models.CharField(max_length=100, null=False)
     reference_transaction = models.CharField(max_length=50, null=False)
-    quittance = models.ForeignKey('quittance.Quittance',
-                                  on_delete=models.SET_NULL, null=True,)
+    quittance = models.ForeignKey(
+        "quittance.Quittance",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
 
     def __init__(self, arg):
         """Reglement str representation."""
-        super(Reglement, self).__init__()
+        super().__init__()
         self.arg = arg
 
     def __str__(self):
         """Reglement str representation."""
-        return '%s %s' % (self.reference, self.regle_par)
+        return f"{self.reference} {self.regle_par}"

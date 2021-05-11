@@ -1,7 +1,8 @@
 """Managing permission."""
 from rest_framework import permissions
-from proprietaire.models import Proprietaire
+
 from client.models import Client
+from proprietaire.models import Proprietaire
 
 
 class IsLoggedInUserOrAdmin(permissions.BasePermission):
@@ -49,4 +50,3 @@ class IsTenant(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         """lessor."""
         return obj.created_by == request.user
-

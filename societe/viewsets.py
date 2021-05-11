@@ -1,13 +1,13 @@
-# -*- coding: UTF-8 -*-
 """RealEstate app viewsets."""
 import logging
-from django.shortcuts import get_object_or_404
+
 from django.contrib.auth import get_user_model
-from .models import Mandat
-from .models import RealEstate, RealEstateUsers
-from .serializers import MandatSerializer
-from .serializers import SocieteSerializer
+from django.shortcuts import get_object_or_404
+
 from tools.viewsets import ActionAPIView
+
+from .models import Mandat, RealEstate, RealEstateUsers
+from .serializers import MandatSerializer, SocieteSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -35,9 +35,7 @@ class SocieteViewSetAction(ActionAPIView):
             return serializer.data
 
         queryset = RealEstate.objects.all()
-        serializer = SocieteSerializer(
-            queryset, context=serializer_context, many=True
-        )
+        serializer = SocieteSerializer(queryset, context=serializer_context, many=True)
         return {"success": True, "payload": serializer.data}
 
     def create_mandataire(self, request, params={}, *args, **kwargs):
@@ -64,9 +62,7 @@ class SocieteViewSetAction(ActionAPIView):
                 mandataire_objects.append(serializer)
             saved_mandataire = [model.save() for model in mandataire_objects]
             [
-                RealEstateUsers(
-                    societe=sc, user=current_user, profil="MASTER"
-                ).save()
+                RealEstateUsers(societe=sc, user=current_user, profil="MASTER").save()
                 for sc in saved_mandataire
             ]
             serialized_mandataire = SocieteSerializer(
@@ -135,9 +131,7 @@ class MandatViewSetAction(ActionAPIView):
             logger.debug("**retrieving mandats **")
             return serializer.data
         queryset = Mandat.objects.all()
-        serializer = MandatSerializer(
-            queryset, context=serializer_context, many=True
-        )
+        serializer = MandatSerializer(queryset, context=serializer_context, many=True)
         return {"success": True, "payload": serializer.data}
 
     def create_mandat(self, request, params={}, *args, **kwargs):
@@ -155,9 +149,7 @@ class MandatViewSetAction(ActionAPIView):
             mandats = request.data.pop("mandat")
             mandat_objects = []
             for mandat in mandats:
-                serializer = MandatSerializer(
-                    data=mandat, context=serializer_context
-                )
+                serializer = MandatSerializer(data=mandat, context=serializer_context)
                 serializer.is_valid(raise_exception=True)
                 mandat_objects.append(serializer)
             saved_mandat = [model.save() for model in mandat_objects]
