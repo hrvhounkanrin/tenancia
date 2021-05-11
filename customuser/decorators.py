@@ -23,10 +23,7 @@ def method_decorator(decorator, name=""):
             else:
                 raise ValueError(
                     "The keyword argument `name` must be the name of a method "
-                    "of the decorated class: {}. Got '{}' instead".format(
-                        obj,
-                        name,
-                    )
+                    "of the decorated class: {}. Got '{}' instead".format(obj, name)
                 )
         else:
             func = obj

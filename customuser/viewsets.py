@@ -52,12 +52,7 @@ class CustomUserAction(ActionAPIView):
                     serializer.validated_data["access_token"]
                 )
             except HTTPError as e:
-                payload = {
-                    "errors": {
-                        "token": "Invalid token",
-                        "detail": str(e),
-                    }
-                }
+                payload = {"errors": {"token": "Invalid token", "detail": str(e)}}
                 return {"success": False, "payload": payload}
 
             if user:
@@ -98,10 +93,8 @@ class CustomUserAction(ActionAPIView):
             "Content-Type": "application/json; UTF-8",
         }
         # return Response({'token': token}, status.HTTP_201_CREATED)
-        settings.PEOPLE_API_URL = (
-            "https://www.googleapis.com/oauth2/v3/userinfo?access_token={}".format(
-                token["access_token"]
-            )
+        settings.PEOPLE_API_URL = "https://www.googleapis.com/oauth2/v3/userinfo?access_token={}".format(
+            token["access_token"]
         )
         r = requests.get(settings.PEOPLE_API_URL, headers=headers)
         profile = json.loads(r.text)
