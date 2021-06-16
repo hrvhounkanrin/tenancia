@@ -35,6 +35,7 @@ class ActionAPIView(APIView):
         params = self.normalize_params(request)
         kwargs["params"] = params
         self._last_action = params.get("action", action)
+        response_status = 200
         try:
             lv_action = self.__getattribute__(self._last_action)
             # print(callable(getattr(self, 'exchange_token', None)))
@@ -43,6 +44,7 @@ class ActionAPIView(APIView):
         except AttributeError:
             print("AttributeError tout de meme")
             lv_action = self.action_does_not_exist
+            response_status = 404
         response = lv_action(request, **kwargs)
         if isinstance(response, (Response,)):
             response = response.data
@@ -56,7 +58,7 @@ class ActionAPIView(APIView):
             )
         )
         serialised = APISerializer(response, context=response_context)
-        return Response(serialised.data)
+        return Response(serialised.data, response_status)
 
     def action_does_not_exist(self, *args, **kwargs):
         """I really don't what this func ain to."""

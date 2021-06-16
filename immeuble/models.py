@@ -32,6 +32,7 @@ class Immeuble(models.Model):
     ref_immeuble = models.CharField(max_length=50, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    nb_etage = models.IntegerField(default=0)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -53,7 +54,7 @@ class Immeuble(models.Model):
 
     class Meta:
         """Immeuble model meta."""
-
+        ordering = ['-id']
         verbose_name = "Immeuble"
         verbose_name_plural = "Immeubles"
 

@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.utils.crypto import get_random_string
 from rest_framework import serializers
-
+from django.db.models import Max
 from immeuble.models import Immeuble
 
 from .models import Appartement, StructureAppartement, TypeDependence
@@ -16,14 +16,14 @@ class TypeDependenceSerializers(serializers.ModelSerializer):
         """TypeDependence serializer meta."""
 
         model = TypeDependence
-        fields = "__all__"
+        fields = ('id', 'libelle', 'utilite')
 
 
 class StructureAppartmentSerializers(serializers.ModelSerializer):
     """Housing decustom_exception_handlerpendecies of specfic housing."""
 
-    # typedependence = TypeDependenceSerializers(read_only=True)
-    typedependence = serializers.SerializerMethodField()
+    typedependence = TypeDependenceSerializers(read_only=True)
+    libelle = serializers.SerializerMethodField()
     typeDependence_id = serializers.PrimaryKeyRelatedField(
         source="TypeDependence",
         queryset=TypeDependence.objects.all(),
@@ -36,13 +36,15 @@ class StructureAppartmentSerializers(serializers.ModelSerializer):
         model = StructureAppartement
         fields = [
             "appartement",
-            "typedependence",
+            "libelle",
             "typeDependence_id",
             "nbre",
+            "superficie",
+            "typedependence",
             "description",
         ]
 
-    def get_typedependence(self, structureAppart):
+    def get_libelle(self, structureAppart):
         return structureAppart.typedependence.libelle
 
 
@@ -84,8 +86,14 @@ class AppartementSerializers(serializers.ModelSerializer):
             structures,
             many=True,
         ).data
-        print(data)
         return data
+
+    def __autoname(self, immeuble, level):
+        last_intitule = Appartement.objects.filter(immeuble=immeuble, level=level)
+        last_intitule = last_intitule.aggregate(Max('intitule'))['intitule__max']
+        if last_intitule is None:
+            return str(level)+'-A'
+        return last_intitule[0:len(last_intitule)-1]+chr(ord(last_intitule[-1]) + 1)
 
     @transaction.atomic
     def create(self, validated_data):
@@ -129,15 +137,27 @@ class AppartementSerializers(serializers.ModelSerializer):
             StructureAppartement.objects.filter(appartement__id=instance.id).delete()
             structures = self.initial_data.get("structures")
             for structure in structures:
+                dependency_id = structure.pop("typeDependence_id", None)
+                try:
+                    dependency_instance = TypeDependence.objects.get(id=dependency_id)
+                except ObjectDoesNotExist:
+                    raise serializers.ValidationError(
+                        "Il y a une dépendence qui n'existe pas."
+                    )
                 structure.pop("appartement", None)
-                print(structure)
-                # StructureAppartement(appartement=instance, **structure).save()
+                StructureAppartement(
+                    appartement=instance,
+                    typedependence=dependency_instance,
+                    **structure,
+                ).save()
+
         return instance
 
 
 class ClonerAppartementSerializer(serializers.Serializer):
-    nb = serializers.IntegerField(default=1)
+    nbre = serializers.IntegerField(default=1)
     appartement_id = serializers.IntegerField()
+    level = serializers.IntegerField()
     immeuble_id = serializers.IntegerField(write_only=True)
     appartements = AppartementSerializers(read_only=True, many=True)
 
@@ -145,9 +165,7 @@ class ClonerAppartementSerializer(serializers.Serializer):
     def create(self, validated_data):
         try:
             appartement = Appartement.objects.get(pk=validated_data["appartement_id"])
-            print(f"appartement: {appartement}")
             immeuble = Immeuble.objects.get(pk=validated_data["immeuble_id"])
-            print(f"immeuble: {immeuble}")
         except ObjectDoesNotExist:
             raise serializers.ValidationError(
                 "L'appartement que vous voulez reproduire n'existe pas."
@@ -161,7 +179,8 @@ class ClonerAppartementSerializer(serializers.Serializer):
             for f in appartement_fields
             if f not in ["id", "created_by_id", "modified_by_id", "_state"]
         ]
-        for i in range(validated_data["nb"]):
+        last_db_name = self.__autoname(immeuble.id, validated_data['level'])
+        for i in range(validated_data["nbre"]):
             new_appartement = Appartement()
             for field in list(appartement_fields):
 
@@ -169,7 +188,9 @@ class ClonerAppartementSerializer(serializers.Serializer):
                 # print(f'field_value: {field_name_val}')
                 setattr(new_appartement, field, field_name_val)
             new_appartement.immeuble = immeuble
-            new_appartement.intitule = get_random_string(8).upper()
+            new_appartement.intitule = last_db_name
+            new_appartement.level = validated_data['level']
+            last_db_name = self.__autoname(immeuble.id, validated_data['level'], last_db_name)
             new_appartement.created_by = user
             appartements.append(new_appartement)
         [m.save() for m in appartements]
@@ -180,13 +201,27 @@ class ClonerAppartementSerializer(serializers.Serializer):
                     appartement=m,
                     typedependence=s.typedependence,
                     nbre=s.nbre,
+                    superficie=s.superficie,
                     description=s.description,
                 ).save()
                 for s in structures
             ]
-
+        validated_data['appartements'] = appartements
         return {
-            "nb": validated_data["nb"],
+            "nbre": validated_data["nbre"],
+            "level":  validated_data["level"],
             "appartement_id": validated_data["appartement_id"],
             "appartements": appartements,
         }
+
+
+
+    def __autoname(self, immeuble_id, level, last_db_name=None):
+        if last_db_name is None:
+            last_intitule = Appartement.objects.filter(immeuble__id=immeuble_id, level=level)
+            last_intitule = last_intitule.aggregate(Max('intitule'))['intitule__max']
+            if last_intitule is None:
+                return str(level) + '-A'
+        else:
+            last_intitule = last_db_name
+        return last_intitule[0:len(last_intitule) - 1] + chr(ord(last_intitule[-1]) + 1)

@@ -1,7 +1,7 @@
 """Customuser serializer."""
 import logging
 import os
-
+from hashids import Hashids
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -35,6 +35,7 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 jwt_get_username_from_payload = api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 
+hashids = Hashids(alphabet='abcdefghijklmnopqrstuvwxyz'[::-1])
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -64,6 +65,8 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         email_sender = Email()
         token_generator = TokenGenerator()
+
+        hashid = hashids.encode(123456789)  # 'kekmyzyk'
         mail_data = {
             "uid": urlsafe_base64_encode(force_bytes(user.pk)),
             "token": token_generator.make_token(user).strip(),

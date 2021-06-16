@@ -57,11 +57,6 @@ class ImmeubleSerializers(serializers.ModelSerializer):
 
         return Immeuble.objects.create(proprietaire=proprietaire, **validated_data)
 
-    def update(self, instance, validated_data):
-        """Upddate immeuble."""
-        instance.save()
-        return instance
-
 
 class ClonerImmeubleSerializer(serializers.Serializer):
     nb = serializers.IntegerField(default=1)

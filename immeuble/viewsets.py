@@ -1,6 +1,6 @@
 """Immeuble action viewset."""
 import logging
-
+from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
 
 from customuser.permissions import IsLessor
@@ -32,12 +32,12 @@ class ImmeubleAction(ActionAPIView):
                 queryset, context=serializer_context, many=True
             )
             logger.debug("**retrieving immeubles **")
-            return {"success": True, "immeubles": serializer.data}
+            return {"success": True, "payload": serializer.data}
         get_all_immeuble = Immeuble.objects.filter(created_by=self.request.user)
         serialized_immeuble = ImmeubleSerializers(
             get_all_immeuble, context=serializer_context, many=True
         )
-        return {"success": True, "immeubles": serialized_immeuble.data}
+        return {"success": True, "payload": serialized_immeuble.data}
 
     def create_immeuble(self, request, params={}, *args, **kwargs):
         """Create immeuble."""
@@ -62,16 +62,19 @@ class ImmeubleAction(ActionAPIView):
             serialized_proprio = ImmeubleSerializers(
                 saved_immeuble, context=serializer_context, many=True
             )
-            return {"success": True, "immeuble": serialized_proprio.data}
+            return {"success": True, "payload": serialized_proprio.data}
 
         data = request.data
-        if not data["intitule"]:
+        print(data)
+        if data.get('intitule', None) is None or data.get('intitule', None) == '':
             autoname = AutoName.objects.random()
             data["intitule"] = autoname.libelle
+        if data.get('ref_immeuble', None) is None or data.get('ref_immeuble', None) == '':
+            data['ref_immeuble'] = get_random_string(8).upper()
         serializer = ImmeubleSerializers(data=data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
-        return {"success": True, "immeuble": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def update_immeuble(self, request, params={}, *args, **kwargs):
         """
@@ -103,21 +106,23 @@ class ImmeubleAction(ActionAPIView):
             serializer = ImmeubleSerializers(
                 saved_immeubles, many=True, context=serializer_context
             )
-            return {"success": True, "immeuble": serializer.data}
+            return {"success": True, "payload": serializer.data}
         instance = get_object_or_404(
             Immeuble.objects.filter(created_by=self.request.user),
             pk=params.get("id", None),
         )
         data = request.data
-        if not data["intitule"]:
+        if data.get('intitule', None) is None or data.get('intitule', None) == '':
             autoname = AutoName.objects.random()
             data["intitule"] = autoname.libelle
+        if data.get('ref_immeuble', None) is None or data.get('ref_immeuble', None) == '':
+            data['ref_immeuble'] = get_random_string(8).upper()
         serializer = ImmeubleSerializers(
             instance, data=data, context=serializer_context
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "immeuble": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def cloner_immeuble(self, request, params={}, *args, **kwargs):
         """Multiplier un immeuble"""

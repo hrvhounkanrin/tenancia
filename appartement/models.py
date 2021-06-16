@@ -43,7 +43,7 @@ class Appartement(models.Model):
     intitule = models.CharField(max_length=50)
     """level le niveau de l'appartement sur l'immeuble."""
     level = models.IntegerField(null=False)
-    autre_description = models.TextField(max_length=1024)
+    autre_description = models.TextField(max_length=1024, null=True)
     immeuble = models.ForeignKey(
         "immeuble.Immeuble", null=True, on_delete=models.SET_NULL
     )
@@ -91,6 +91,7 @@ class StructureAppartement(models.Model):
         null=True,
     )
     nbre = models.IntegerField(default=1)
+    superficie = models.DecimalField(max_digits=9, decimal_places=2, default=0)
     description = models.CharField(max_length=256)
     is_periodic = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

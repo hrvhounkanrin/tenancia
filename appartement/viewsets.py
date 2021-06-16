@@ -1,6 +1,6 @@
 """Housing app Action viewset."""
 import logging
-
+from django.db.models import Max
 from django.shortcuts import get_object_or_404
 
 from appartement.models import Appartement, StructureAppartement, TypeDependence
@@ -68,6 +68,11 @@ class AppartementViewSet(ActionAPIView):
                 saved_appartements, many=True, context=serializer_context
             )
             return {"success": True, "payload": serialized_proprio.data}
+        data = request.data
+        if data['level'] is None or data['level'] == '':
+            data['level'] = 0
+        if data['intitule'] is None or data['intitule'] == '':
+            data['intitule'] = self.__autoname(data['immeuble_id'], data['level'])
         serializer = AppartementSerializers(
             data=request.data, context=serializer_context
         )
@@ -128,6 +133,12 @@ class AppartementViewSet(ActionAPIView):
         serializer.save(created_by=request.user)
         return {"success": True, "payload": serializer.data}
 
+    def __autoname(self, immeuble_id, level):
+        last_intitule = Appartement.objects.filter(immeuble__id=immeuble_id, level=level)
+        last_intitule = last_intitule.aggregate(Max('intitule'))['intitule__max']
+        if last_intitule is None:
+            return str(level) + '-A'
+        return last_intitule[0:len(last_intitule) - 1] + chr(ord(last_intitule[-1]) + 1)
 
 class ComposantAppartementViewSet(ActionAPIView):
     """Housing dependency Action Viewset."""
@@ -150,7 +161,7 @@ class ComposantAppartementViewSet(ActionAPIView):
         serializer = TypeDependenceSerializers(queryset, many=True)
         return {"success": True, "payload": serializer.data}
 
-    def create_dependency(self, request, params={}, *args, **kwargs):
+    def create_dependancy(self, request, params={}, *args, **kwargs):
         """Create housing dependency."""
         serializer_context = {
             "request": request,
@@ -176,7 +187,7 @@ class ComposantAppartementViewSet(ActionAPIView):
         serializer.save()
         return {"success": True, "payload": serializer.data}
 
-    def update_dependency(self, request, params={}, *args, **kwargs):
+    def update_dependancy(self, request, params={}, *args, **kwargs):
         """
          Update housing dependency.
 
@@ -211,7 +222,6 @@ class ComposantAppartementViewSet(ActionAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return {"success": True, "payload": serializer.data}
-
 
 class StructureAppartmentViewSet(ActionAPIView):
     """StructureAppartement Actions viewset."""
