@@ -7,6 +7,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_decode
+from django.shortcuts import redirect
 from requests.exceptions import HTTPError
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
@@ -181,3 +182,36 @@ class ProfileAction(ActionAPIView):
             return {"success": True, "payload": serializer.data}
         else:
             return {"success": False, "msg": "An error occured."}
+
+    def create_profile(self, request, params={}, *args, **kwargs):
+        data = request.data
+        profile_type = data.pop('profile_type', None)
+        if profile_type is None or profile_type not in ['lessor', 'tenant', 'real_estate']:
+            return {"success": False, "payload": {"message": "Il manque le type de profil"}}
+
+        serializer_context = {
+            "request": request,
+        }
+        data["user_id"] = request.user.id
+        if profile_type == 'lessor':
+            serializer = ProprietaireSerializers(data=data, context=serializer_context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(created_by=request.user)
+            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+            return redirect(url, *args, permanent=False, **kwargs)
+
+        if profile_type == 'tenant':
+            serializer = ClientSerializer(data=data, context=serializer_context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+            return redirect(url, *args, permanent=False, **kwargs)
+
+        if profile_type == 'real_estate':
+            serializer = SocieteSerializer(data=data, context=serializer_context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+            return redirect(url, *args, permanent=False, **kwargs)
+
+        return {"success": False, "payload": {"message": "Il manque le payload du profil"}}

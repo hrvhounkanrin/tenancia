@@ -378,7 +378,7 @@ JWT_AUTH = {
     "JWT_AUTH_HEADER_PREFIX": "Bearer",
     "JWT_AUTH_COOKIE": None,
 }
-BASE_API_URL = "http://tenancia.com/api/v1/"
+BASE_API_URL = "http://tenancia.com/api/v1/"#"http://localhost:8000/api/v1/"
 BASE_FRONT_URL = "http://localhost:8080"
 ALLOWED_HOSTS = ["http://localhost:8080", "localhost", "tenancia.com"]
 CORS_ORIGIN_ALLOW_ALL = True
