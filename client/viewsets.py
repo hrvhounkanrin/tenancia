@@ -1,11 +1,9 @@
 """Client app Actions Viewset."""
 import logging
-
-from django.shortcuts import get_object_or_404
-
+from django.conf import settings
+from django.shortcuts import get_object_or_404, redirect
 from client.models import Client
 from tools.viewsets import ActionAPIView
-
 from .serializers import ClientSerializer
 
 logger = logging.getLogger(__name__)
@@ -36,6 +34,8 @@ class ClientAction(ActionAPIView):
 
         queryset = Client.objects.filter(user_id=request.user)
         serializer = ClientSerializer(queryset, context={"request": request}, many=True)
+        # url = 'http://localhost:8000/api/v1/profile_action/get_profile/'
+        # return HttpResponseRedirect(redirect_to=url)
         return {"success": True, "payload": serializer.data}
 
     def create_client(self, request, params={}, *args, **kwargs):
@@ -67,7 +67,9 @@ class ClientAction(ActionAPIView):
         serializer = ClientSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "payload": serializer.data}
+        url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+        return redirect(url, *args, permanent=False, **kwargs)
+        # return {"success": True, "payload": serializer.data}
 
     def update_client(self, request, params={}, *args, **kwargs):
         """

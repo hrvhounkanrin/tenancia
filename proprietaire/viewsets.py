@@ -2,12 +2,13 @@
 import logging
 
 from django.shortcuts import get_object_or_404
-
+from django.conf import settings
 from proprietaire.models import Proprietaire
 from tools.viewsets import ActionAPIView
-
+from django.contrib.sites.shortcuts import get_current_site
 from .serializers import ProprietaireSerializers
-
+from django.shortcuts import reverse, redirect
+from django.http import HttpResponseRedirect
 logger = logging.getLogger(__name__)
 
 
@@ -55,29 +56,13 @@ class ProprietairAction(ActionAPIView):
         serializer_context = {
             "request": request,
         }
-        """
-        if isinstance(request.data.get('proprietaire', None), list):
-            proprietaires = request.data.pop('proprietaire')
-            proprietaire_objects = []
-            for proprio in proprietaires:
-                proprio['user_id'] = request.user.id
-                serializer = ProprietaireSerializers(
-                    data=proprio, context=serializer_context)
-                serializer.is_valid(raise_exception=True)
-                proprietaire_objects.append(serializer)
-            saved_proprio = \
-                [model.save(created_by=request.user)
-                 for model in proprietaire_objects]
-            serialized_proprio = ProprietaireSerializers(
-                saved_proprio, many=True, context=serializer_context)
-            return {'success': True, 'proprietaire': serialized_proprio.data}
-        """
-        print(request.user.id)
-        request.data["user_id"] = request.user.id
         serializer = ProprietaireSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
-        return {"success": True, "payload": serializer.data}
+        request.data["user_id"] = request.user.id
+        url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+        return redirect(url, *args, permanent=False, **kwargs)
+        # return {"success": True, "payload": serializer.data}
 
     def update_proprio(self, request, params={}, *args, **kwargs):
         """

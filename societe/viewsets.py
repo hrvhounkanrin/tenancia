@@ -1,11 +1,9 @@
 """RealEstate app viewsets."""
 import logging
-
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-
+from django.shortcuts import get_object_or_404, redirect
 from tools.viewsets import ActionAPIView
-
 from .models import Mandat, RealEstate, RealEstateUsers
 from .serializers import MandatSerializer, SocieteSerializer
 
@@ -72,7 +70,9 @@ class SocieteViewSetAction(ActionAPIView):
         serializer = SocieteSerializer(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "payload": serializer.data}
+        url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+        return redirect(url, *args, permanent=False, **kwargs)
+        #return {"success": True, "payload": serializer.data}
 
     def update_mandataire(self, request, params={}, *args, **kwargs):
         """

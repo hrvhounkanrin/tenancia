@@ -69,7 +69,7 @@ class ProprietaireSerializers(serializers.ModelSerializer):
         user_instance = validated_data.pop("User", None)
         banque_instance = validated_data.pop("Banque", None)
         try:
-            Proprietaire.objects.get(user=user_instance)
+            proprietaire = Proprietaire.objects.get(user=user_instance)
         except Proprietaire.DoesNotExist:
             pass
         else:
