@@ -7,7 +7,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_decode
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from requests.exceptions import HTTPError
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
@@ -24,7 +24,7 @@ from proprietaire.serializers import ProprietaireSerializers
 from societe.models import RealEstate
 from societe.serializers import SocieteSerializer
 from tools.viewsets import ActionAPIView
-
+from proprietaire.viewsets import ProprietairAction
 from .token_generator import TokenGenerator
 
 logger = logging.getLogger(__name__)
@@ -209,6 +209,48 @@ class ProfileAction(ActionAPIView):
 
         if profile_type == 'real_estate':
             serializer = SocieteSerializer(data=data, context=serializer_context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+            return redirect(url, *args, permanent=False, **kwargs)
+
+        return {"success": False, "payload": {"message": "Il manque le payload du profil"}}
+
+    def update_profile(self, request, params={}, *args, **kwargs):
+        data = request.data
+        profile_type = data.pop('profile_type', None)
+        if profile_type is None or profile_type not in ['lessor', 'tenant', 'real_estate']:
+            return {"success": False, "payload": {"message": "Il manque le type de profil"}}
+
+        serializer_context = {
+            "request": request,
+        }
+        data["user_id"] = request.user.id
+        if profile_type == 'lessor':
+            instance = get_object_or_404(Proprietaire, pk=params.get("id", None))
+            data = request.data
+            data["user_id"] = request.user.id
+
+            serializer = ProprietaireSerializers(
+                instance, data=request.data, context=serializer_context
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(modified_by=request.user)
+            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+            return redirect(url, *args, permanent=False, **kwargs)
+
+        if profile_type == 'tenant':
+            serializer = ClientSerializer(data=data, context=serializer_context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+            return redirect(url, *args, permanent=False, **kwargs)
+
+        if profile_type == 'real_estate':
+            instance = get_object_or_404(RealEstate, pk=params.get("id", None))
+            serializer = SocieteSerializer(
+                instance, data=request.data, context=serializer_context
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])

@@ -77,24 +77,6 @@ class ProprietairAction(ActionAPIView):
         serializer_context = {
             "request": request,
         }
-        """
-        if isinstance(request.data.get('proprietaire', None), list):
-            proprietaires = request.data.pop('proprietaire')
-            proprietaire_objects = []
-            for proprio in proprietaires:
-                instance = get_object_or_404(Proprietaire.objects.filter(
-                    created_by=self.request.user), pk=params.get('id', None))
-                serializer = ProprietaireSerializers(
-                    instance, data=proprio, context=serializer_context)
-                serializer.is_valid(raise_exception=True)
-                proprietaire_objects.append(serializer)
-            saved_proprio = \
-                [model.save(modified_by=request.user)
-                 for model in proprietaire_objects]
-            serializer = ProprietaireSerializers(
-                saved_proprio, many=True, context=serializer_context)
-            return {'success': True, 'payload': serializer.data}
-        """
         instance = get_object_or_404(Proprietaire, pk=params.get("id", None))
         data = request.data
         data["user_id"] = request.user.id
@@ -104,4 +86,6 @@ class ProprietairAction(ActionAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save(modified_by=request.user)
-        return {"success": True, "payload": serializer.data}
+        url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+        return redirect(url, *args, permanent=False, **kwargs)
+        #return {"success": True, "payload": serializer.data}

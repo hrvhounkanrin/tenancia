@@ -84,21 +84,6 @@ class ClientAction(ActionAPIView):
         serializer_context = {
             "request": request,
         }
-        """
-        if isinstance(request.data.get('client', None), list):
-            clients = request.data.pop('client')
-            client_object = []
-            for client in clients:
-                instance = Client.objects.get(pk=params.get('id', None))
-                serializer = ClientSerializer(
-                    instance, data=client, context=serializer_context)
-                serializer.is_valid(raise_exception=True)
-                client_object.append(serializer)
-            saved_client = [model.save() for model in client_object]
-            serializer = ClientSerializer(
-                saved_client, many=True, context=serializer_context)
-            return {'success': True, 'client': serializer.data}
-        """
         request.data["user_id"] = request.user.id
         instance = get_object_or_404(Client, pk=params.get("id", None))
         serializer = ClientSerializer(
@@ -106,4 +91,6 @@ class ClientAction(ActionAPIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "payload": serializer.data}
+        url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
+        return redirect(url, *args, permanent=False, **kwargs)
+        # return {"success": True, "payload": serializer.data}

@@ -121,25 +121,14 @@ WSGI_APPLICATION = "meslimmo.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("SQL_ENGINE"),
-        "NAME": os.environ.get("SQL_DATABASE"),
-        "USER": os.environ.get("SQL_USER"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD"),
-        "HOST": os.environ.get("SQL_HOST"),
-        "PORT": os.environ.get("SQL_PORT"),
+        "NAME": os.environ.get("SQL_DATABASE") if os.environ.get("ENV") != 'local'  else os.environ.get("SQL_DATABASE_LOCAL"),
+        "USER": os.environ.get("SQL_USER") if os.environ.get("ENV") != 'local' else os.environ.get("SQL_USER_LOCAL"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD") if os.environ.get("ENV") != 'local' else os.environ.get("SQL_PASSWORD_LOCAL"),
+        "HOST": os.environ.get("SQL_HOST") if os.environ.get("ENV") != 'local' else os.environ.get("SQL_HOST_LOCAL"),
+        "PORT": os.environ.get("SQL_PORT") if os.environ.get("ENV") != 'local' else os.environ.get("SQL_PORT_LOCAL"),
     }
 }
-"""
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'tenancia_db',
-        'USER': 'postgres',
-        'PASSWORD': 'tenancia',
-        'HOST': 'db',
-        'PORT': '5433',
-    }
-}
-"""
+
 
 # Password validatirest_registeron
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -378,7 +367,7 @@ JWT_AUTH = {
     "JWT_AUTH_HEADER_PREFIX": "Bearer",
     "JWT_AUTH_COOKIE": None,
 }
-BASE_API_URL = "http://tenancia.com/api/v1/"#"http://localhost:8000/api/v1/"
+BASE_API_URL = "http://localhost:8000/api/v1/"#"http://tenancia.com/api/v1/"#
 BASE_FRONT_URL = "http://localhost:8080"
 ALLOWED_HOSTS = ["http://localhost:8080", "localhost", "tenancia.com"]
 CORS_ORIGIN_ALLOW_ALL = True
