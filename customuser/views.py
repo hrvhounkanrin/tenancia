@@ -1,6 +1,5 @@
 import os
-from datetime import datetime
-
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.auth import logout as django_logout
 from django.core.exceptions import ObjectDoesNotExist
@@ -96,11 +95,11 @@ class CustomObtainJSONWebToken(ObtainJSONWebToken):
         payload = jwt_payload_handler(user)
         ini_time_for_now = datetime.now()
         now = datetime.now()
+
         timestamp = datetime.timestamp(now)
         return Response(
             {
-                "expire_in": datetime.utcnow()
-                + settings.JWT_AUTH["JWT_EXPIRATION_DELTA"],
+                "expire_in": 20,
                 "token": jwt_encode_handler(payload),
                 "user": UserSerializer(user, context={"request": request}).data,
             }
