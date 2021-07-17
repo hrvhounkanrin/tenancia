@@ -121,11 +121,11 @@ WSGI_APPLICATION = "meslimmo.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("SQL_ENGINE"),
-        "NAME": os.environ.get("SQL_DATABASE") if os.environ.get("ENV") != 'local'  else os.environ.get("SQL_DATABASE_LOCAL"),
-        "USER": os.environ.get("SQL_USER") if os.environ.get("ENV") != 'local' else os.environ.get("SQL_USER_LOCAL"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD") if os.environ.get("ENV") != 'local' else os.environ.get("SQL_PASSWORD_LOCAL"),
-        "HOST": os.environ.get("SQL_HOST") if os.environ.get("ENV") != 'local' else os.environ.get("SQL_HOST_LOCAL"),
-        "PORT": os.environ.get("SQL_PORT") if os.environ.get("ENV") != 'local' else os.environ.get("SQL_PORT_LOCAL"),
+        "NAME": os.environ.get("SQL_DATABASE") if os.environ.get("SRVENV") != 'local'  else os.environ.get("SQL_DATABASE_LOCAL"),
+        "USER": os.environ.get("SQL_USER") if os.environ.get("SRVENV") != 'local' else os.environ.get("SQL_USER_LOCAL"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD") if os.environ.get("SRVENV") != 'local' else os.environ.get("SQL_PASSWORD_LOCAL"),
+        "HOST": os.environ.get("SQL_HOST") if os.environ.get("SRVENV") != 'local' else os.environ.get("SQL_HOST_LOCAL"),
+        "PORT": os.environ.get("SQL_PORT") if os.environ.get("SRVENV") != 'local' else os.environ.get("SQL_PORT_LOCAL"),
     }
 }
 
@@ -355,7 +355,7 @@ JWT_AUTH = {
     # You can turn off expiration time verification by setting
     # JWT_VERIFY_EXPIRATION to False. Without expiration verification,
     # JWTs will last forever meaning a leaked token could be used by an attacker indefinitely'JWT_LEEWAY': 0,
-    "JWT_EXPIRATION_DELTA": datetime.timedelta(hours=24),
+    "JWT_EXPIRATION_DELTA": datetime.timedelta(hours=20),
     #  This will be added to datetime.utcnow() to set the expiration time.
     # Default is datetime.timedelta(seconds=300)(5 minutes).
     "JWT_AUDIENCE": None,
@@ -367,7 +367,7 @@ JWT_AUTH = {
     "JWT_AUTH_HEADER_PREFIX": "Bearer",
     "JWT_AUTH_COOKIE": None,
 }
-BASE_API_URL = "http://localhost:8000/api/v1/"#"http://tenancia.com/api/v1/"#
+BASE_API_URL = "http://localhost:8000/api/v1/" if os.environ.get("SRVENV") != 'local' else "http://tenancia.com/api/v1/"
 BASE_FRONT_URL = "http://localhost:8080"
 ALLOWED_HOSTS = ["http://localhost:8080", "localhost", "tenancia.com"]
 CORS_ORIGIN_ALLOW_ALL = True
