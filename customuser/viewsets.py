@@ -156,25 +156,30 @@ class CustomUserAction(ActionAPIView):
 
 
 class ProfileAction(ActionAPIView):
-    def get_profile(self, request, params={}, *args, **kwargs):
-        """Get all user profile."""
+    def __get_profile(self, user_id):
         User = get_user_model()
         try:
-            user = User.objects.get(pk=request.user.id)
-            serializer = UserSerializer(user)
-            proprietaire = Proprietaire.objects.filter(user__id=request.user.id).first()
+            user = User.objects.get(pk=user_id)
+            user_serializer = UserSerializer(user)
+            proprietaire = Proprietaire.objects.filter(user__id=user_id).first()
             lessor_serializer = ProprietaireSerializers(proprietaire)
-            client = Client.objects.filter(user__id=request.user.id).first()
-            real_estate = RealEstate.objects.filter(created_by=request.user.id).first()
+            client = Client.objects.filter(user__id=user_id).first()
+            real_estate = RealEstate.objects.filter(created_by=user_id).first()
             client_serializer = ClientSerializer(client)
-            profiles = {}
+            profiles = {**user_serializer.data}
             if proprietaire is not None:
-                profiles.update({"lessor": lessor_serializer.data})
+                lessor_data = lessor_serializer.data
+                lessor_data.pop('user', None)
+                profiles.update({"lessor": lessor_data})
             if client is not None:
-                profiles.update({"tenant": client_serializer.data})
+                tenant_data = client_serializer.data
+                tenant_data.pop('user', None)
+                profiles.update({"tenant": tenant_data})
             if real_estate is not None:
                 real_estate_serialiser = SocieteSerializer(real_estate)
-                profiles.update({"real_estate": real_estate_serialiser.data})
+                real_estate_data = real_estate_serialiser.data
+                real_estate_data.pop('user', None)
+                profiles.update({"real_estate": real_estate_data})
             return {"success": True, "payload": profiles}
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
@@ -182,6 +187,11 @@ class ProfileAction(ActionAPIView):
             return {"success": True, "payload": serializer.data}
         else:
             return {"success": False, "msg": "An error occured."}
+
+    def get_profile(self, request, params={}, *args, **kwargs):
+        """Get all user profile."""
+        return self.__get_profile(request.user.id)
+
 
     def create_profile(self, request, params={}, *args, **kwargs):
         data = request.data
@@ -197,24 +207,18 @@ class ProfileAction(ActionAPIView):
             serializer = ProprietaireSerializers(data=data, context=serializer_context)
             serializer.is_valid(raise_exception=True)
             serializer.save(created_by=request.user)
-            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
-            return redirect(url, *args, permanent=False, **kwargs)
 
         if profile_type == 'tenant':
             serializer = ClientSerializer(data=data, context=serializer_context)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
-            return redirect(url, *args, permanent=False, **kwargs)
 
         if profile_type == 'real_estate':
             serializer = SocieteSerializer(data=data, context=serializer_context)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
-            return redirect(url, *args, permanent=False, **kwargs)
 
-        return {"success": False, "payload": {"message": "Il manque le payload du profil"}}
+        return self.__get_profile(data["user_id"])
 
     def update_profile(self, request, params={}, *args, **kwargs):
         data = request.data
@@ -230,21 +234,16 @@ class ProfileAction(ActionAPIView):
             instance = get_object_or_404(Proprietaire, pk=params.get("id", None))
             data = request.data
             data["user_id"] = request.user.id
-
             serializer = ProprietaireSerializers(
                 instance, data=request.data, context=serializer_context
             )
             serializer.is_valid(raise_exception=True)
             serializer.save(modified_by=request.user)
-            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
-            return redirect(url, *args, permanent=False, **kwargs)
 
         if profile_type == 'tenant':
             serializer = ClientSerializer(data=data, context=serializer_context)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
-            return redirect(url, *args, permanent=False, **kwargs)
 
         if profile_type == 'real_estate':
             instance = get_object_or_404(RealEstate, pk=params.get("id", None))
@@ -253,7 +252,10 @@ class ProfileAction(ActionAPIView):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
-            return redirect(url, *args, permanent=False, **kwargs)
 
-        return {"success": False, "payload": {"message": "Il manque le payload du profil"}}
+        return self.__get_profile(data["user_id"])
+
+
+
+
+

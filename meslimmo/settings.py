@@ -121,11 +121,11 @@ WSGI_APPLICATION = "meslimmo.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("SQL_ENGINE"),
-        "NAME": os.environ.get("SQL_DATABASE") if os.environ.get("SRVENV") != 'local'  else os.environ.get("SQL_DATABASE_LOCAL"),
-        "USER": os.environ.get("SQL_USER") if os.environ.get("SRVENV") != 'local' else os.environ.get("SQL_USER_LOCAL"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD") if os.environ.get("SRVENV") != 'local' else os.environ.get("SQL_PASSWORD_LOCAL"),
-        "HOST": os.environ.get("SQL_HOST") if os.environ.get("SRVENV") != 'local' else os.environ.get("SQL_HOST_LOCAL"),
-        "PORT": os.environ.get("SQL_PORT") if os.environ.get("SRVENV") != 'local' else os.environ.get("SQL_PORT_LOCAL"),
+        "NAME": os.environ.get("SQL_DATABASE"),
+        "USER": os.environ.get("SQL_USER"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD"),
+        "HOST": os.environ.get("SQL_HOST"),
+        "PORT": os.environ.get("SQL_PORT"),
     }
 }
 
@@ -367,8 +367,8 @@ JWT_AUTH = {
     "JWT_AUTH_HEADER_PREFIX": "Bearer",
     "JWT_AUTH_COOKIE": None,
 }
-BASE_API_URL = "http://localhost:8000/api/v1/" if os.environ.get("SRVENV") != 'local' else "http://tenancia.com/api/v1/"
-BASE_FRONT_URL = "http://localhost:8080"
+BASE_API_URL = os.environ.get("BASE_API_URL")
+BASE_FRONT_URL = os.environ.get("FRONTEND")
 ALLOWED_HOSTS = ["http://localhost:8080", "localhost", "tenancia.com"]
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
