@@ -1,6 +1,5 @@
 import os
 import sys
-
 from setup import main as project_setup_main
 
 if __name__ == "__main__":

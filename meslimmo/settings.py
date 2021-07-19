@@ -128,7 +128,7 @@ DATABASES = {
         "PORT": os.environ.get("SQL_PORT"),
     }
 }
-
+print(DATABASES)
 
 # Password validatirest_registeron
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
