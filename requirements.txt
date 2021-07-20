@@ -74,5 +74,5 @@ hashids==1.3.1
 django-extensions
 pytest-django==4.2.0
 pytest-cov
-django-environ-2
 # django-celery-beat
+django-environ-2
