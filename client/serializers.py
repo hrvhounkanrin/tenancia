@@ -32,6 +32,7 @@ class ClientSerializer(serializers.ModelSerializer):
             "ice_contact",
             "ice_number",
             "ice_relation",
+            "numero_ifu",
             "user",
             "user_id",
             "phone_number",

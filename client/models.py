@@ -12,6 +12,7 @@ class Client(models.Model):
     ice_number = models.CharField(max_length=28, null=True, blank=False)
     ice_relation = models.CharField(max_length=64, null=True, blank=True)
     phone_number = models.CharField(max_length=56, null=True, blank=False)
+    numero_ifu = models.CharField(max_length=150, null=True)
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

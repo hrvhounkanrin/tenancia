@@ -20,6 +20,7 @@ class Proprietaire(models.Model):
         on_delete=models.SET_NULL,
         null=True,
     )
+    numero_ifu = models.CharField(max_length=150, null=True)
     pays_residence = models.ForeignKey(Country, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)

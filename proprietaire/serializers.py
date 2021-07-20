@@ -44,6 +44,7 @@ class ProprietaireSerializers(serializers.ModelSerializer):
             "banque",
             "banque_id",
             "phone_number",
+            "numero_ifu"
         ]
 
     def get_user(self, proprietaire):
