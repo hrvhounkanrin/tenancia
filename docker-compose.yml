@@ -32,6 +32,7 @@ services:
       - tenancia-nt
   celery:
     build: .
+    entrypoint: ./entrypoint-celery.sh
     command: celery -b rabbitmq -A meslimmo.celery worker --loglevel=debug
     depends_on:
       - rabbitmq
