@@ -9,8 +9,8 @@ env = environ.Env(
 
 def main():
     # reading .env file
-    environ.Env.read_env()
-    #pass
+    # environ.Env.read_env()
+    pass
 
 
 if __name__ == "__main__":

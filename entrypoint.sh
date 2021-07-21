@@ -18,10 +18,10 @@ mkdir -p "LOGS"
 echo "Collect static files"
 python manage.py collectstatic --noinput
 # make migrations
-python manage.py makemigrations
+python manage.py makemigrations --no-input
 # Apply database migrations
 echo "Apply database migrations"
-python manage.py migrate
+python manage.py migrate --no-input
 python manage.py update_countries_plus
 python manage.py loaddata autoname.json
 python manage.py loaddata banque.json
