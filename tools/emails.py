@@ -88,9 +88,6 @@ class Email:
         }
         sending_email(receiver, subject, template_name, key)
 
-    @task(name="sum_two_numbers")
-    def add(x, y):
-        return x + y
 
 
 """

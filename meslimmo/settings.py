@@ -377,7 +377,7 @@ JWT_AUTH = {
 }
 BASE_API_URL = os.environ.get("BASE_API_URL")
 BASE_FRONT_URL = os.environ.get("FRONTEND")
-ALLOWED_HOSTS = ["http://localhost:8080", "localhost", "tenancia.com"]
+ALLOWED_HOSTS = ["http://localhost:8080", "localhost", "tenancia.com", "104.248.34.117"]
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
     "http://tenancia.com",

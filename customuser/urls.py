@@ -14,7 +14,7 @@ from .views import (
 )
 
 router = routers.DefaultRouter()
-router.register("accounts/users", UserViewSet, basename="users")
+
 from rest_framework_jwt.views import (
     obtain_jwt_token,
     refresh_jwt_token,
@@ -48,4 +48,5 @@ urlpatterns = [
         name="activate-account",
     ),
 ]
+router.register("accounts/users", UserViewSet, basename="users")
 urlpatterns += router.urls

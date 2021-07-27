@@ -33,7 +33,7 @@ class AccessoireloyerAction(ActionAPIView):
         serializer = AccesoireloyerSerializers(
             queryset, many=True, context=serializer_context
         )
-        return {"success": True, "accessoireloyer": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def create_accessoire(self, request, params={}, *args, **kwargs):
         """Create accessoireloyer."""
@@ -53,13 +53,13 @@ class AccessoireloyerAction(ActionAPIView):
             serialized_acc = AccesoireloyerSerializers(
                 saved_acc, context=serializer_context, many=True
             )
-            return {"success": True, "accessoireloyer": serialized_acc.data}
+            return {"success": True, "payload": serialized_acc.data}
         serializer = AccesoireloyerSerializers(
             data=request.data, context=serializer_context
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "accessoire": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def update_accessoire(self, request, params={}, *args, **kwargs):
         """
@@ -120,14 +120,14 @@ class ContratAction(ActionAPIView):
                 queryset, context={"request": request}, many=True
             )
             logger.debug("**retrieving Contrat **")
-            return {"success": True, "contrat": serializer.data}
+            return {"success": True, "payload": serializer.data}
         queryset = Contrat.objects.filter(
             Q(created_by=request.user) | Q(client__user=request.user)
         )
         serializer = ContratSerializers(
             queryset, many=True, context={"request": request}
         )
-        return {"success": True, "contrat": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def create_contrat(self, request, params={}, *args, **kwargs):
         """Create contract."""
@@ -147,11 +147,11 @@ class ContratAction(ActionAPIView):
             serialized_contrat = ContratSerializers(
                 saved_contrat, context=serializer_context, many=True
             )
-            return {"success": True, "contrat": serialized_contrat.data}
+            return {"success": True, "payload": serialized_contrat.data}
         serializer = ContratSerializers(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {"success": True, "contrat": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def update_contrat(self, request, params={}, *args, **kwargs):
         """Update contract."""
