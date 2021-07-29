@@ -1,18 +1,29 @@
 """Client app Actions Viewset."""
 import logging
 from django.conf import settings
+from rest_framework import permissions
 from django.shortcuts import get_object_or_404, redirect
 from client.models import Client
 from tools.viewsets import ActionAPIView
 from .serializers import ClientSerializer
-
+from customuser.permissions import IsLessor, IsTenant
+from django.db.models import Q
 logger = logging.getLogger(__name__)
 
 
 class ClientAction(ActionAPIView):
     """Client action viewset."""
 
+    def __init__(self):
+        self.permission_classes = {
+        "get_client":  [permissions.IsAuthenticated, IsLessor],
+        "create_client": [permissions.IsAuthenticated],
+        "update_client": [permissions.IsAuthenticated, IsTenant],
+        "retrieve_client": [IsLessor]
+        }
+
     def get_client(self, request, params={}, *args, **kwargs):
+        print('ClientAction get_client')
         """
          Get all the client without a specif params for now.
 
@@ -34,8 +45,6 @@ class ClientAction(ActionAPIView):
 
         queryset = Client.objects.filter(user_id=request.user)
         serializer = ClientSerializer(queryset, context={"request": request}, many=True)
-        # url = 'http://localhost:8000/api/v1/profile_action/get_profile/'
-        # return HttpResponseRedirect(redirect_to=url)
         return {"success": True, "payload": serializer.data}
 
     def create_client(self, request, params={}, *args, **kwargs):
@@ -94,3 +103,20 @@ class ClientAction(ActionAPIView):
         url = ''.join([settings.BASE_API_URL, 'profile_action/get_profile'])
         return redirect(url, *args, permanent=False, **kwargs)
         # return {"success": True, "payload": serializer.data}
+
+    def retrieve_client(self, request, params={}, *args, **kwargs):
+        """
+         Get all the client without a specif params for now.
+
+        :param request:
+        :param params:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        email = params.get('q', None)
+        if email is None:
+            return {"success": True, "payload": []}
+        queryset = Client.objects.filter(user__email__startswith=email)
+        serializer = ClientSerializer(queryset, context={"request": request}, many=True)
+        return {"success": True, "payload": serializer.data}

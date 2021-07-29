@@ -21,17 +21,70 @@ class ActionAPIView(APIView):
     (if required) and returns a dictionary
     or Response instance.
     """
-
+    action = ''
     permission_classes = [permissions.IsAuthenticated]
     _last_action = None
     success = True
     RESPONSE_KEYS = ["user", "action", "token", "subject", "type", "messageid"]
 
+    def get_permissions(self):
+        # Instances and returns the dict of permissions that the view requires.
+        if isinstance(self.permission_classes, list):
+            return [permission() for permission in self.permission_classes]
+        else:
+             return {key: [permission() for permission in permissions] for key, permissions in
+                self.permission_classes.items()}
+
+    def check_permissions(self, request, action):
+        # Gets the request method and the permissions dict,
+        # and checks the permissions defined in the key matching
+        # the method.
+        method = request.method.lower()
+        params = self.normalize_params(request)
+        print(action)
+        self._last_action = params.get("action", self.args)
+        if isinstance(self.permission_classes, list):
+            for permission in self.get_permissions():
+                if not permission.has_permission(request, self):
+                    self.permission_denied(
+                        request,
+                        message=getattr(permission, 'message', None),
+                        code=getattr(permission, 'code', None)
+                    )
+        else:
+            for permission in self.get_permissions()[action]:
+                print(permission)
+                if not permission.has_permission(request, self):
+                    self.permission_denied(
+                        request, message=getattr(permission, 'message', None)
+                    )
+
+    def initial(self, request, *args, **kwargs):
+        """
+        Runs anything that needs to occur prior to calling the method handler.
+        """
+        self.format_kwarg = self.get_format_suffix(**kwargs)
+
+        # Perform content negotiation and store the accepted info on the request
+        neg = self.perform_content_negotiation(request)
+        request.accepted_renderer, request.accepted_media_type = neg
+
+        # Determine the API version, if versioning is in use.
+        version, scheme = self.determine_version(request, *args, **kwargs)
+        request.version, request.versioning_scheme = version, scheme
+
+        # Ensure that the incoming request is permitted
+        self.perform_authentication(request)
+        self.check_permissions(request, kwargs.get('action', None))
+        self.check_throttles(request)
+
     def post(self, request, action, **kwargs):
+        print('ActionAPIView view post')
         return self.get(request, action, **kwargs)
 
     def get(self, request, action, **kwargs):
         """I really don't what this func ain to."""
+        print(f'ActionAPIView view get: {request.query_params}')
         params = self.normalize_params(request)
         kwargs["params"] = params
         self._last_action = params.get("action", action)
@@ -45,7 +98,9 @@ class ActionAPIView(APIView):
             print("AttributeError tout de meme")
             lv_action = self.action_does_not_exist
             response_status = 404
+        # check permissions before
         response = lv_action(request, **kwargs)
+
         if isinstance(response, (Response,)):
             response = response.data
         if isinstance(response, (HttpResponse,)):
