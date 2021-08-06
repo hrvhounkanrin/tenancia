@@ -1,8 +1,9 @@
 """Immeuble action viewset."""
 import logging
+import requests
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
-
+from rest_framework.permissions import IsAuthenticated
 from customuser.permissions import IsLessor
 from tools.viewsets import ActionAPIView
 
@@ -15,9 +16,14 @@ logger = logging.getLogger(__name__)
 class ImmeubleAction(ActionAPIView):
     """Immeuble Action apiview."""
 
-    permission_classes = [
-        IsLessor,
-    ]
+    def __init__(self):
+        self.permission_classes = {
+            "get_immeuble": [IsLessor],
+            "create_immeuble": [IsLessor],
+            "update_immeuble": [IsLessor],
+            "cloner_immeuble": [IsLessor],
+            "reverse_geocoding": [IsAuthenticated],
+        }
 
     def get_immeuble(self, request, params={}, *args, **kwargs):
         """Get immeubles."""
@@ -144,3 +150,11 @@ class ImmeubleAction(ActionAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
         return {"success": True, "payload": serializer.data}
+
+    def reverse_geocoding(self, func_request, params={}, *args,**kwargs):
+        api_key = 'AIzaSyBAkNKNluUXWFnVbxi-81lrdojzLx5MOyY'
+        print(params)
+        url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={},{}&key={}".format(params.get('lat', None), params.get('lng', None), api_key)
+        resp = requests.get(url=url)
+        data = resp.json()
+        return {"success": True, "payload": data}
