@@ -13,7 +13,6 @@ def get_response(message="", result={}, status=False, status_code=200):
 
 
 def get_error_message(error_dict):
-    print(error_dict)
     field = next(iter(error_dict))
     response = error_dict[next(iter(error_dict))]
     if isinstance(response, dict):
@@ -21,9 +20,9 @@ def get_error_message(error_dict):
     elif isinstance(response, list):
         response_message = response[0]
         if isinstance(response_message, dict):
-            response = get_error_message(response_message)
+            response = "{}: {}".format(field, get_error_message(response_message))
         else:
-            response = response[0]
+            response = "{}: {}".format(field, response[0])
     return response
 
 
@@ -61,8 +60,10 @@ def custom_exception_handler(exc, context):
     if response is not None:
         data = response.data
         response.data = {}
+        # print("data: {}".format(data))
         errors = []
         for field, value in data.items():
+            # print("field: {}".format(field))
             errors.append("{} : {}".format(field, " ".join(value)))
 
         response.data["errors"] = errors

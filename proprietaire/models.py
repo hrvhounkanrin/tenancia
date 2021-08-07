@@ -10,6 +10,7 @@ class Proprietaire(models.Model):
     # utiliser un json field
     mode_paiement = models.CharField(max_length=50, null=False)
     numcompte = models.CharField(max_length=50, null=True)
+    name_on_account = models.CharField(null=True, max_length=64)
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

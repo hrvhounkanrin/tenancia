@@ -41,7 +41,6 @@ class ActionAPIView(APIView):
         # the method.
         method = request.method.lower()
         params = self.normalize_params(request)
-        print(action)
         self._last_action = params.get("action", self.args)
         if isinstance(self.permission_classes, list):
             for permission in self.get_permissions():
@@ -53,7 +52,6 @@ class ActionAPIView(APIView):
                     )
         else:
             for permission in self.get_permissions()[action]:
-                print(permission)
                 if not permission.has_permission(request, self):
                     self.permission_denied(
                         request, message=getattr(permission, 'message', None)
@@ -79,12 +77,10 @@ class ActionAPIView(APIView):
         self.check_throttles(request)
 
     def post(self, request, action, **kwargs):
-        print('ActionAPIView view post')
         return self.get(request, action, **kwargs)
 
     def get(self, request, action, **kwargs):
         """I really don't what this func ain to."""
-        print(f'ActionAPIView view get: {request.query_params}')
         params = self.normalize_params(request)
         kwargs["params"] = params
         self._last_action = params.get("action", action)
@@ -95,7 +91,6 @@ class ActionAPIView(APIView):
             # print('self._last_action: {}'.format(type(self.__getattribute__(self._last_action))))
             # print('self._last_action decorator: {}'.format(get_decorators(lv_action)))
         except AttributeError:
-            print("AttributeError tout de meme")
             lv_action = self.action_does_not_exist
             response_status = 404
         # check permissions before
