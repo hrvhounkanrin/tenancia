@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 """Banque app serializer."""
 from rest_framework import serializers
 
@@ -12,7 +11,7 @@ class BanqueSerializers(serializers.ModelSerializer):
         """Banque model meta."""
 
         model = Banque
-        fields = '__all__'
+        fields = "__all__"
         extra_kwargs = {
-            'codebanque': {'validators': []},
+            "codebanque": {"validators": []},
         }

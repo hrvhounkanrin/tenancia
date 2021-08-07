@@ -3,9 +3,7 @@ import logging
 
 from rest_framework import serializers
 
-from factures.models import Invoice
-from factures.models import InvoiceItem
-from factures.models import Item
+from factures.models import Invoice, InvoiceItem, Item
 
 LOGGER = logging.getLogger(__name__)
 

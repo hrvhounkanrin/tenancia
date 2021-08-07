@@ -1,9 +1,11 @@
 """Facture app models."""
-from django.conf import settings
-from django.db import models
 from datetime import date
 from decimal import Decimal
+
+from django.conf import settings
+from django.db import models
 from jsonfield import JSONField
+
 from proprietaire.models import Proprietaire
 from tools import format_currency
 
@@ -17,12 +19,18 @@ class Currency(models.Model):
     created_at = models.ForeignKey(auto_now_add=True)
     modified_at = models.ForeignKey(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name="currency_created_user"
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="currency_created_user",
     )
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name="currency_updated_user"
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="currency_updated_user",
     )
 
     def __str__(self):
@@ -39,8 +47,7 @@ class InvoiceManager(models.Manager):
 
     def get_due(self):
         """Get invoice due."""
-        return self.filter(invoice_date__lte=date.today(),
-                           invoiced=False, draft=False)
+        return self.filter(invoice_date__lte=date.today(), invoiced=False, draft=False)
 
 
 class Item(models.Model):
@@ -62,12 +69,18 @@ class Item(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name="user"
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="user",
     )
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name="user"
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="user",
     )
 
     def __str__(self):
@@ -99,17 +112,23 @@ class Invoice(models.Model):
     created_at = models.ForeignKey(auto_now_add=True)
     modified_at = models.ForeignKey(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name="invoice_created_user"
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="invoice_created_user",
     )
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name="invoice_updated_user"
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="invoice_updated_user",
     )
 
     def __str__(self):
         """Convert invoice to string."""
-        return u"%s (%s)" % (self.invoice_id, self.total_amount())
+        return f"{self.invoice_id} ({self.total_amount()})"
 
     class Meta:
         """Invoice model meta class."""
@@ -129,7 +148,7 @@ class Invoice(models.Model):
 
     def file_name(self):
         """Get invoice fileName."""
-        return u"Invoice %s.pdf" % self.invoice_id
+        return "Invoice %s.pdf" % self.invoice_id
 
 
 class InvoiceItem(models.Model):
@@ -144,12 +163,18 @@ class InvoiceItem(models.Model):
     created_at = models.ForeignKey(auto_now_add=True)
     modified_at = models.ForeignKey(auto_now=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name="invoiceitem_created_user"
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="invoiceitem_created_user",
     )
     modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-        editable=False, related_name="invoiceitem_created_user"
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="invoiceitem_created_user",
     )
 
     def total(self):

@@ -1,69 +1,86 @@
-# -*- coding: UTF-8 -*-
 """Immeuble action viewset."""
 import logging
+import requests
+from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from customuser.permissions import IsLessor
-from .models import Immeuble, AutoName
-from .serializers import ImmeubleSerializers, ClonerImmeubleSerializer
 from tools.viewsets import ActionAPIView
+
+from .models import AutoName, Immeuble
+from .serializers import ClonerImmeubleSerializer, ImmeubleSerializers
+
 logger = logging.getLogger(__name__)
 
 
 class ImmeubleAction(ActionAPIView):
     """Immeuble Action apiview."""
 
-    permission_classes = [IsLessor, ]
+    def __init__(self):
+        self.permission_classes = {
+            "get_immeuble": [IsLessor],
+            "create_immeuble": [IsLessor],
+            "update_immeuble": [IsLessor],
+            "cloner_immeuble": [IsLessor],
+            "reverse_geocoding": [IsAuthenticated],
+        }
 
     def get_immeuble(self, request, params={}, *args, **kwargs):
         """Get immeubles."""
         serializer_context = {
-            'request': request,
+            "request": request,
         }
-        if 'id' in params:
+        if "id" in params:
             queryset = Immeuble.objects.filter(
-                id__in=params['id'].split(','),
-                created_by=self.request.user)
+                id__in=params["id"].split(","), created_by=self.request.user
+            )
             serializer = ImmeubleSerializers(
-                queryset, context=serializer_context, many=True)
-            logger.debug('**retrieving immeubles **')
-            return {'success': True, 'immeubles': serializer.data}
-        get_all_immeuble = Immeuble.objects.filter(
-            created_by=self.request.user)
+                queryset, context=serializer_context, many=True
+            )
+            logger.debug("**retrieving immeubles **")
+            return {"success": True, "payload": serializer.data}
+        get_all_immeuble = Immeuble.objects.filter(created_by=self.request.user)
         serialized_immeuble = ImmeubleSerializers(
-            get_all_immeuble, context=serializer_context, many=True)
-        return {'success': True, 'immeubles': serialized_immeuble.data}
+            get_all_immeuble, context=serializer_context, many=True
+        )
+        return {"success": True, "payload": serialized_immeuble.data}
 
     def create_immeuble(self, request, params={}, *args, **kwargs):
         """Create immeuble."""
         serializer_context = {
-            'request': request,
+            "request": request,
         }
-        if isinstance(request.data.get('immeuble', None), list):
-            immeubles = request.data.pop('immeuble')
+        if isinstance(request.data.get("immeuble", None), list):
+            immeubles = request.data.pop("immeuble")
             immeuble_objects = []
             for immeuble in immeubles:
-                if not immeuble['intitule']:
+                if not immeuble["intitule"]:
                     autoname = AutoName.objects.random()
-                    immeuble['intitule'] = autoname.libelle
+                    immeuble["intitule"] = autoname.libelle
                 serializer = ImmeubleSerializers(
-                    data=immeuble, context=serializer_context)
+                    data=immeuble, context=serializer_context
+                )
                 serializer.is_valid(raise_exception=True)
                 immeuble_objects.append(serializer)
-            saved_immeuble = [model.save(created_by=request.user)
-                              for model in immeuble_objects]
+            saved_immeuble = [
+                model.save(created_by=request.user) for model in immeuble_objects
+            ]
             serialized_proprio = ImmeubleSerializers(
-                saved_immeuble, context=serializer_context, many=True)
-            return {'success': True, 'immeuble': serialized_proprio.data}
+                saved_immeuble, context=serializer_context, many=True
+            )
+            return {"success": True, "payload": serialized_proprio.data}
 
         data = request.data
-        if not data['intitule']:
+        print(data)
+        if data.get('intitule', None) is None or data.get('intitule', None) == '':
             autoname = AutoName.objects.random()
-            data['intitule'] = autoname.libelle
-        serializer = ImmeubleSerializers(
-            data=data, context=serializer_context)
+            data["intitule"] = autoname.libelle
+        if data.get('ref_immeuble', None) is None or data.get('ref_immeuble', None) == '':
+            data['ref_immeuble'] = get_random_string(8).upper()
+        serializer = ImmeubleSerializers(data=data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
-        return {'success': True, 'immeuble': serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def update_immeuble(self, request, params={}, *args, **kwargs):
         """
@@ -76,33 +93,42 @@ class ImmeubleAction(ActionAPIView):
         :return:
         """
         serializer_context = {
-            'request': request,
+            "request": request,
         }
-        if isinstance(request.data.get('immeuble', None), list):
-            immeubles = request.data.pop('immeuble')
+        if isinstance(request.data.get("immeuble", None), list):
+            immeubles = request.data.pop("immeuble")
             immeuble_objects = []
             for immeuble in immeubles:
-                instance = get_object_or_404(Immeuble.objects.filter(
-                    created_by=self.request.user), pk=params.get('id', None))
+                instance = get_object_or_404(
+                    Immeuble.objects.filter(created_by=self.request.user),
+                    pk=params.get("id", None),
+                )
                 serializer = ImmeubleSerializers(
-                    instance, data=immeuble, context=serializer_context)
+                    instance, data=immeuble, context=serializer_context
+                )
                 serializer.is_valid(raise_exception=True)
                 immeuble_objects.append(serializer)
             saved_immeubles = [model.save() for model in immeuble_objects]
             serializer = ImmeubleSerializers(
-                saved_immeubles, many=True, context=serializer_context)
-            return {'success': True, 'immeuble': serializer.data}
-        instance = get_object_or_404(Immeuble.objects.filter(
-            created_by=self.request.user), pk=params.get('id', None))
+                saved_immeubles, many=True, context=serializer_context
+            )
+            return {"success": True, "payload": serializer.data}
+        instance = get_object_or_404(
+            Immeuble.objects.filter(created_by=self.request.user),
+            pk=params.get("id", None),
+        )
         data = request.data
-        if not data['intitule']:
+        if data.get('intitule', None) is None or data.get('intitule', None) == '':
             autoname = AutoName.objects.random()
-            data['intitule'] = autoname.libelle
+            data["intitule"] = autoname.libelle
+        if data.get('ref_immeuble', None) is None or data.get('ref_immeuble', None) == '':
+            data['ref_immeuble'] = get_random_string(8).upper()
         serializer = ImmeubleSerializers(
-            instance, data=data, context=serializer_context)
+            instance, data=data, context=serializer_context
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return {'success': True, 'immeuble': serializer.data}
+        return {"success": True, "payload": serializer.data}
 
     def cloner_immeuble(self, request, params={}, *args, **kwargs):
         """Multiplier un immeuble"""
@@ -116,10 +142,19 @@ class ImmeubleAction(ActionAPIView):
        :return:
        """
         serializer_context = {
-            'request': request,
+            "request": request,
         }
         serializer = ClonerImmeubleSerializer(
-            data=request.data, context=serializer_context)
+            data=request.data, context=serializer_context
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
-        return {'success': True, 'payload': serializer.data}
+        return {"success": True, "payload": serializer.data}
+
+    def reverse_geocoding(self, func_request, params={}, *args,**kwargs):
+        api_key = 'AIzaSyBAkNKNluUXWFnVbxi-81lrdojzLx5MOyY'
+        print(params)
+        url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={},{}&key={}".format(params.get('lat', None), params.get('lng', None), api_key)
+        resp = requests.get(url=url)
+        data = resp.json()
+        return {"success": True, "payload": data}

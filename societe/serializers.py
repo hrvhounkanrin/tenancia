@@ -1,15 +1,14 @@
-# -*- coding: UTF-8 -*-
 """RealEstate app serializers."""
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework.fields import CurrentUserDefault
 from rest_framework.utils.model_meta import get_field_info
 
-from .models import Mandat
-from .models import RealEstate
-from .models import RealEstateUsers
 from customuser.models import User
 from immeuble.serializers import ImmeubleSerializers
-from rest_framework.fields import CurrentUserDefault
+
+from .models import Mandat, RealEstate, RealEstateUsers
+
 
 class SocieteSerializer(serializers.ModelSerializer):
     """RealEstate model serializer."""
@@ -18,7 +17,15 @@ class SocieteSerializer(serializers.ModelSerializer):
         """RealEstate serializer meta."""
 
         model = RealEstate
-        fields = ('id', 'raison_social', 'num_telephone', 'adresse', 'num_carte_professionnel', 'numero_ifu', 'date_delivrance')
+        fields = (
+            "id",
+            "raison_social",
+            "num_telephone",
+            "adresse",
+            "num_carte_professionnel",
+            "numero_ifu",
+            "date_delivrance",
+        )
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -41,12 +48,16 @@ class SocieteSerializer(serializers.ModelSerializer):
         :rtype:RealEstate
         """
 
-        user = self.context['request'].user
+        user = self.context["request"].user
         nb_real_estate = RealEstate.objects.filter(created_by=user.id).count()
         if nb_real_estate > 0:
-            raise serializers.ValidationError("Vous avez déjà configuré une agence immobilière")
+            raise serializers.ValidationError(
+                "Vous avez déjà configuré une agence immobilière"
+            )
 
-        societe = RealEstate.objects.create(**validated_data, created_by=user, modified_by=user)
+        societe = RealEstate.objects.create(
+            **validated_data, created_by=user, modified_by=user
+        )
         realEstateUser = RealEstateUsers(societe=societe, user=user)
         realEstateUser.save()
         return societe

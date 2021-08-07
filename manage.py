@@ -2,9 +2,9 @@ import os
 import sys
 from setup import main as project_setup_main
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     project_setup_main()
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'meslimmo.settings'
+    os.environ["DJANGO_SETTINGS_MODULE"] = "meslimmo.settings"
     try:
         from django.core.management import execute_from_command_line
     except ImportError:
@@ -13,7 +13,8 @@ if __name__ == '__main__':
         # exceptions on Python 2.
         try:
             import django
-            print('runing django {}'.format(django.VERSION))
+
+            print(f"runing django {django.VERSION}")
         except ImportError:
             raise ImportError(
                 "Couldn't import Django. Are you sure it's installed and "

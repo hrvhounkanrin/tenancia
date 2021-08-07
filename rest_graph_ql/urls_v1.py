@@ -1,33 +1,27 @@
 """Tenancia urls v1."""
-from django.conf.urls import url, include
+from django.conf.urls import include, url
 from django.urls import path
-
+from rest_auth.views import PasswordResetConfirmView
 from rest_framework import routers
+
 import banque.viewsets as banque_views
 import client.viewsets as client_viewset
 import immeuble.viewsets as immeuble_viewsets
 import proprietaire.viewsets as proprietaire_viewsets
 import quittance.viewsets as quitance_viewsets
 from appartement.viewsets import AppartementViewSet as appartement_viewsets
-from appartement.viewsets import (
-    ComposantAppartementViewSet as component_viewsets,
-)
-from appartement.viewsets import (
-    StructureAppartmentViewSet as structure_viewsets,
-)
-from contrat.viewsets import AccessoireloyerAction
-from contrat.viewsets import ContratAction
+from appartement.viewsets import ComposantAppartementViewSet as component_viewsets
+from appartement.viewsets import StructureAppartmentViewSet as structure_viewsets
+from contrat.viewsets import AccessoireloyerAction, ContratAction
+from customuser.viewsets import CustomUserAction as account_viewset
+from customuser.viewsets import ProfileAction as profile_viewset
 from landing import views as landing_view
 from societe.viewsets import MandatViewSetAction as mandat_viewset
 from societe.viewsets import SocieteViewSetAction as societe_views
-from rest_auth.views import PasswordResetConfirmView
-from customuser.viewsets import CustomUserAction as account_viewset
-from customuser.viewsets import ProfileAction as profile_viewset
 from tools.views import CountryListView
 
 router = routers.SimpleRouter()
 urlpatterns = [
-
     url(r"^$", landing_view.index, name="index"),
     url(
         r"^banque_action/(?P<action>[^/.]+)$",
@@ -104,9 +98,8 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(),
         name="rest_password_reset_confirm",
     ),
-    url(r"^countries/$", CountryListView.as_view(),
-        name="countries_list"),
-    path(r'', include('customuser.urls', namespace='customuser'))
+    url(r"^countries/$", CountryListView.as_view(), name="countries_list"),
+    path(r"", include("customuser.urls", namespace="customuser")),
 ]
 api_urlpatterns = []
 urlpatterns += router.urls

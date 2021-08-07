@@ -1,7 +1,7 @@
 """Facture admin."""
 from django.contrib import admin
-from factures.models import \
-    (Currency, Item, Invoice, InvoiceItem)
+
+from factures.models import Currency, Invoice, InvoiceItem, Item
 
 
 class InvoiceAdmin(admin.ModelAdmin):

@@ -30,4 +30,3 @@ COPY . .
 # run entrypoint.sh
 # ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 # CMD ["gunicorn", "--bind", ":8000", "--workers", "3",  "meslimmo.wsgi:application"]
-

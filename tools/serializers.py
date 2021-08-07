@@ -1,9 +1,9 @@
-# -*- coding: UTF-8 -*-
 """Misc serializers."""
 from collections import OrderedDict
-from rest_framework.utils.serializer_helpers import ReturnDict
-from rest_framework import serializers
+
 from countries_plus.models import Country
+from rest_framework import serializers
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 
 class CountrySerialier(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class CountrySerialier(serializers.ModelSerializer):
         """Country model meta."""
 
         model = Country
-        fields = '__all__'
+        fields = "__all__"
 
 
 class DictSerializer(serializers.ListSerializer):
@@ -25,7 +25,7 @@ class DictSerializer(serializers.ListSerializer):
     is minimal nesting. dict_key defaults to 'id' but can be overridden.
     """
 
-    dict_key = 'id'
+    dict_key = "id"
 
     @property
     def data(self):
@@ -35,7 +35,7 @@ class DictSerializer(serializers.ListSerializer):
 
     def to_representation(self, data):
         """Convert the data from a list to a dictionary."""
-        items = super(DictSerializer, self).to_representation(data)
+        items = super().to_representation(data)
         return {item[self.dict_key]: item for item in items}
 
 
@@ -61,13 +61,7 @@ class AsymetricRelatedField(serializers.PrimaryKeyRelatedField):
         if cutoff is not None:
             queryset = queryset[:cutoff]
 
-        return OrderedDict([
-            (
-                item.pk,
-                self.display_value(item)
-            )
-            for item in queryset
-        ])
+        return OrderedDict([(item.pk, self.display_value(item)) for item in queryset])
 
     def use_pk_only_optimization(self):
         """I really don't know what this function ain to."""

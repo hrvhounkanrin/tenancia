@@ -5,4 +5,4 @@ from django.apps import AppConfig
 class ScaffoldingConfig(AppConfig):
     """Scaffolding app config."""
 
-    name = 'scaffolding'
+    name = "scaffolding"

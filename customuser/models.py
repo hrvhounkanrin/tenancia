@@ -1,10 +1,9 @@
 """Customuser models."""
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 
 
 class UserManager(BaseUserManager):
@@ -19,10 +18,11 @@ class UserManager(BaseUserManager):
         :return:
         """
         if not email:
-            raise ValueError('User may have an email')
+            raise ValueError("User may have an email")
         email = self.normalize_email(email)
-        user = self.model(username=username, email=email, first_name=first_name,
-                          last_name=last_name)
+        user = self.model(
+            username=username, email=email, first_name=first_name, last_name=last_name
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -39,13 +39,16 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     """Abtract user Model."""
-    username = models.CharField(max_length=255,  null=True)
-    email = models.EmailField(max_length=255, unique=True,  error_messages={
-                    "unique": "Un utilisateur avec ce mail existe déjà."
-                    })
+
+    username = models.CharField(max_length=255, null=True)
+    email = models.EmailField(
+        max_length=255,
+        unique=True,
+        error_messages={"unique": "Un utilisateur avec ce mail existe déjà."},
+    )
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
-    phone_number = models.CharField(max_length=56,  null=True)
+    phone_number = models.CharField(max_length=56, null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -54,29 +57,26 @@ class User(AbstractBaseUser):
     country = models.CharField(max_length=50, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
     zip = models.CharField(max_length=5, null=True, blank=True)
-    photo = models.ImageField(upload_to='profile-logo/%Y/%m/%d',
-                              blank=True,
-                              null=True
-                              )
+    photo = models.ImageField(upload_to="profile-logo/%Y/%m/%d", blank=True, null=True)
 
     objects = UserManager()
     # USERNAME_FIELD = 'username'
-    '''
+    """
     The name of the field on the User model that is used as the unique identifier.
     The field must be unique (i.e., have unique=True set in its definition);
-    '''
-    USERNAME_FIELD = 'email'
-    '''
-    A list of the field names that will be prompted for when 
+    """
+    USERNAME_FIELD = "email"
+    """
+    A list of the field names that will be prompted for when
     creating a user via the createsuperuser management command
-    '''
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number']
+    """
+    REQUIRED_FIELDS = ["first_name", "last_name", "phone_number"]
 
     def get_full_name(self):
         """
         :return:Returns the first_name plus the last_name, with a space in between.
         """
-        full_name = '%s %s' % (self.first_name, self.last_name)
+        full_name = f"{self.first_name} {self.last_name}"
         return full_name.strip()
 
     def get_short_name(self):
@@ -97,5 +97,3 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
-
-

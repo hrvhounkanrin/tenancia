@@ -1,6 +1,6 @@
-from rest_framework.views import exception_handler
-from rest_framework.exceptions import ValidationError
 from django.http import JsonResponse
+from rest_framework.exceptions import ValidationError
+from rest_framework.views import exception_handler
 
 
 def get_response(message="", result={}, status=False, status_code=200):
@@ -13,7 +13,6 @@ def get_response(message="", result={}, status=False, status_code=200):
 
 
 def get_error_message(error_dict):
-    print(error_dict)
     field = next(iter(error_dict))
     response = error_dict[next(iter(error_dict))]
     if isinstance(response, dict):
@@ -21,9 +20,9 @@ def get_error_message(error_dict):
     elif isinstance(response, list):
         response_message = response[0]
         if isinstance(response_message, dict):
-            response = get_error_message(response_message)
+            response = "{}: {}".format(field, get_error_message(response_message))
         else:
-            response = response[0]
+            response = "{}: {}".format(field, response[0])
     return response
 
 
@@ -43,14 +42,12 @@ def handle_exception(exc, context):
 
             elif isinstance(error[0], str):
                 error_response.data = get_response(
-                    message=error[0],
-                    status_code=error_response.status_code
+                    message=error[0], status_code=error_response.status_code
                 )
 
         if isinstance(error, dict):
             error_response.data = get_response(
-                message=get_error_message(error),
-                status_code=error_response.status_code
+                message=get_error_message(error), status_code=error_response.status_code
             )
     return error_response
 
@@ -63,17 +60,21 @@ def custom_exception_handler(exc, context):
     if response is not None:
         data = response.data
         response.data = {}
+        # print("data: {}".format(data))
         errors = []
         for field, value in data.items():
+            # print("field: {}".format(field))
             errors.append("{} : {}".format(field, " ".join(value)))
 
-        response.data['errors'] = errors
-        response.data['status'] = False
+        response.data["errors"] = errors
+        response.data["status"] = False
 
-        response.data['exception'] = str(exc)
+        response.data["exception"] = str(exc)
 
     return response
-class ExceptionMiddleware(object):
+
+
+class ExceptionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -83,14 +84,13 @@ class ExceptionMiddleware(object):
         if response.status_code == 500:
             response = get_response(
                 message="Internal server error, please try again later",
-                status_code=response.status_code
+                status_code=response.status_code,
             )
-            return JsonResponse(response, status=response['status_code'])
+            return JsonResponse(response, status=response["status_code"])
 
         if response.status_code == 404 and "Page not found" in str(response.content):
             response = get_response(
-                message="Page not found, invalid url",
-                status_code=response.status_code
+                message="Page not found, invalid url", status_code=response.status_code
             )
-            return JsonResponse(response, status=response['status_code'])
+            return JsonResponse(response, status=response["status_code"])
         return response

@@ -1,9 +1,12 @@
 """Quittance app serializer."""
-import  datetime
+import datetime
+
 from rest_framework import serializers
-from contrat.serializers import ContratSerializers
+
 from contrat.models import Contrat, ContratAccessoiresloyer
-from . models import Quittance
+from contrat.serializers import ContratSerializers
+
+from .models import Quittance
 
 
 class QuittanceSerializers(serializers.ModelSerializer):
@@ -11,8 +14,9 @@ class QuittanceSerializers(serializers.ModelSerializer):
 
     class Meta:
         """Quittance serializer meta."""
+
         model = Quittance
-        fields = '__all__'
+        fields = "__all__"
 
 
 class FirstQuittanceSerializers(serializers.ModelSerializer):
@@ -20,14 +24,31 @@ class FirstQuittanceSerializers(serializers.ModelSerializer):
 
     class Meta:
         """Quittance serializer meta."""
+
         contrat = ContratSerializers(read_only=True)
         contrat_id = serializers.PrimaryKeyRelatedField(
-            source='Contrat', queryset=Contrat.objects.all(), write_only=True, )
+            source="Contrat",
+            queryset=Contrat.objects.all(),
+            write_only=True,
+        )
         model = Quittance
         # fields = '__all__'
-        fields = ('reference', 'date_emission', 'date_valeur', 'debut_periode', 'fin_periode',
-                   'nature', 'montant', 'statut', 'date_statut', 'contrat', 'contrat_id', 'motif_annulation',
-                   'created_at', 'modified_at')
+        fields = (
+            "reference",
+            "date_emission",
+            "date_valeur",
+            "debut_periode",
+            "fin_periode",
+            "nature",
+            "montant",
+            "statut",
+            "date_statut",
+            "contrat",
+            "contrat_id",
+            "motif_annulation",
+            "created_at",
+            "modified_at",
+        )
 
     """
     def create(self, validated_data):

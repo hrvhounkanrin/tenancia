@@ -1,13 +1,12 @@
-# -*- coding: UTF-8 -*-
 """Housing app serializers."""
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from rest_framework import serializers
 from django.utils.crypto import get_random_string
-from .models import Appartement
-from .models import TypeDependence
-from .models import StructureAppartement
+from rest_framework import serializers
+from django.db.models import Max
 from immeuble.models import Immeuble
+
+from .models import Appartement, StructureAppartement, TypeDependence
 
 
 class TypeDependenceSerializers(serializers.ModelSerializer):
@@ -17,28 +16,35 @@ class TypeDependenceSerializers(serializers.ModelSerializer):
         """TypeDependence serializer meta."""
 
         model = TypeDependence
-        fields = '__all__'
+        fields = ('id', 'libelle', 'utilite')
 
 
 class StructureAppartmentSerializers(serializers.ModelSerializer):
     """Housing decustom_exception_handlerpendecies of specfic housing."""
 
-    # typedependence = TypeDependenceSerializers(read_only=True)
-    typedependence = serializers.SerializerMethodField()
+    typedependence = TypeDependenceSerializers(read_only=True)
+    libelle = serializers.SerializerMethodField()
     typeDependence_id = serializers.PrimaryKeyRelatedField(
-        source='TypeDependence',
+        source="TypeDependence",
         queryset=TypeDependence.objects.all(),
-        write_only=True, )
+        write_only=True,
+    )
 
     class Meta:
         """StructureAppartement meta."""
 
         model = StructureAppartement
-        fields = ['appartement', 'typedependence',
-                  'typeDependence_id', 'nbre',
-                  'description']
+        fields = [
+            "appartement",
+            "libelle",
+            "typeDependence_id",
+            "nbre",
+            "superficie",
+            "typedependence",
+            "description",
+        ]
 
-    def get_typedependence(self, structureAppart):
+    def get_libelle(self, structureAppart):
         return structureAppart.typedependence.libelle
 
 
@@ -48,13 +54,24 @@ class AppartementSerializers(serializers.ModelSerializer):
     structures = serializers.SerializerMethodField()
     # immeuble = ImmeubleSerializers(read_only=True)
     immeuble_id = serializers.PrimaryKeyRelatedField(
-        source='Immeuble', queryset=Immeuble.objects.all(), write_only=True, )
+        source="Immeuble",
+        queryset=Immeuble.objects.all(),
+        write_only=True,
+    )
 
     class Meta:
         """Housing serializer meta."""
 
         model = Appartement
-        fields = ('id', 'intitule', 'level', 'autre_description', 'statut', 'immeuble_id', 'structures',) # 'immeuble',
+        fields = (
+            "id",
+            "intitule",
+            "level",
+            "autre_description",
+            "statut",
+            "immeuble_id",
+            "structures",
+        )  # 'immeuble',
 
     def get_structures(self, appartement):
         """Get housing dependecies.
@@ -69,8 +86,14 @@ class AppartementSerializers(serializers.ModelSerializer):
             structures,
             many=True,
         ).data
-        print(data)
         return data
+
+    def __autoname(self, immeuble, level):
+        last_intitule = Appartement.objects.filter(immeuble=immeuble, level=level)
+        last_intitule = last_intitule.aggregate(Max('intitule'))['intitule__max']
+        if last_intitule is None:
+            return str(level)+'-A'
+        return last_intitule[0:len(last_intitule)-1]+chr(ord(last_intitule[-1]) + 1)
 
     @transaction.atomic
     def create(self, validated_data):
@@ -78,22 +101,26 @@ class AppartementSerializers(serializers.ModelSerializer):
 
         :rtype: Appartement
         """
-        immeuble = validated_data.pop('Immeuble', None)
+        immeuble = validated_data.pop("Immeuble", None)
         logement_instance = Appartement.objects.create(
-            immeuble=immeuble, **validated_data)
-        if 'structures' in self.initial_data:
-            structures = self.initial_data.get('structures')
+            immeuble=immeuble, **validated_data
+        )
+        if "structures" in self.initial_data:
+            structures = self.initial_data.get("structures")
             for structure in structures:
-                dependency_id = structure.pop('typeDependence_id', None)
+                dependency_id = structure.pop("typeDependence_id", None)
                 try:
-                    dependency_instance = \
-                        TypeDependence.objects.get(id=dependency_id)
+                    dependency_instance = TypeDependence.objects.get(id=dependency_id)
                 except ObjectDoesNotExist:
-                    raise serializers.ValidationError("Il y a une dépendence qui n'existe pas.")
+                    raise serializers.ValidationError(
+                        "Il y a une dépendence qui n'existe pas."
+                    )
                 structure.pop("appartement", None)
-                StructureAppartement(appartement=logement_instance,
-                                     typedependence=dependency_instance,
-                                     **structure).save()
+                StructureAppartement(
+                    appartement=logement_instance,
+                    typedependence=dependency_instance,
+                    **structure,
+                ).save()
             logement_instance.save()
         return logement_instance
 
@@ -101,43 +128,59 @@ class AppartementSerializers(serializers.ModelSerializer):
     @transaction.atomic
     def update(self, instance, validated_data):
         """Update housing."""
-        instance.intitule = validated_data['intitule']
-        instance.level = validated_data['level']
-        instance.autre_description = validated_data['autre_description']
-        instance.statut = validated_data['statut']
+        instance.intitule = validated_data["intitule"]
+        instance.level = validated_data["level"]
+        instance.autre_description = validated_data["autre_description"]
+        instance.statut = validated_data["statut"]
         instance.save()
-        if 'structures' in self.initial_data:
-            StructureAppartement.objects.filter(
-                appartement__id=instance.id).delete()
-            structures = self.initial_data.get('structures')
+        if "structures" in self.initial_data:
+            StructureAppartement.objects.filter(appartement__id=instance.id).delete()
+            structures = self.initial_data.get("structures")
             for structure in structures:
+                dependency_id = structure.pop("typeDependence_id", None)
+                try:
+                    dependency_instance = TypeDependence.objects.get(id=dependency_id)
+                except ObjectDoesNotExist:
+                    raise serializers.ValidationError(
+                        "Il y a une dépendence qui n'existe pas."
+                    )
                 structure.pop("appartement", None)
-                print(structure)
-                # StructureAppartement(appartement=instance, **structure).save()
+                StructureAppartement(
+                    appartement=instance,
+                    typedependence=dependency_instance,
+                    **structure,
+                ).save()
+
         return instance
 
 
 class ClonerAppartementSerializer(serializers.Serializer):
-    nb = serializers.IntegerField(default=1)
+    nbre = serializers.IntegerField(default=1)
     appartement_id = serializers.IntegerField()
+    level = serializers.IntegerField()
     immeuble_id = serializers.IntegerField(write_only=True)
     appartements = AppartementSerializers(read_only=True, many=True)
 
     @transaction.atomic
     def create(self, validated_data):
         try:
-            appartement = Appartement.objects.get(pk=validated_data['appartement_id'])
-            print('appartement: {}'.format(appartement))
-            immeuble = Immeuble.objects.get(pk=validated_data['immeuble_id'])
-            print('immeuble: {}'.format(immeuble))
+            appartement = Appartement.objects.get(pk=validated_data["appartement_id"])
+            immeuble = Immeuble.objects.get(pk=validated_data["immeuble_id"])
         except ObjectDoesNotExist:
-            raise serializers.ValidationError("L'appartement que vous voulez reproduire n'existe pas.")
+            raise serializers.ValidationError(
+                "L'appartement que vous voulez reproduire n'existe pas."
+            )
 
-        user = self.context['request'].user
+        user = self.context["request"].user
         appartements = []
         appartement_fields = list(appartement.__dict__.keys())
-        appartement_fields = [f for f in appartement_fields if f not in ['id', 'created_by_id', 'modified_by_id', '_state']]
-        for i in range(validated_data['nb']):
+        appartement_fields = [
+            f
+            for f in appartement_fields
+            if f not in ["id", "created_by_id", "modified_by_id", "_state"]
+        ]
+        last_db_name = self.__autoname(immeuble.id, validated_data['level'])
+        for i in range(validated_data["nbre"]):
             new_appartement = Appartement()
             for field in list(appartement_fields):
 
@@ -145,17 +188,40 @@ class ClonerAppartementSerializer(serializers.Serializer):
                 # print(f'field_value: {field_name_val}')
                 setattr(new_appartement, field, field_name_val)
             new_appartement.immeuble = immeuble
-            new_appartement.intitule = get_random_string(8).upper()
+            new_appartement.intitule = last_db_name
+            new_appartement.level = validated_data['level']
+            last_db_name = self.__autoname(immeuble.id, validated_data['level'], last_db_name)
             new_appartement.created_by = user
             appartements.append(new_appartement)
         [m.save() for m in appartements]
         structures = StructureAppartement.objects.filter(appartement=appartement)
         for m in appartements:
-            [StructureAppartement(appartement=m,
-                                 typedependence=s.typedependence,
-                                  nbre=s.nbre,
-                                  description=s.description
-                                 ).save() for s in structures]
+            [
+                StructureAppartement(
+                    appartement=m,
+                    typedependence=s.typedependence,
+                    nbre=s.nbre,
+                    superficie=s.superficie,
+                    description=s.description,
+                ).save()
+                for s in structures
+            ]
+        validated_data['appartements'] = appartements
+        return {
+            "nbre": validated_data["nbre"],
+            "level":  validated_data["level"],
+            "appartement_id": validated_data["appartement_id"],
+            "appartements": appartements,
+        }
 
-        return {'nb': validated_data['nb'], 'appartement_id': validated_data['appartement_id'],
-                'appartements': appartements}
+
+
+    def __autoname(self, immeuble_id, level, last_db_name=None):
+        if last_db_name is None:
+            last_intitule = Appartement.objects.filter(immeuble__id=immeuble_id, level=level)
+            last_intitule = last_intitule.aggregate(Max('intitule'))['intitule__max']
+            if last_intitule is None:
+                return str(level) + '-A'
+        else:
+            last_intitule = last_db_name
+        return last_intitule[0:len(last_intitule) - 1] + chr(ord(last_intitule[-1]) + 1)

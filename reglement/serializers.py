@@ -1,7 +1,7 @@
 """Reglement app serializer."""
 from rest_framework import serializers
 
-from . models import Reglement
+from .models import Reglement
 
 
 class ReglementSerializer(serializers.ModelSerializer):
@@ -11,4 +11,4 @@ class ReglementSerializer(serializers.ModelSerializer):
         """Reglegement model meta."""
 
         mode = Reglement
-        fields = '__all__'
+        fields = "__all__"

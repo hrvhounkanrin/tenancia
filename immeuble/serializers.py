@@ -1,15 +1,14 @@
-# -*- coding: UTF-8 -*-
 """Immeuble app serializer."""
-from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from rest_framework import serializers
 
-from .models import Immeuble, AutoName
-from proprietaire.models import Proprietaire
 from appartement.models import Appartement
 from appartement.serializers import AppartementSerializers, ClonerAppartementSerializer
-
+from proprietaire.models import Proprietaire
 from proprietaire.serializers import ProprietaireSerializers
+
+from .models import AutoName, Immeuble
 
 
 class ImmeubleSerializers(serializers.ModelSerializer):
@@ -18,18 +17,29 @@ class ImmeubleSerializers(serializers.ModelSerializer):
     # proprietaire = ProprietaireSerializers(read_only=True)
     appartements = serializers.SerializerMethodField()
     proprietaire_id = serializers.PrimaryKeyRelatedField(
-        source='Proprietaire',
-        queryset=Proprietaire.objects.all(), write_only=True)  # ,
+        source="Proprietaire", queryset=Proprietaire.objects.all(), write_only=True
+    )  # ,
 
     class Meta:
         """Immeuble serializer meta."""
 
         model = Immeuble
-        fields = ('id', 'intitule', 'description', 'adresse',
-                  'jour_emission_facture', 'jour_valeur_facture',
-                  'ville', 'quartier', 'pays', 'longitude',
-                  'latitude', 'ref_immeuble',
-                  'proprietaire_id', 'appartements') #'proprietaire',
+        fields = (
+            "id",
+            "intitule",
+            "description",
+            "adresse",
+            "jour_emission_facture",
+            "jour_valeur_facture",
+            "ville",
+            "quartier",
+            "pays",
+            "longitude",
+            "latitude",
+            "ref_immeuble",
+            "proprietaire_id",
+            "appartements",
+        )  #'proprietaire',
 
     def get_appartements(self, immeuble):
         appartements = Appartement.objects.filter(immeuble_id=immeuble.id)
@@ -43,40 +53,39 @@ class ImmeubleSerializers(serializers.ModelSerializer):
 
         :rtype: Immeuble
         """
-        proprietaire = validated_data.pop('Proprietaire', None)
+        proprietaire = validated_data.pop("Proprietaire", None)
 
-
-        return Immeuble.objects.create(proprietaire=proprietaire,
-                                       **validated_data)
-
-    def update(self, instance, validated_data):
-        """Upddate immeuble."""
-        instance.save()
-        return instance
+        return Immeuble.objects.create(proprietaire=proprietaire, **validated_data)
 
 
 class ClonerImmeubleSerializer(serializers.Serializer):
     nb = serializers.IntegerField(default=1)
     immeuble_id = serializers.IntegerField()
     immeuble = ImmeubleSerializers(read_only=True)
+
     class Meta:
-        read_only_fields =('immeuble')
+        read_only_fields = "immeuble"
 
     @transaction.atomic
     def create(self, validated_data):
         try:
-            immeuble = Immeuble.objects.get(pk=validated_data['immeuble_id'])
+            immeuble = Immeuble.objects.get(pk=validated_data["immeuble_id"])
         except ObjectDoesNotExist:
-            raise serializers.ValidationError("L'immeuble que vous voulez cloner n'existe pas.")
+            raise serializers.ValidationError(
+                "L'immeuble que vous voulez cloner n'existe pas."
+            )
 
         apprtments = immeuble.appartement_set.all()
-        user = self.context['request'].user
+        user = self.context["request"].user
 
         new_immeubles = []
         immeuble_fields = list(immeuble.__dict__.keys())
-        immeuble_fields = [f for f in immeuble_fields if
-                              f not in ['id', 'created_by_id', 'modified_by_id', '_state']]
-        for i in range(validated_data['nb']):
+        immeuble_fields = [
+            f
+            for f in immeuble_fields
+            if f not in ["id", "created_by_id", "modified_by_id", "_state"]
+        ]
+        for i in range(validated_data["nb"]):
             new_immeuble = Immeuble()
             for field in list(immeuble_fields):
                 field_name_val = getattr(immeuble, field)
@@ -89,13 +98,19 @@ class ClonerImmeubleSerializer(serializers.Serializer):
         for im in new_immeubles:
             for app in apprtments:
                 appartment_data = {
-                    'immeuble_id': im.id,
-                    'appartement_id': app.id,
-                    'nb': 1
+                    "immeuble_id": im.id,
+                    "appartement_id": app.id,
+                    "nb": 1,
                 }
-                appartment_serializer = ClonerAppartementSerializer(data=appartment_data, context=self.context)
+                appartment_serializer = ClonerAppartementSerializer(
+                    data=appartment_data, context=self.context
+                )
                 appartment_serializer.is_valid()
                 appartment_serializer.save()
         serialized_immeuble = ImmeubleSerializers(data=new_immeuble)
         serialized_immeuble.is_valid()
-        return {'nb': validated_data['nb'], 'immeuble_id': validated_data['immeuble_id'], 'immeuble': new_immeuble}
+        return {
+            "nb": validated_data["nb"],
+            "immeuble_id": validated_data["immeuble_id"],
+            "immeuble": new_immeuble,
+        }

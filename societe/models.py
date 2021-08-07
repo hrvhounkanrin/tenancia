@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 """Mandataire app models."""
 from django.conf import settings
 from django.db import models
@@ -81,9 +80,7 @@ class Mandat(models.Model):
     immeuble = models.ForeignKey(
         "immeuble.Immeuble", null=True, on_delete=models.SET_NULL
     )
-    societe = models.ForeignKey(
-        "RealEstate", null=True, on_delete=models.SET_NULL
-    )
+    societe = models.ForeignKey("RealEstate", null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(

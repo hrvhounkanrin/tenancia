@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 """Banque app admin.py."""
 from django.contrib import admin
 
@@ -9,8 +8,8 @@ class ClientAdmin(admin.ModelAdmin):
     """ClientAdmin class."""
 
     save_on_top = True
-    list_display = ['nom', 'prenom', 'address']
-    search_fields = 'id'
+    list_display = ["nom", "prenom", "address"]
+    search_fields = "id"
 
 
 admin.register(Client)

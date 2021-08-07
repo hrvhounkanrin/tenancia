@@ -18,14 +18,18 @@ mkdir -p "LOGS"
 echo "Collect static files"
 python manage.py collectstatic --noinput
 # make migrations
-python manage.py makemigrations
+python manage.py makemigrations --no-input
 # Apply database migrations
 echo "Apply database migrations"
-python manage.py migrate
+python manage.py migrate --no-input
 python manage.py update_countries_plus
 python manage.py loaddata autoname.json
 python manage.py loaddata banque.json
 python manage.py loaddata typedependence.json
+python manage.py loaddata accessoireloyer.json
+python manage.py loaddata user.json
+python manage.py loaddata client.json
+python manage.py loaddata proprietaire.json
 
 # celery -b rabbitmq -A meslimmo.celery worker --loglevel=debug
 # Start server
