@@ -4,6 +4,7 @@ from django.db.models import Max
 from django.shortcuts import get_object_or_404
 
 from appartement.models import Appartement, StructureAppartement, TypeDependence
+from appartement.appartement_immebeule_serializer import AppartementImmeubleSerializers
 from appartement.serializers import (
     AppartementSerializers,
     ClonerAppartementSerializer,
@@ -23,8 +24,8 @@ class AppartementViewSet(ActionAPIView):
         serializer_context = {
             "request": request,
         }
-        if len(params) == 0:
-            queryset = Appartement.objects.filter(created_by=self.request.user)
+
+        queryset = Appartement.objects.filter(created_by=self.request.user)
         if "id" in params:
             queryset = Appartement.objects.filter(
                 id__in=params["id"].split(","), created_by=self.request.user
@@ -33,6 +34,17 @@ class AppartementViewSet(ActionAPIView):
             queryset = Appartement.objects.filter(
                 immeuble_id=params["immeuble_id"], created_by=self.request.user
             )
+        if "statut_appartement" in params and "query" in params:
+            queryset = Appartement.objects.filter(created_by=self.request.user,
+                                                  statut=params['statut_appartement'],
+                                                  intitule__istartswith=params['query'])
+            print("searching appartment: {}".format(params['statut_appartement']))
+            serializer = AppartementImmeubleSerializers(
+                queryset, context=serializer_context, many=True
+            )
+            logger.debug("**retrieving housing **")
+            return {"success": True, "payload": serializer.data}
+
         serializer = AppartementSerializers(
             queryset, context=serializer_context, many=True
         )

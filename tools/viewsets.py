@@ -51,6 +51,9 @@ class ActionAPIView(APIView):
                         code=getattr(permission, 'code', None)
                     )
         else:
+            print(self.get_permissions().keys())
+            if action not in self.get_permissions().keys():
+                return
             for permission in self.get_permissions()[action]:
                 if not permission.has_permission(request, self):
                     self.permission_denied(

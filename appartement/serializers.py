@@ -52,7 +52,14 @@ class AppartementSerializers(serializers.ModelSerializer):
     """Housing serializer."""
 
     structures = serializers.SerializerMethodField()
-    # immeuble = ImmeubleSerializers(read_only=True)
+    ville = serializers.SerializerMethodField()
+    quartier = serializers.SerializerMethodField()
+    longitude = serializers.SerializerMethodField()
+    latitude = serializers.SerializerMethodField()
+    immeuble_intitule = serializers.SerializerMethodField()
+    proprietaire = serializers.SerializerMethodField()
+    proprietaire_phone_number = serializers.SerializerMethodField()
+    proprietaire_mail = serializers.SerializerMethodField()
     immeuble_id = serializers.PrimaryKeyRelatedField(
         source="Immeuble",
         queryset=Immeuble.objects.all(),
@@ -69,9 +76,18 @@ class AppartementSerializers(serializers.ModelSerializer):
             "level",
             "autre_description",
             "statut",
+            'immeuble',
             "immeuble_id",
             "structures",
-        )  # 'immeuble',
+            'ville',
+            'quartier',
+            'longitude',
+            'latitude',
+            'immeuble_intitule',
+            'proprietaire',
+            'proprietaire_phone_number',
+            'proprietaire_mail'
+        )
 
     def get_structures(self, appartement):
         """Get housing dependecies.
@@ -87,6 +103,31 @@ class AppartementSerializers(serializers.ModelSerializer):
             many=True,
         ).data
         return data
+
+    def get_ville(self, appartement):
+        return appartement.immeuble.ville
+
+    def get_quartier(self, appartement):
+        return appartement.immeuble.quartier
+
+    def get_longitude(self, appartement):
+        return appartement.immeuble.longitude
+
+    def get_latitude(self, appartement):
+        return appartement.immeuble.latitude
+
+    def get_immeuble_intitule(self, appartement):
+        return appartement.immeuble.intitule
+
+    def get_proprietaire(self, appartement):
+        return "{} {}".format(appartement.immeuble.proprietaire.user.first_name,
+                              appartement.immeuble.proprietaire.user.last_name)
+
+    def get_proprietaire_phone_number(self, appartement):
+        return appartement.immeuble.proprietaire.phone_number
+
+    def get_proprietaire_mail(self, appartement):
+        return appartement.immeuble.proprietaire.user.email
 
     def __autoname(self, immeuble, level):
         last_intitule = Appartement.objects.filter(immeuble=immeuble, level=level)

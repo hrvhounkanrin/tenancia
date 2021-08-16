@@ -30,20 +30,23 @@ class ImmeubleAction(ActionAPIView):
         serializer_context = {
             "request": request,
         }
+        queryset = Immeuble.objects.filter(created_by=self.request.user)
+
+        if "statut" in params:
+            queryset = Immeuble.objects.filter(created_by=self.request.user)
+
         if "id" in params:
             queryset = Immeuble.objects.filter(
                 id__in=params["id"].split(","), created_by=self.request.user
             )
-            serializer = ImmeubleSerializers(
-                queryset, context=serializer_context, many=True
-            )
-            logger.debug("**retrieving immeubles **")
-            return {"success": True, "payload": serializer.data}
-        get_all_immeuble = Immeuble.objects.filter(created_by=self.request.user)
-        serialized_immeuble = ImmeubleSerializers(
-            get_all_immeuble, context=serializer_context, many=True
+
+        serializer = ImmeubleSerializers(
+            queryset, context=serializer_context, many=True
         )
-        return {"success": True, "payload": serialized_immeuble.data}
+        logger.debug("**retrieving immeubles **")
+        return {"success": True, "payload": serializer.data}
+
+
 
     def create_immeuble(self, request, params={}, *args, **kwargs):
         """Create immeuble."""

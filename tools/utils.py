@@ -17,6 +17,10 @@ Description: Invoice numbers like "0000004" are unprofessional in that they
 """
 import math
 import warnings
+import string
+import uuid
+import random
+
 
 try:
     from django.conf import settings
@@ -47,36 +51,6 @@ PERIOD = getattr(settings, "FRIENDLY_ID_PERIOD", None)
 # Don't set this, it isn't necessary and you'll get ugly strings like 'AAAAAB3D'
 # It will be otherwise done automatically to match SIZE
 STRING_LENGTH = getattr(settings, "FRIENDLY_ID_STRING_LENGTH", None)
-
-
-def find_suitable_period():
-    """Automatically find a suitable period to use.
-    Factors are best, because they will have 1 left over when
-    dividing SIZE+1.
-    This only needs to be run once, on import.
-    """
-    # The highest acceptable factor will be the square root of the size.
-    highest_acceptable_factor = int(math.sqrt(SIZE))
-
-    # Too high a factor (eg SIZE/2) and the interval is too small, too
-    # low (eg 2) and the period is too small.
-    # We would prefer it to be lower than the number of VALID_CHARS, but more
-    # than say 4.
-    starting_point = len(VALID_CHARS) > 14 and len(VALID_CHARS) / 2 or 13
-    for p in (
-        range(starting_point, 7, -1)
-        + range(highest_acceptable_factor, starting_point + 1, -1)
-        + [6, 5, 4, 3, 2]
-    ):
-        if SIZE % p == 0:
-            return p
-    raise Exception
-
-
-# Set the period if it is missing
-if not PERIOD:
-    PERIOD = find_suitable_period()
-
 
 def perfect_hash(num):
     """Translate a number to another unique number, using a perfect hash function.
@@ -118,3 +92,10 @@ def encode(num):
         return None
 
     return friendly_number(perfect_hash(num))
+
+def random_choice(nb=9):
+    alphabet = string.ascii_lowercase + string.digits
+    return ''.join(random.choices(alphabet, k=nb))
+
+def truncated_uuid4(nb=9):
+    return str(uuid.uuid4())[:nb]

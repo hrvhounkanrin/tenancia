@@ -148,6 +148,7 @@ class ContratAction(ActionAPIView):
                 saved_contrat, context=serializer_context, many=True
             )
             return {"success": True, "payload": serialized_contrat.data}
+        print(request.data)
         serializer = ContratSerializers(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()

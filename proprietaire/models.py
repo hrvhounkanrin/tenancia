@@ -43,4 +43,4 @@ class Proprietaire(models.Model):
 
     def _str__(self):
         """Proprietaire str representation."""
-        return f"{self.user.first_name} {self.user.last_name}"
+        return "{} {} ({})".format(self.user.first_name,self.user.last_name, self.phone_number )

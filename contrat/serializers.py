@@ -14,6 +14,7 @@ from client.models import Client
 from client.serializers import ClientSerializer
 from quittance.models import Quittance
 from tools.sms import Sms
+from tools.utils import truncated_uuid4
 
 from .models import Accesoireloyer, Contrat, ContratAccessoiresloyer
 
@@ -25,7 +26,7 @@ class AccesoireloyerSerializers(serializers.ModelSerializer):
         """AccesoireloyerSerializers meta."""
 
         model = Accesoireloyer
-        fields = "__all__"
+        fields =('id', 'libelle', 'utilite')
 
 
 class ContratSerializers(serializers.ModelSerializer):
@@ -94,15 +95,20 @@ class ContratSerializers(serializers.ModelSerializer):
 
         :rtype: object
         """
-        client_instance = validated_data.pop("Client", None)
         appartement_instance = validated_data.pop("Appartement", None)
+        if appartement_instance.statut != 'LIBRE':
+            raise serializers.ValidationError("Impossible de mettre un contrat sur un appartement {}".format(appartement_instance.statut))
+
+        print(f"validated_data: {validated_data}")
+        client_instance = validated_data.pop("Client", None)
+
         date_effet = validated_data["date_effet"]
         jour_emission = validated_data["jour_emission"]
         prochaine_echeance = date(
             date_effet.year, date_effet.month, jour_emission
         ) + relativedelta(months=+1)
         contrat = Contrat.objects.create(
-            reference_bail=get_random_string(8).upper(),
+            reference_bail=truncated_uuid4(),
             client_accord=False,
             prochaine_echeance=prochaine_echeance,
             client=client_instance,
@@ -114,25 +120,21 @@ class ContratSerializers(serializers.ModelSerializer):
             accessoires = self.initial_data.get("accessoires")
             for accessoire in accessoires:
                 accessoire_instance = Accesoireloyer.objects.get(
-                    pk=accessoire.get("accessoire_id", None)
+                    pk=accessoire.get("id", None)
                 )
-                accessoire.pop("accessoire_id", None)
+                accessoire.pop("id", None)
                 ContratAccessoiresloyer(
                     contrat_id=contrat.id,
                     accesoireloyer_id=accessoire_instance.id,
-                    **accessoire,
+                    montant=accessoire.get("montant", None),
+                    is_peridic=accessoire.get("is_peridic", False)
                 ).save()
         contrat.save()
+        appartement_instance.statut = 'RESERVE'
+        appartement_instance.save(update_fields=['statut'])
         # sms = Sms()
-        print(
-            {
-                "first_name": contrat.client.user.first_name,
-                "phone_number": contrat.client.user.phone_number,
-                "reference:": contrat.reference_bail,
-            }
-        )
         sms_client = Sms()
-        print(sms_client)
+        # print(sms_client)
         sms_client.contrat_emis_sms.delay(
             {
                 "first_name": contrat.client.user.first_name,
@@ -190,7 +192,13 @@ class AgreementSerializer(serializers.Serializer):
         else:
             instance.observation = "CONTRAT REFUSE PAR LE CLIENT"
 
-        instance.save()
+        instance.save(update_fields=['statut', 'observation', 'client_accord', 'modified_by', 'date_accord_client'])
+
+        # Un contrat accepté est un contrat dont l'appartment devient occuper
+        appartement_instance = instance.appartement
+        appartement_instance.statut = 'OCCUPE'
+        appartement_instance.save(update_fields=['statut'])
+
         montant_global = 0
         if validated_data["client_accord"]:
             contrat = instance
@@ -200,7 +208,7 @@ class AgreementSerializer(serializers.Serializer):
             # création des quittances de frais accessoires
             for acc in accessoires:
                 quittance = Quittance(
-                    reference=get_random_string(8).upper(),
+                    reference=truncated_uuid4(),
                     date_emission=date.today(),
                     date_valeur=contrat.date_effet,
                     debut_periode=contrat.date_effet,
@@ -214,7 +222,7 @@ class AgreementSerializer(serializers.Serializer):
             # création des quittance d'avance sur loyer
             for i in range(instance.nb_avance):
                 quittance = Quittance(
-                    reference=get_random_string(8).upper(),
+                    reference=truncated_uuid4(),
                     date_emission=date.today(),
                     date_valeur=contrat.date_effet,
                     debut_periode=contrat.date_effet,
@@ -228,7 +236,7 @@ class AgreementSerializer(serializers.Serializer):
             # création des quittance de prépayés
             for i in range(instance.nb_prepaye):
                 quittance = Quittance(
-                    reference=get_random_string(8).upper(),
+                    reference=truncated_uuid4(),
                     date_emission=date.today(),
                     date_valeur=contrat.date_effet,
                     debut_periode=contrat.date_effet,

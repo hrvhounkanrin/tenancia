@@ -22,6 +22,7 @@ class Immeuble(models.Model):
     proprietaire = models.ForeignKey(
         "proprietaire.Proprietaire", on_delete=models.CASCADE, null=False
     )
+
     jour_emission_facture = models.IntegerField(default=5)
     jour_valeur_facture = models.IntegerField(default=5)
     ville = models.CharField(max_length=128, null=True)
