@@ -15,7 +15,7 @@ from client.serializers import ClientSerializer
 from quittance.models import Quittance
 from tools.sms import Sms
 from tools.utils import truncated_uuid4
-
+from quittance.serializers import QuittanceSerializers
 from .models import Accesoireloyer, Contrat, ContratAccessoiresloyer
 
 
@@ -160,26 +160,24 @@ class ContratSerializers(serializers.ModelSerializer):
         return instance
 
 
-class AgreementSerializer(serializers.Serializer):
-    contrat_id = serializers.PrimaryKeyRelatedField(
-        source="Contrat",
-        queryset=Contrat.objects.all(),
-        write_only=True,
-    )
-    contrat = ContratSerializers(
-        read_only=True,
-    )
-    client_accord = serializers.BooleanField(write_only=True)
 
+class AgreementSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    client_accord = serializers.BooleanField()
+
+
+    @transaction.atomic
     def create(self, validated_data):
         raise NotImplementedError("`create()` must be implemented.")
 
     @transaction.atomic
     def update(self, instance, validated_data):
+
         if instance.client.user_id != self.context["request"].user.id:
             raise serializers.ValidationError(
                 "Vous n'avez pas l'autorisation pour valider ce contrat."
             )
+
         if instance.client_accord:
             raise serializers.ValidationError("Ce contrat a été déjà accepté.")
 
@@ -193,7 +191,132 @@ class AgreementSerializer(serializers.Serializer):
             instance.observation = "CONTRAT REFUSE PAR LE CLIENT"
 
         instance.save(update_fields=['statut', 'observation', 'client_accord', 'modified_by', 'date_accord_client'])
+        # Un contrat accepté est un contrat dont l'appartment devient occuper
+        appartement_instance = instance.appartement
+        appartement_instance.statut = 'OCCUPE'
+        appartement_instance.save(update_fields=['statut'])
 
+        montant_global = 0
+
+        if validated_data["client_accord"]:
+            contrat = instance
+            # récupération des frais accessoires sur le contrat
+            accessoires = ContratAccessoiresloyer.objects.filter(contrat=contrat)
+            quittances = []
+            # création des quittances de frais accessoires
+            for acc in accessoires:
+                quittance = Quittance(
+                    reference=truncated_uuid4(),
+                    date_emission=date.today(),
+                    date_valeur=contrat.date_effet,
+                    debut_periode=contrat.date_effet,
+                    fin_periode=contrat.date_effet,
+                    nature=acc.accesoireloyer.libelle,
+                    contrat=contrat,
+                    montant=acc.montant,
+                    lessor_user_id=appartement_instance.immeuble.proprietaire_id,
+                    tenant_user_id=instance.client_id
+                )
+                quittances.append(quittance)
+                # montant_global = montant_global + acc.montant
+            # création des quittance d'avance sur loyer
+            for i in range(instance.nb_avance):
+                quittance = Quittance(
+                    reference=truncated_uuid4(),
+                    date_emission=date.today(),
+                    date_valeur=contrat.date_effet,
+                    debut_periode=contrat.date_effet,
+                    fin_periode=contrat.date_effet,
+                    nature="AVANCE SUR LOYER",
+                    contrat=contrat,
+                    montant=instance.montant_bail,
+                    lessor_user_id=appartement_instance.immeuble.proprietaire_id,
+                    tenant_user_id=instance.client_id
+
+                )
+                quittances.append(quittance)
+                montant_global = montant_global + acc.montant
+            # création des quittance de prépayés
+            for i in range(instance.nb_prepaye):
+                quittance = Quittance(
+                    reference=truncated_uuid4(),
+                    date_emission=date.today(),
+                    date_valeur=contrat.date_effet,
+                    debut_periode=contrat.date_effet,
+                    fin_periode=contrat.date_effet,
+                    nature="QUITTANCE DE LOYER PREPAYE",
+                    contrat=contrat,
+                    montant=instance.montant_bail,
+                    lessor_user_id=appartement_instance.immeuble.proprietaire_id,
+                    tenant_user_id=instance.client_id
+                )
+                quittances.append(quittance)
+
+            [model.save() for model in quittances]
+        # alert sms validation
+        contrat_data = {
+            "first_name": instance.created_by.first_name,
+            "reference": instance.reference_bail,
+            "created_at": instance.created_at,
+            "client_accord": instance.client_accord,
+            "phone_number": instance.created_by.phone_number,
+            "client_name": f"{instance.client.user.first_name} {instance.client.user.last_name}",
+        }
+        sms_client = Sms()
+        # sms_client.contrat_valide_sms.delay
+        montant_global = sum([quittance.montant for quittance in quittances])
+        if instance.client_accord:
+            quittance_data = {
+                "first_name": instance.client.user.first_name,
+                "reference": instance.reference_bail,
+                "montant_global": montant_global,
+                "phone_number": instance.client.user.phone_number,
+                "client_accord": instance.client_accord,
+            }
+            # sms_client.contrat_valide_client_sms.delay(quittance_data)
+        return instance
+
+"""
+class AgreementSerializer(serializers.ModelSerializer):
+    contrat_id = serializers.PrimaryKeyRelatedField(
+        source="Contrat",
+        queryset=Contrat.objects.all(),
+        write_only=True,
+    )
+    contrat = ContratSerializers(
+        read_only=True,
+    )
+    client_accord = serializers.BooleanField(write_only=True)
+    quittances = serializers.SerializerMethodField()
+
+    def get_quittances(self, contrat_id):
+        return  contrat_id
+
+    @transaction.atomic
+    def create(self, validated_data):
+        raise NotImplementedError("`create()` must be implemented.")
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+
+        if instance.client.user_id != self.context["request"].user.id:
+            raise serializers.ValidationError(
+                "Vous n'avez pas l'autorisation pour valider ce contrat."
+            )
+
+        if instance.client_accord:
+            raise serializers.ValidationError("Ce contrat a été déjà accepté.")
+
+        instance.client_accord = validated_data["client_accord"]
+        instance.modified_by = self.context["request"].user
+        instance.date_accord_client = datetime.today()
+        if validated_data["client_accord"]:
+            instance.statut = "CONTRAT ACCEPTE"
+            instance.observation = "CONTRAT ACCEPTE PAR LE CLIENT"
+        else:
+            instance.observation = "CONTRAT REFUSE PAR LE CLIENT"
+
+        instance.save(update_fields=['statut', 'observation', 'client_accord', 'modified_by', 'date_accord_client'])
         # Un contrat accepté est un contrat dont l'appartment devient occuper
         appartement_instance = instance.appartement
         appartement_instance.statut = 'OCCUPE'
@@ -246,7 +369,7 @@ class AgreementSerializer(serializers.Serializer):
                     montant=instance.montant_bail,
                 )
                 quittances.append(quittance)
-                # montant_global = montant_global + acc.montant
+
             [model.save() for model in quittances]
         # alert sms validation
         contrat_data = {
@@ -268,9 +391,9 @@ class AgreementSerializer(serializers.Serializer):
                 "phone_number": instance.client.user.phone_number,
                 "client_accord": instance.client_accord,
             }
-            sms_client.contrat_valide_client_sms.delay(quittance_data)
+            # sms_client.contrat_valide_client_sms.delay(quittance_data)
         return instance
-
+"""
 
 class ContratAccessoiresloyerSerializers(serializers.ModelSerializer):
     """ContratAccessoireloyer serializer."""

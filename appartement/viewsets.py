@@ -12,12 +12,22 @@ from appartement.serializers import (
     TypeDependenceSerializers,
 )
 from tools.viewsets import ActionAPIView
-
+from customuser.permissions import IsLessor, IsTenant
 logger = logging.getLogger(__name__)
 
 
 class AppartementViewSet(ActionAPIView):
     """Housing Viewset."""
+
+    def __init__(self):
+        self.permission_classes = {
+            "get_logement": [IsLessor],
+            "create_logement": [IsLessor],
+            "update_logement": [IsLessor],
+            "cloner_immeuble": [IsLessor],
+            "cloner_logement": [IsLessor],
+        }
+
 
     def get_logement(self, request, params={}, *args, **kwargs):
         """Get housing."""

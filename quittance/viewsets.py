@@ -3,57 +3,65 @@ import datetime
 import logging
 
 from contrat.models import Contrat, ContratAccessoiresloyer
-from quittance.serializers import FirstQuittanceSerializers, QuittanceSerializers
+from quittance.serializers import  QuittanceSerializers
 from tools.viewsets import ActionAPIView
 
 from .models import Quittance
 
 logger = logging.getLogger(__name__)
 
+FILTER_PARAMS = {
+    'id': 'id',
+    'contrat': 'contrat_id',
+    'client': 'client_id',
+    'color': 'values__something__color__name__iexact'
+}
+
+
+
 
 class QuittanceActionViewSet(ActionAPIView):
     """Quittance action viewet."""
 
+    def _get_filter_params(self, query_params):
+        fields = {}
+
+        for k, v in query_params.items():
+            if k in self.FILTER_PARAMS:
+                fields[self.FILTER_PARAMS[k]] = v
+        return fields
+
     def get_quittances(self, request, params={}, *args, **kwargs):
         """Get quitances."""
-
+        # filter_params = self.get_filter_params(self.request.query_params)
+        queryset = Quittance.objects.filter(tenant_user_id=request.user.id)
         if "id" in params:
-            queryset = Quittance.objects.filter(id__in=params["id"].split(","))
+            queryset = Quittance.objects.filter(id__in=params["id"].split(","), tenant_user_id=request.user.id)
         if "contrat_id" in params:
             queryset = Quittance.objects.filter(
-                contrat_id__in=params["contrat_id"].split(",")
+                contrat_id__in=params["contrat_id"].split(","), tenant_user_id=request.user.id
             )
         serializer = QuittanceSerializers(
             queryset, context={"request": request}, many=True
         )
         logger.debug("**retrieving Quittance **")
-        return {"success": True, "quittances": serializer.data}
+        return {"success": True, "payload": serializer.data}
 
-    def create_first_quittance(self, request, params={}, *args, **kwargs):
-        """Create contract."""
-        serializer_context = {
-            "request": request,
-        }
-        print(f"params: {params}")
-        serializer = FirstQuittanceSerializers(
-            data=request.data, context=serializer_context
+    def get_client_quittances(self, request, params={}, *args, **kwargs):
+        """Get quitances."""
+        # filter_params = self.get_filter_params(self.request.query_params)
+        queryset = Quittance.objects.filter(lessor_user_id=request.user.id)
+        if "id" in params:
+            queryset = Quittance.objects.filter(id__in=params["id"].split(","), lessor_user_id=request.user.id)
+        if "contrat_id" in params:
+            queryset = Quittance.objects.filter(
+                contrat_id__in=params["contrat_id"].split(","), lessor_user_id=request.user.id
+            )
+        serializer = QuittanceSerializers(
+            queryset, context={"request": request}, many=True
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return {"success": True, "quittances": serializer.data}
-
-    def create_first_quittance(self, request, params={}, *args, **kwargs):
-        """Create contract."""
-        serializer_context = {
-            "request": request,
-        }
-        print(f"params: {params}")
-        serializer = FirstQuittanceSerializers(
-            data=request.data, context=serializer_context
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return {"success": True, "quittances": serializer.data}
+        logger.debug("**retrieving Quittance **")
+        return {"success": True, "payload": serializer.data}
 
     def get_client_per_invoice(self, request, params={}, *args, **kwargs):
         """

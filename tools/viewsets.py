@@ -51,7 +51,7 @@ class ActionAPIView(APIView):
                         code=getattr(permission, 'code', None)
                     )
         else:
-            print(self.get_permissions().keys())
+            #print(self.get_permissions().keys())
             if action not in self.get_permissions().keys():
                 return
             for permission in self.get_permissions()[action]:
@@ -103,13 +103,14 @@ class ActionAPIView(APIView):
             response = response.data
         if isinstance(response, (HttpResponse,)):
             return response
-
+        response_status = response.get('status_code', response_status)
         response_context = dict(
             filter(
                 lambda item: item[1] is not None,
                 {k: params.get(k, None) for k in self.RESPONSE_KEYS}.items(),
             )
         )
+
         serialised = APISerializer(response, context=response_context)
         return Response(serialised.data, response_status)
 
