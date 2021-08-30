@@ -4,13 +4,14 @@ from rest_framework.views import exception_handler
 
 
 def get_response(message="", result={}, status=False, status_code=200):
-    return {
+    error_object = {
         "message": message,
         "result": result,
         "status": status,
         "status_code": status_code,
     }
-
+    payload = dict({'data': error_object})
+    return dict({'payload': error_object})
 
 def get_error_message(error_dict):
     field = next(iter(error_dict))
@@ -49,6 +50,9 @@ def handle_exception(exc, context):
             error_response.data = get_response(
                 message=get_error_message(error), status_code=error_response.status_code
             )
+    payload = {}
+    payload['message'] = error_response
+    # payload
     return error_response
 
 
@@ -86,11 +90,11 @@ class ExceptionMiddleware:
                 message="Internal server error, please try again later",
                 status_code=response.status_code,
             )
-            return JsonResponse(response, status=response["status_code"])
+            return JsonResponse(response, status=response.get("status_code", 500))
 
         if response.status_code == 404 and "Page not found" in str(response.content):
             response = get_response(
                 message="Page not found, invalid url", status_code=response.status_code
             )
-            return JsonResponse(response, status=response["status_code"])
+            return JsonResponse(response, status=response.get("status_code", 404))
         return response

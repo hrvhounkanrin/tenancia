@@ -50,10 +50,9 @@ class Quittance(models.Model):
         editable=False,
         related_name="quittance_updated_user",
     )
-
-    class Meta:
-        ordering = (["-created_at", "contrat"],)
-        # permissions = [('is_lessor',)]
+    lessor_user_id = models.IntegerField(null=True)
+    real_estate_user_id = models.IntegerField(null=True)
+    tenant_user_id = models.IntegerField(null=True)
 
     def __str__(self):
         """Quittance str reprensentation."""

@@ -4,10 +4,9 @@ import logging
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-
-from customuser.permissions import IsLessor, IsTenant
 from quittance.models import Quittance
-from quittance.serializers import FirstQuittanceSerializers, QuittanceSerializers
+from quittance.serializers import  QuittanceSerializers
+from customuser.permissions import IsLessor, IsTenant
 from tools.viewsets import ActionAPIView
 
 from .models import Accesoireloyer, Contrat, ContratAccessoiresloyer
@@ -108,11 +107,19 @@ class ContratAccessoiresloyerAction(ActionAPIView):
 class ContratAction(ActionAPIView):
     """Contrat Action viewset."""
 
-    permission_classes = [IsLessor, IsTenant]
+    def __init__(self):
+        self.permission_classes = {
+            "get_contrat": [IsLessor],
+            "get_client_contrats": [IsTenant],
+            "create_contrat": [IsLessor],
+            "update_contrat": [IsLessor],
+            "contrat_agreement": [IsTenant],
+        }
 
     def get_contrat(self, request, params={}, *args, **kwargs):
         """Get contrat."""
         if "id" in params:
+            # todo: add real estate portfolio (Q(created_by=request.user) | Q(client=request.user))
             queryset = Contrat.objects.filter(id__in=params["id"].split(",")).filter(
                 Q(created_by=request.user) | Q(client=request.user)
             )
@@ -123,6 +130,25 @@ class ContratAction(ActionAPIView):
             return {"success": True, "payload": serializer.data}
         queryset = Contrat.objects.filter(
             Q(created_by=request.user) | Q(client__user=request.user)
+        )
+        serializer = ContratSerializers(
+            queryset, many=True, context={"request": request}
+        )
+        return {"success": True, "payload": serializer.data}
+
+    def get_client_contrat(self, request, params={}, *args, **kwargs):
+        """Get contrat."""
+        if "id" in params:
+            queryset = Contrat.objects.filter(id__in=params["id"].split(",")).filter(
+                client__user=request.user
+            )
+            serializer = ContratSerializers(
+                queryset, context={"request": request}, many=True
+            )
+            logger.debug("**retrieving Contrat **")
+            return {"success": True, "payload": serializer.data}
+        queryset = Contrat.objects.filter(
+            client__user=request.user
         )
         serializer = ContratSerializers(
             queryset, many=True, context={"request": request}
@@ -148,6 +174,7 @@ class ContratAction(ActionAPIView):
                 saved_contrat, context=serializer_context, many=True
             )
             return {"success": True, "payload": serialized_contrat.data}
+        print(request.data)
         serializer = ContratSerializers(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -181,20 +208,24 @@ class ContratAction(ActionAPIView):
         serializer_context = {
             "request": request,
         }
-        instance = get_object_or_404(Contrat, pk=params.get("contrat_id", None))
+        try:
+            instance = Contrat.objects.get(pk=params.get("id", None))
+        except:
+            return {"success": False, "payload": dict({"message": "Ce contrat n'existe pas"}), "status_code": 400}
+
         serializer = AgreementSerializer(
             instance, data=params, context=serializer_context
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         if params.get("client_accord", None) in [False, None]:
-            return {"success": True, "contrat": serializer.data}
-        created_quittances = Quittance.objects.filter(contrat=instance)
-        queryset = Quittance.objects.filter(
-            contrat=instance, date_valeur=instance.date_effet
-        )
-        serializer = QuittanceSerializers(
+            return {"success": True, "payload": serializer.data}
+
+        queryset = Quittance.objects.all()
+        quittances_serializer = QuittanceSerializers(
             queryset, many=True, context={"request": request}
         )
-
-        return {"success": True, "quittances": serializer.data}
+        payload = serializer.data
+        payload['quittances'] = quittances_serializer.data
+        # print(f"quittances: {serializer.data}")
+        return {"success": True, "payload": payload}

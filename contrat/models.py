@@ -42,11 +42,21 @@ class Contrat(models.Model):
         (RESILIE, "RESILIE"),
         (TERME, "TERME"),
     )
+    MENSUELLE = 12
+    TRIMESTRIELLE = 4
+    SEMESTRIELLE = 2
+    ANNUELLE = 1
+    PERIODICITE_CONTRAT = (
+        (MENSUELLE, "MENSUELLE"),
+        (TRIMESTRIELLE, "TRIMESTRIELLE"),
+        (SEMESTRIELLE, "SEMESTRIELLE"),
+        (ANNUELLE, "ANNUELLE")
+    )
     reference_bail = models.CharField(max_length=50, null=False)
     date_signature = models.DateField(null=False)
     date_effet = models.DateField(null=False)
-    periodicite = models.IntegerField()
-    duree = models.IntegerField()
+    periodicite = models.IntegerField(choices=PERIODICITE_CONTRAT, default=MENSUELLE)
+    duree = models.IntegerField(default=0)
     montant_bail = models.DecimalField(max_digits=9, decimal_places=2)
     nb_avance = models.IntegerField(default=0)
     nb_prepaye = models.IntegerField(default=0)

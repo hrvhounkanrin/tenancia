@@ -114,3 +114,5 @@ class ClonerImmeubleSerializer(serializers.Serializer):
             "immeuble_id": validated_data["immeuble_id"],
             "immeuble": new_immeuble,
         }
+
+

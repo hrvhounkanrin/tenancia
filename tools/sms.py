@@ -21,7 +21,7 @@ class Sms:
     def contrat_emis_sms(self, contrat):
         client = Client(account_sid, account_token)
         first_name = contrat["first_name"]
-        body = "Bonjour {}. Le contrat de bail n° {} d'un montant périodique de {}\
+        body = "Hello {}. Le contrat de bail n° {} d'un montant périodique de {}\
          a été émis sur votre compte. Connectez vous sur Tenancia pour valider avant le {}, date effet de ce contrat.".format(
             first_name,
             contrat["reference"],
@@ -38,7 +38,7 @@ class Sms:
         client = Client(account_sid, account_token)
         logger.debug(f"This is contrat_data: {contrat_data}")
         client_accord = "accepté" if contrat_data["client_accord"] is True else "refusé"
-        body = "Bonjour {}. Le contrat n° {}, en date du {}, a été {} par le client {}".format(
+        body = "Hello {}. Le contrat n° {}, en date du {}, a été {} par le client {}".format(
             contrat_data["first_name"],
             contrat_data["reference"],
             contrat_data["created_at"],

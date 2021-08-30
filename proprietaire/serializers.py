@@ -89,10 +89,13 @@ class ProprietaireSerializers(serializers.ModelSerializer):
             )
         info = get_field_info(instance)
         for attr, value in validated_data.items():
+            # print('attr: {}'.format(attr))
             if attr in info.relations and info.relations[attr].to_many:
+                print('attr 1: {}'.format(attr))
                 field = getattr(instance, attr)
                 field.set(value)
             else:
+                print('attr 2: {}, value: {}'.format(attr, value))
                 setattr(instance, attr, value)
         instance.save()
         return instance
