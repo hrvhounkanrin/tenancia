@@ -31,7 +31,7 @@ class QuittanceActionViewSet(ActionAPIView):
                 fields[self.FILTER_PARAMS[k]] = v
         return fields
 
-    def get_quittances(self, request, params={}, *args, **kwargs):
+    def get_tenant_quittances(self, request, params={}, *args, **kwargs):
         """Get quitances."""
         # filter_params = self.get_filter_params(self.request.query_params)
         queryset = Quittance.objects.filter(tenant_user_id=request.user.id)
@@ -47,7 +47,7 @@ class QuittanceActionViewSet(ActionAPIView):
         logger.debug("**retrieving Quittance **")
         return {"success": True, "payload": serializer.data}
 
-    def get_client_quittances(self, request, params={}, *args, **kwargs):
+    def get_lessor_quittances(self, request, params={}, *args, **kwargs):
         """Get quitances."""
         # filter_params = self.get_filter_params(self.request.query_params)
         queryset = Quittance.objects.filter(lessor_user_id=request.user.id)

@@ -109,34 +109,58 @@ class ContratAction(ActionAPIView):
 
     def __init__(self):
         self.permission_classes = {
-            "get_contrat": [IsLessor],
-            "get_client_contrats": [IsTenant],
+            "get_lessor_contrat": [IsLessor],
+            "get_tenant_contrat": [IsTenant],
             "create_contrat": [IsLessor],
             "update_contrat": [IsLessor],
             "contrat_agreement": [IsTenant],
         }
 
-    def get_contrat(self, request, params={}, *args, **kwargs):
-        """Get contrat."""
+    def __filter_q_object(self, params):
+        q_objects = Q()
         if "id" in params:
-            # todo: add real estate portfolio (Q(created_by=request.user) | Q(client=request.user))
-            queryset = Contrat.objects.filter(id__in=params["id"].split(",")).filter(
-                Q(created_by=request.user) | Q(client=request.user)
-            )
-            serializer = ContratSerializers(
-                queryset, context={"request": request}, many=True
-            )
-            logger.debug("**retrieving Contrat **")
-            return {"success": True, "payload": serializer.data}
-        queryset = Contrat.objects.filter(
-            Q(created_by=request.user) | Q(client__user=request.user)
-        )
+            q_objects &= Q(id=params["id"])
+        if "immeuble_id" in params:
+            q_objects &= Q(appartement__immeuble__id=params["immeuble_id"])
+        if "appartement_id" in params:
+            q_objects &= Q(appartement__id=params["appartement_id"])
+        if "tenant" in params:
+            q_objects &= (Q(client__user__last_name__istartswith=params["tenant"]) |
+                          Q(client__user__first_name__istartswith=params["tenant"]))
+        if "lessor" in params:
+            q_objects &= (Q(appartement__immeuble__proprietaire__user__last_name__istartswith=params["lessor"]) |
+                          Q(appartement__immeuble__proprietaire__user__first_name__istartswith=params["lessor"]))
+        if "statut" in params:
+            q_objects &= Q(statut__iexact=params["statut"])
+        if "date_effet" in params and len(params["date_effet"]) == 1:
+            q_objects &= Q(date_effet=params["date_effet"][0])
+        if "date_effet" in params and len(params["date_effet"]) > 1:
+            q_objects &= (Q(date_effet__gte=params["date_effet"][0]) &
+                          Q(date_effet__lte=params["date_effet"][1]))
+        if "prochaine_echeance" in params and len(params["prochaine_echeance"]) == 1:
+            q_objects &= Q(date_effet=params["prochaine_echeance"][0])
+        if "prochaine_echeance" in params and len(params["prochaine_echeance"]) > 1:
+            q_objects &= (Q(date_effet__gte=params["prochaine_echeance"][0]) &
+                          Q(date_effet__lte=params["prochaine_echeance"][1]))
+
+        if "montant_bail" in params and len(params["montant_bail"]) == 1:
+            q_objects &= Q(montant_bail=params["montant_bail"][0])
+        if "montant_bail" in params and len(params["montant_bail"]) > 1:
+            q_objects &= (Q(montant_bail__gte=params["montant_bail"][0]) &
+                          Q(montant_bail__lte=params["montant_bail"][1]))
+        return q_objects
+
+    def get_lessor_contrat(self, request, params={}, *args, **kwargs):
+        """Get contract portfolios for lessor or real_estate."""
+        q_objects = self.__filter_q_object(params)
+        q_objects &= (Q(created_by=request.user) | Q(appartement__immeuble__proprietaire__user=request.user))
+        queryset = Contrat.objects.filter(q_objects)
         serializer = ContratSerializers(
             queryset, many=True, context={"request": request}
         )
         return {"success": True, "payload": serializer.data}
 
-    def get_client_contrat(self, request, params={}, *args, **kwargs):
+    def get_tenant_contrat(self, request, params={}, *args, **kwargs):
         """Get contrat."""
         if "id" in params:
             queryset = Contrat.objects.filter(id__in=params["id"].split(",")).filter(
@@ -174,7 +198,6 @@ class ContratAction(ActionAPIView):
                 saved_contrat, context=serializer_context, many=True
             )
             return {"success": True, "payload": serialized_contrat.data}
-        print(request.data)
         serializer = ContratSerializers(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -227,5 +250,4 @@ class ContratAction(ActionAPIView):
         )
         payload = serializer.data
         payload['quittances'] = quittances_serializer.data
-        # print(f"quittances: {serializer.data}")
         return {"success": True, "payload": payload}

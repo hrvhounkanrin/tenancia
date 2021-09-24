@@ -42,8 +42,12 @@ class ActionAPIView(APIView):
         method = request.method.lower()
         params = self.normalize_params(request)
         self._last_action = params.get("action", self.args)
+        # print(f"permission: {self.permission_classes}")
+        # print(f"self._last_action: {self._last_action}")
+        # print(f"action arg: {action}")
         if isinstance(self.permission_classes, list):
             for permission in self.get_permissions():
+
                 if not permission.has_permission(request, self):
                     self.permission_denied(
                         request,
@@ -53,7 +57,10 @@ class ActionAPIView(APIView):
         else:
             #print(self.get_permissions().keys())
             if action not in self.get_permissions().keys():
-                return
+                # print(f"serious security issue")
+                self.permission_denied(
+                    request, message='permission denied.'
+                )
             for permission in self.get_permissions()[action]:
                 if not permission.has_permission(request, self):
                     self.permission_denied(
@@ -75,6 +82,7 @@ class ActionAPIView(APIView):
         request.version, request.versioning_scheme = version, scheme
 
         # Ensure that the incoming request is permitted
+        print(f"kwargs.get('action', None):{kwargs.get('action', None)}")
         self.perform_authentication(request)
         self.check_permissions(request, kwargs.get('action', None))
         self.check_throttles(request)
