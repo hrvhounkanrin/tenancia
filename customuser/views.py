@@ -7,7 +7,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext as _
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.debug import sensitive_post_parameters
-
+from django.contrib.auth import get_user_model
 # Create your views here.
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -22,7 +22,12 @@ from rest_framework_jwt.views import ObtainJSONWebToken, jwt_response_payload_ha
 
 from customuser.decorators import method_decorator
 from customuser.models import User
-
+from proprietaire.models import Proprietaire
+from client.models import Client
+from societe.models import RealEstate
+from proprietaire.serializers import ProprietaireSerializers
+from client.serializers import ClientSerializer
+from societe.serializers import SocieteSerializer
 from .permissions import IsAdminUser, IsLoggedInUserOrAdmin
 from .serializers import (
     PasswordChangeSerializer,
@@ -102,10 +107,36 @@ class CustomObtainJSONWebToken(ObtainJSONWebToken):
                 "expire_in": 20,
                 "token": jwt_encode_handler(payload),
                 "user": UserSerializer(user, context={"request": request}).data,
+                "profiles": self.__get_profile(user.id)
             }
         )
         return Response(response_data)
-
+    def __get_profile(self, user_id):
+        profiles = {}
+        try:
+            proprietaire = Proprietaire.objects.filter(user__id=user_id).first()
+            lessor_serializer = ProprietaireSerializers(proprietaire)
+            client = Client.objects.filter(user__id=user_id).first()
+            real_estate = RealEstate.objects.filter(created_by=user_id).first()
+            client_serializer = ClientSerializer(client)
+            if proprietaire is not None:
+                lessor_data = lessor_serializer.data
+                lessor_data.pop('user', None)
+                profiles.update({"lessor": lessor_data})
+            if client is not None:
+                tenant_data = client_serializer.data
+                tenant_data.pop('user', None)
+                profiles.update({"tenant": tenant_data})
+            if real_estate is not None:
+                real_estate_serialiser = SocieteSerializer(real_estate)
+                real_estate_data = real_estate_serialiser.data
+                real_estate_data.pop('user', None)
+                profiles.update({"real_estate": real_estate_data})
+            return profiles
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return {}
+        else:
+            return {}
 
 class PasswordResetView(GenericAPIView):
     """

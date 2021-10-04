@@ -39,23 +39,17 @@ class ActionAPIView(APIView):
         # Gets the request method and the permissions dict,
         # and checks the permissions defined in the key matching
         # the method.
-        method = request.method.lower()
         params = self.normalize_params(request)
         self._last_action = params.get("action", self.args)
-        # print(f"permission: {self.permission_classes}")
-        # print(f"self._last_action: {self._last_action}")
-        # print(f"action arg: {action}")
         if isinstance(self.permission_classes, list):
             for permission in self.get_permissions():
-
+                print(f"permission: {permission}")
                 if not permission.has_permission(request, self):
                     self.permission_denied(
                         request,
-                        message=getattr(permission, 'message', None),
-                        code=getattr(permission, 'code', None)
+                        message=getattr(permission, 'message', None)
                     )
         else:
-            #print(self.get_permissions().keys())
             if action not in self.get_permissions().keys():
                 # print(f"serious security issue")
                 self.permission_denied(

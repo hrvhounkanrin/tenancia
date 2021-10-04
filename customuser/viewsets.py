@@ -192,7 +192,6 @@ class ProfileAction(ActionAPIView):
         """Get all user profile."""
         return self.__get_profile(request.user.id)
 
-
     def create_profile(self, request, params={}, *args, **kwargs):
         data = request.data
         profile_type = data.pop('profile_type', None)
