@@ -131,6 +131,7 @@ class CustomUserAction(ActionAPIView):
         if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save()
+            logger.info(f"User account activation successfuly: {user.email}")
             payload = jwt_payload_handler(user)
             """
                 return Response({
