@@ -6,13 +6,13 @@ from django.shortcuts import get_object_or_404, redirect
 from tools.viewsets import ActionAPIView
 from .models import Mandat, RealEstate, RealEstateUsers
 from .serializers import MandatSerializer, SocieteSerializer
-
+from rest_framework.parsers import MultiPartParser, FormParser
 logger = logging.getLogger(__name__)
 
 
 class SocieteViewSetAction(ActionAPIView):
     """RealEstate action viewset."""
-
+    parser_classes = (MultiPartParser, FormParser)
     def get_mandataire(self, request, params={}, *args, **kwargs):
         """
         Get  mandatire.

@@ -3,8 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 from rest_framework.utils.model_meta import get_field_info
-
-from customuser.models import User
+from django.conf import settings
 from immeuble.serializers import ImmeubleSerializers
 
 from .models import Mandat, RealEstate, RealEstateUsers
@@ -12,7 +11,7 @@ from .models import Mandat, RealEstate, RealEstateUsers
 
 class SocieteSerializer(serializers.ModelSerializer):
     """RealEstate model serializer."""
-
+    logo_url = serializers.SerializerMethodField('get_logo_url')
     class Meta:
         """RealEstate serializer meta."""
 
@@ -25,8 +24,11 @@ class SocieteSerializer(serializers.ModelSerializer):
             "num_carte_professionnel",
             "numero_ifu",
             "date_delivrance",
+            "logo",
+            "logo_url"
         )
-
+    def get_logo_url(self, societe):
+        return f"{settings.MEDIA_URL}{societe.logo}"
     @transaction.atomic
     def update(self, instance, validated_data):
         """RealEstate serializer update."""

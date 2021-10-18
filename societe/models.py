@@ -1,7 +1,15 @@
 """Mandataire app models."""
+import os
+import uuid
 from django.conf import settings
 from django.db import models
-
+from django.utils import timezone
+def upload_to(instance, filename):
+    # now = timezone.now()
+    base, extension = os.path.splitext(filename.lower())
+    #milliseconds = now.microsecond // 1000
+    uid = str(uuid.uuid1())
+    return f"realestate/{uid}{extension}"
 
 class RealEstate(models.Model):
     """RealEstate model."""
@@ -9,7 +17,7 @@ class RealEstate(models.Model):
     raison_social = models.CharField(max_length=150, null=False)
     num_telephone = models.CharField(max_length=50, null=False)
     adresse = models.CharField(max_length=150, null=True)
-    logo = models.CharField(max_length=150, null=True)
+    logo = models.ImageField(upload_to=upload_to, null=True)
     num_carte_professionnel = models.CharField(max_length=150, null=True)
     numero_ifu = models.CharField(max_length=150, null=True)
     date_delivrance = models.DateField(null=True)
@@ -20,6 +28,7 @@ class RealEstate(models.Model):
         related_name="users",
         blank=True,
     )
+    mode_recouvrement = models.CharField(max_length=50, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(

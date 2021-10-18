@@ -37,11 +37,22 @@ jwt_get_username_from_payload = api_settings.JWT_PAYLOAD_GET_USERNAME_HANDLER
 
 hashids = Hashids(alphabet='abcdefghijklmnopqrstuvwxyz'[::-1])
 
+class ProfilePhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = ["photo"]
+
+    def save(self, *args, **kwargs):
+
+        if self.instance.photo:
+            self.instance.photo.delete()
+        return super().save(*args, **kwargs)
+
 class UserSerializer(serializers.ModelSerializer):
     """
     user writable  serializer
     """
-
+    photo_url = serializers.SerializerMethodField('get_photo_url')
     class Meta:
         model = User
         fields = [
@@ -55,8 +66,12 @@ class UserSerializer(serializers.ModelSerializer):
             "country",
             "city",
             "password",
+            'photo_url'
         ]
         extra_kwargs = {"password": {"write_only": True}}
+
+    def get_photo_url(self, user):
+        return f"{settings.MEDIA_URL}{user.photo}"
 
     def create(self, validated_data):
         password = validated_data.pop("password")

@@ -136,7 +136,6 @@ DATABASES = {
         "PORT": os.environ.get("SQL_PORT"),
     }
 }
-print(DATABASES)
 
 # Password validatirest_registeron
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -175,17 +174,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 STATIC_URL = "/static/"
-
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
-
 STATIC_ROOT = "/static/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = '/media/'
+
 
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-MEDIA_URL = "/media/"
+# MEDIA_URL = "/media/"
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'data/')
+
+
+
+
+
 if not os.path.join("LOGS"):
     os.mkdir("LOGS")
 LOGGING = {
@@ -194,16 +200,16 @@ LOGGING = {
     "formatters": {
         "verbose": {
             "format": "[%(asctime)s] %(levelname)s " "[%(name)s:%(lineno)s] {message}",
-            "datefmt": "%d/%b/%Y %H:%M:%S",
+            "datefmt": "%Y-%b-%d %H:%M:%S",
         },
         "verbose2": {
             "format": "[%(asctime)s] %(levelname)s"
             " [%(filename)s:%(lineno)s:%(funcName)s()] %(message)s",
-            "datefmt": "%d/%b/%Y %H:%M:%S",
+            "datefmt": "%Y-%b-%d %H:%M:%S",
         },
         "with_ip": {
             "format": "[%(asctime)s] [%(clientip)s] %(levelname)s %(message)s",
-            "datefmt": "%d/%b/%Y %H:%M:%S",
+            "datefmt": "%Y-%b-%d %H:%M:%S",
         },
         "simple": {"format": "%(levelname)s %(message)s"},
     },
@@ -395,12 +401,7 @@ CORS_ALLOW_METHODS = [
 APPEND_SLASH = False
 RABBITMQ_HOST = "rabbitmq"
 CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5672//"
-# CELERY_BROKER_URL = 'amqp://tenancia:myrabbitpass@rabbitmq'
 TWILIO_ACCOUNT_SID = "AC841b0c01be5608ad900f5fcd452a6172"
 TWILIO_AUTH_TOKEN = "e08b2c59fe5a6c4c674e2fdacefd3963"
 FERNET_KEY = "e08b2c59fe5a6c4c674e2fdacefd3963"
-# CELERY_BROKER_URL = 'amqp://rabbitmq'
-# CELERY_BROKER_URL = 'amqp://guest@localhost'
-# CELERY_BROKER_URL = "amqp://tenancia:tenancia@localhost:5672/"
-# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '515214403352-dd3itjg2aequg8387650rr1b8aefpovf.apps.googleusercontent.com'
-# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'N8k7xSNPfjn4rJf5fvyVOAs7'
+

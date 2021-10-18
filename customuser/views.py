@@ -1,5 +1,8 @@
 import os
-from datetime import datetime, timedelta
+from django.http import QueryDict
+import json
+from rest_framework import parsers
+from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import logout as django_logout
 from django.core.exceptions import ObjectDoesNotExist
@@ -7,8 +10,6 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext as _
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.debug import sensitive_post_parameters
-from django.contrib.auth import get_user_model
-# Create your views here.
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -18,7 +19,7 @@ from rest_framework.views import APIView, status
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.settings import api_settings
-from rest_framework_jwt.views import ObtainJSONWebToken, jwt_response_payload_handler
+from rest_framework_jwt.views import ObtainJSONWebToken
 
 from customuser.decorators import method_decorator
 from customuser.models import User
@@ -35,6 +36,7 @@ from .serializers import (
     PasswordResetSerializer,
     UserSerializer,
 )
+from .token_generator import TokenGenerator
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -57,7 +59,9 @@ def jwt_response_payload_handler(token, user=None, request=None):
     }
 
 
-from .token_generator import TokenGenerator
+
+
+
 
 
 class UserViewSet(ModelViewSet):
@@ -88,15 +92,7 @@ class CustomObtainJSONWebToken(ObtainJSONWebToken):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)  # pass the 'raise_exception' flag
         user = serializer.object.get("user") or request.user
-        print("CustomObtainJSONWebToken Ok")
 
-        """
-        serializer.is_valid(raise_exception=True) # pass the 'raise_exception' flag
-        user = serializer.object.get('user') or request.user
-        token = serializer.object.get('token')
-        response_data = jwt_response_payload_handler(token, user, request)
-        """
-        # Should be redirected to the frontend login page instead.
         payload = jwt_payload_handler(user)
         ini_time_for_now = datetime.now()
         now = datetime.now()

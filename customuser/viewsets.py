@@ -18,13 +18,13 @@ from social_django.utils import psa
 from client.models import Client
 from client.serializers import ClientSerializer
 from customuser.models import User
-from customuser.serializers import SocialSerializer, UserSerializer
+from customuser.serializers import SocialSerializer, UserSerializer, ProfilePhotoSerializer
 from proprietaire.models import Proprietaire
 from proprietaire.serializers import ProprietaireSerializers
 from societe.models import RealEstate
 from societe.serializers import SocieteSerializer
 from tools.viewsets import ActionAPIView
-from proprietaire.viewsets import ProprietairAction
+from rest_framework.parsers import MultiPartParser, FormParser
 from .token_generator import TokenGenerator
 
 logger = logging.getLogger(__name__)
@@ -153,10 +153,14 @@ class CustomUserAction(ActionAPIView):
             }
 
 
+
+
 """Get connected user profiles"""
 
 
 class ProfileAction(ActionAPIView):
+
+
     def __get_profile(self, user_id):
         User = get_user_model()
         try:
@@ -196,6 +200,8 @@ class ProfileAction(ActionAPIView):
     def create_profile(self, request, params={}, *args, **kwargs):
         data = request.data
         profile_type = data.pop('profile_type', None)
+        profile_type = profile_type[0] if type(profile_type) == list else profile_type
+        print(f"profile_type: {profile_type}")
         if profile_type is None or profile_type not in ['lessor', 'tenant', 'real_estate']:
             return {"success": False, "payload": {"message": "Il manque le type de profil"}}
 
@@ -214,6 +220,7 @@ class ProfileAction(ActionAPIView):
             serializer.save()
 
         if profile_type == 'real_estate':
+            self.parser_classes = (MultiPartParser, FormParser)
             serializer = SocieteSerializer(data=data, context=serializer_context)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -222,6 +229,7 @@ class ProfileAction(ActionAPIView):
 
     def update_profile(self, request, params={}, *args, **kwargs):
         data = request.data
+
         profile_type = data.pop('profile_type', None)
         if profile_type is None or profile_type not in ['lessor', 'tenant', 'real_estate']:
             return {"success": False, "payload": {"message": "Il manque le type de profil"}}
@@ -255,7 +263,12 @@ class ProfileAction(ActionAPIView):
 
         return self.__get_profile(data["user_id"])
 
-
+    def define_profile(self, request, params, *args, **kwargs):
+        serializer = ProfilePhotoSerializer(data=request.data, instance=request.user)
+        if serializer.is_valid():
+            serializer.save()
+            return {"success": True, "payload": serializer.data}
+        return {"success": False, "msg": "An error occured."}
 
 
 

@@ -1,10 +1,17 @@
 """Customuser models."""
+import os
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 
+def upload_to(instance, filename):
+    now = timezone.now()
+    base, extension = os.path.splitext(filename.lower())
+    milliseconds = now.microsecond // 1000
+    return f"users/{instance.pk}/{now:%Y%m%d%H%M%S}{milliseconds}{extension}"
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -57,7 +64,8 @@ class User(AbstractBaseUser):
     country = models.CharField(max_length=50, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
     zip = models.CharField(max_length=5, null=True, blank=True)
-    photo = models.ImageField(upload_to="profile-logo/%Y/%m/%d", blank=True, null=True)
+    # photo = models.ImageField(_("Avatar"), upload_to=upload_to, blank=True)
+    photo = models.ImageField(upload_to=upload_to, null=True)
 
     objects = UserManager()
     # USERNAME_FIELD = 'username'
