@@ -1,31 +1,22 @@
 """
+email.py
 Module for sending emails
 make email async https://code.tutsplus.com/tutorials/using-celery-with-django-for-background-task-processing--cms-28732
 
 """
 import logging
 import os
+
 from celery.decorators import task
-from django.template import Context
 from django.conf import settings
-from django.core.mail import send_mail, EmailMultiAlternatives
-from email.mime.image import MIMEImage
+from django.core.mail import EmailMessage, send_mail
+from django.template import TemplateDoesNotExist
 from django.template.loader import get_template, render_to_string
 
 from meslimmo.celery import app
 
 logger = logging.getLogger(__name__)
 
-"""
-def make_activation_code():
-    random_string = str(random.random())
-    random_digest = sha1(force_bytes(random_string)).hexdigest()[:5]
-    time_string = str(datetime.now().microsecond)
-
-    combined_string = random_digest + time_string
-
-    return sha1(force_bytes(combined_string)).hexdigest()
-"""
 
 def sending_email(receiver, subject, template_name, key):
     """
@@ -33,16 +24,8 @@ def sending_email(receiver, subject, template_name, key):
     send the email/ return error message
     """
     try:
-        logger.debug(f"key_data: {key}")
+        logger.debug(key)
         message = get_template(template_name=template_name).render(key)
-        msg = EmailMultiAlternatives(subject, body=message, from_email="Hello from tenancia", to=[receiver])
-        msg.content_subtype = "html"
-        msg.mixed_subtype = "related"
-
-
-        msg.send(fail_silently=False)
-        logger.info(f"Activation mail sent to {receiver} with {key} as data")
-
         send_mail(
             subject,
             "Hello from tenancia",
@@ -52,8 +35,7 @@ def sending_email(receiver, subject, template_name, key):
         )
 
     except Exception as exception:
-        logger.debug(f"Error occured: {exception}")
-        print("Error occured")
+        logger.debug(exception)
         print(exception)
 
 
@@ -76,7 +58,7 @@ class Email:
         key = {"first_name": user.username, "password_reset_url": token}
         sending_email(receiver, subject, template_name, key)
 
-
+    @task(name="emails.activate_clipped_asset")
     def password_change_email(self, user):
         """
         Accepts the following  parameters: user
@@ -107,6 +89,9 @@ class Email:
         }
         sending_email(receiver, subject, template_name, key)
 
+    @task(name="sum_two_numbers")
+    def add(x, y):
+        return x + y
 
 
 """
