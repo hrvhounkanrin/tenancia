@@ -71,19 +71,12 @@ class UserViewSet(ModelViewSet):
     def get_permissions(self):
         permission_classes = []
         if self.action == "create":
-            permission_classes = [AllowAny]
-        elif (
-            self.action == "retrieve"
-            or self.action == "update"
-            or self.action == "partial_update"
-        ):
-            permission_classes = [IsLoggedInUserOrAdmin]
-        elif self.action == "list" or self.action == "destroy":
-            permission_classes = [IsAdminUser]
+            self.permission_classes = [AllowAny]
+        if self.action in ["retrieve", "update", "partial_update"]:
+            self.permission_classes = [IsLoggedInUserOrAdmin]
+        if self.action in ["list", "destroy"]:
+            self.permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
-
-
-# Create your views here.
 
 
 class CustomObtainJSONWebToken(ObtainJSONWebToken):

@@ -39,21 +39,10 @@ def sending_email(receiver, subject, template_name, key):
         msg.content_subtype = "html"
         msg.mixed_subtype = "related"
 
-        """
-        img_dir = 'static/mail'
-        img_names = ['facebook.png', 'instagram.png', 'linkedin.png', 'mail.png', 'mail-separator.png', 'tenancia.png', 'youtube.png']
-        for img_name in img_names:
-            file_path = os.path.join(img_dir, img_name)
-            with open(file_path, 'rb') as f:
-                img = MIMEImage(f.read())
-                img.add_header('Content-ID', '<{name}>'.format(name=img_name))
-                img.add_header('Content-Disposition', 'inline', filename=img_name)
-            msg.attach(img)
-            logger.info('<{name}>'.format(name=img_name))
-        """
+
         msg.send(fail_silently=False)
         logger.info(f"Activation mail sent to {receiver} with {key} as data")
-        """
+
         send_mail(
             subject,
             "Hello from tenancia",
@@ -61,7 +50,6 @@ def sending_email(receiver, subject, template_name, key):
             [receiver],
             html_message=message,
         )
-        """
 
     except Exception as exception:
         logger.debug(f"Error occured: {exception}")
