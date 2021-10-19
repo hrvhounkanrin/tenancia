@@ -10,20 +10,8 @@ class TypeDependence(models.Model):
     utilite = models.CharField(max_length=256, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL,
-        editable=False,
-        related_name="depenency_created_user",
-    )
-    modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL,
-        editable=False,
-        related_name="depenency_updated_user",
-    )
+    created_by = models.IntegerField(null=True)
+    modified_by = models.IntegerField(null=True)
 
 
 class Appartement(models.Model):
@@ -42,7 +30,7 @@ class Appartement(models.Model):
     )
     intitule = models.CharField(max_length=50)
     """level le niveau de l'appartement sur l'immeuble."""
-    level = models.IntegerField(null=False)
+    level = models.IntegerField(default=0, null=False)
     autre_description = models.TextField(max_length=1024, null=True)
     immeuble = models.ForeignKey(
         "immeuble.Immeuble", null=True, on_delete=models.SET_NULL

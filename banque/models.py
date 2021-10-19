@@ -13,20 +13,8 @@ class Banque(models.Model):
     pays = models.ForeignKey(Country, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL,
-        editable=False,
-        related_name="banque_created_user",
-    )
-    modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL,
-        editable=False,
-        related_name="banque_updated_user",
-    )
+    created_by = models.IntegerField(null=True)
+    modified_by = models.IntegerField(null=True)
 
     def __str__(self):
         """Banque model representation."""

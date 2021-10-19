@@ -18,13 +18,10 @@ class Client(models.Model):
         on_delete=models.CASCADE,
         null=True,
     )
-    banque = models.ForeignKey(
-        "banque.Banque",
-        on_delete=models.SET_NULL,
-        null=True,
-    )
+    banque = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    allow_sharing = models.BooleanField(default=False) # autoriser le partage des quittance pour tier payeur
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,

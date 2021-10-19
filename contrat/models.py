@@ -10,20 +10,8 @@ class Accesoireloyer(models.Model):
     utilite = models.CharField(max_length=256)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL,
-        editable=False,
-        related_name="accessoire_created_user",
-    )
-    modified_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.SET_NULL,
-        editable=False,
-        related_name="accessoire_updated_user",
-    )
+    created_by = models.IntegerField(null=True)
+    modified_by = models.IntegerField(null=True)
 
 
 class Contrat(models.Model):
