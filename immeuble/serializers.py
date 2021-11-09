@@ -2,12 +2,10 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from rest_framework import serializers
-
 from appartement.models import Appartement
 from appartement.serializers import AppartementSerializers, ClonerAppartementSerializer
 from proprietaire.models import Proprietaire
-from proprietaire.serializers import ProprietaireSerializers
-
+from societe.models import RealEstateUsers, RealEstate
 from .models import AutoName, Immeuble
 
 
@@ -17,9 +15,11 @@ class ImmeubleSerializers(serializers.ModelSerializer):
     # proprietaire = ProprietaireSerializers(read_only=True)
     appartements = serializers.SerializerMethodField()
     proprietaire_id = serializers.PrimaryKeyRelatedField(
-        source="Proprietaire", queryset=Proprietaire.objects.all(), write_only=True
-    )  # ,
-
+        source="Proprietaire", queryset=Proprietaire.objects.all(), write_only=True, required=False
+    )
+    realestate_id = serializers.PrimaryKeyRelatedField(
+        source="RealEstate", queryset=RealEstate.objects.all(), write_only=True, required=False
+    )
     class Meta:
         """Immeuble serializer meta."""
 
@@ -38,6 +38,7 @@ class ImmeubleSerializers(serializers.ModelSerializer):
             "latitude",
             "ref_immeuble",
             "proprietaire_id",
+            "realestate_id",
             "appartements",
         )  #'proprietaire',
 
@@ -54,9 +55,46 @@ class ImmeubleSerializers(serializers.ModelSerializer):
         :rtype: Immeuble
         """
         proprietaire = validated_data.pop("Proprietaire", None)
+        realEstate = validated_data.pop("RealEstate", None)
+        if not proprietaire and not realEstate:
+            raise serializers.ValidationError("Il manque le propriétaire ou l'agence immobilière.")
+        # noinspection PyPackageRequirements
+        user_count = RealEstateUsers.objects.filter(user=self.context["request"].user,
+                                            societe=realEstate).count()
+        if realEstate and user_count <= 0:
+            raise serializers.ValidationError("Not authorized")
+        return Immeuble.objects.create(proprietaire=proprietaire,
+                                       realestate=realEstate, **validated_data)
 
-        return Immeuble.objects.create(proprietaire=proprietaire, **validated_data)
+class LigthImmeubleSerializers(serializers.ModelSerializer):
+    """Immeuble serializer."""
 
+    class Meta:
+        """Ligth Immeuble serializer meta."""
+
+        model = Immeuble
+        fields = (
+            "id",
+            "intitule",
+            "description",
+            "adresse",
+            "jour_emission_facture",
+            "jour_valeur_facture",
+            "ville",
+            "quartier",
+            "pays",
+            "longitude",
+            "latitude",
+            "ref_immeuble",
+        )
+
+
+
+    def create(self, validated_data):
+        raise serializers.ValidationError("Not implemented")
+
+    def update(self, validated_data):
+        raise serializers.ValidationError("Not implemented")
 
 class ClonerImmeubleSerializer(serializers.Serializer):
     nb = serializers.IntegerField(default=1)

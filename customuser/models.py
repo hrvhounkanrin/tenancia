@@ -94,7 +94,7 @@ class User(AbstractBaseUser):
         return self.first_name
 
     def __str__(self):
-        return self.username
+        return self.email
 
     def has_perm(self, perm, obj=None):
         return True

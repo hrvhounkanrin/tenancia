@@ -3,6 +3,7 @@ from rest_framework import permissions
 
 from client.models import Client
 from proprietaire.models import Proprietaire
+from societe.models import RealEstate
 
 
 class IsLoggedInUserOrAdmin(permissions.BasePermission):
@@ -49,4 +50,16 @@ class IsTenant(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """lessor."""
+        return obj.created_by == request.user
+
+class IsRealEstate(permissions.BasePermission):
+    """Is Real estate."""
+
+    def has_permission(self, request, view):
+        """Check if user is a real estate owner."""
+        real_estate = RealEstate.objects.filter(created_by=request.user).exists()
+        return real_estate
+
+    def has_object_permission(self, request, view, obj):
+        """real estate."""
         return obj.created_by == request.user

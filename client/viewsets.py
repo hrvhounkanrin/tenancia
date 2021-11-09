@@ -57,21 +57,7 @@ class ClientAction(ActionAPIView):
         :param kwargs:
         :return:
         """
-        """
-        if isinstance(request.data.get('client', None), list):
-            clients = request.data.pop('client')
-            client_objects = []
-            for client in clients:
-                serializer = ClientSerializer(
-                    data=client, context={'request': request})
-                serializer.is_valid(raise_exception=True)
-                client_objects.append(serializer)
 
-            saved_clients = [model.save(user_id=request.user.id) for model in client_objects]
-            serrialized_client = ClientSerializer(
-                saved_clients, many=True, context={'request': request})
-            return {'success': True, 'client': serrialized_client.data}
-        """
         request.data["user_id"] = request.user.id
         serializer = ClientSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)

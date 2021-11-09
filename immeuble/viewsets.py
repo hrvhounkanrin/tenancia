@@ -4,7 +4,7 @@ import requests
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from customuser.permissions import IsLessor
+from customuser.permissions import IsLessor, IsRealEstate
 from tools.viewsets import ActionAPIView
 
 from .models import AutoName, Immeuble
@@ -18,11 +18,11 @@ class ImmeubleAction(ActionAPIView):
 
     def __init__(self):
         self.permission_classes = {
-            "get_immeuble": [IsLessor],
-            "create_immeuble": [IsLessor],
-            "update_immeuble": [IsLessor],
-            "cloner_immeuble": [IsLessor],
-            "reverse_geocoding": [IsAuthenticated],
+            "get_immeuble": [IsLessor, IsRealEstate],
+            "create_immeuble": [IsLessor, IsRealEstate],
+            "update_immeuble": [IsLessor, IsRealEstate],
+            "cloner_immeuble": [IsLessor, IsRealEstate],
+            "reverse_geocoding": [IsAuthenticated, IsRealEstate],
         }
 
     def get_immeuble(self, request, params={}, *args, **kwargs):

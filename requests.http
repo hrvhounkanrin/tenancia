@@ -1,0 +1,225 @@
+# créer un compte
+POST http://localhost:8000/api/v1/accounts/users/
+content-type: application/json
+
+{
+    "last_name": "HOUNKANRIN",
+    "first_name": "Setondji",
+    "email": "rinvher@yahoo.fr",
+    "phone_number": "+22996120534",
+    "password": "merveiLLe"
+}
+
+# s'authentifier
+POST http://localhost:8000/api/v1/accounts/login/
+content-type: application/json
+
+{
+    "email": "hrvhounkanrin@gmail.com",
+    "password": "merveiLLe"
+}
+
+# créer un profil proporietaire(lessor)
+POST http://localhost:8000/api/v1/profile_action/create_profile
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM0ODE1OTc4LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ3NDM5Nzh9.MMpECJAf8b8t88xtH4WtLm2Uvc7j2Wj3vJE-gOLieXw
+
+{
+    "mode_paiement": "VIREMENT BANCAIRE",
+    "numcompte": "012154512054",
+    "banque_id": 9,
+    "pays_residence": "BJ",
+    "phone_number": "+22996120534",
+    "user_id": 2,
+    "profile_type": "lessor"
+}
+
+# créer un profil client(tenant)
+POST http://localhost:8000/api/v1/profile_action/create_profile
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM0ODE1OTc4LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ3NDM5Nzh9.MMpECJAf8b8t88xtH4WtLm2Uvc7j2Wj3vJE-gOLieXw
+
+{
+    "id": 0,
+    "profession": "Commercante",
+    "mode_paiement": "MOMO",
+    "ice_contact": "HOUNKANRIN PAULETTE",
+    "ice_number": "+22997611897",
+    "banque_id": 9,
+    "ice_relation": "string",
+    "phone_number": "+22996120534",
+    "numero_ifu": "02402952231322",
+     "profile_type": "tenant"
+}
+
+
+# créer un profil agence immobilier(realestate)
+POST http://localhost:8000/api/v1/profile_action/create_profile
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1MjMyOTE2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzUxNjA5MTZ9.uADnvnO_Jv3Rw2Kl07fJsfusBkfWguKdINzzWAQFQg8
+
+{
+    "id": 0,
+    "raison_social": "CKG ENTERPRISE",
+    "num_telephone": "+22995244000",
+    "adresse": "HOUNKANRIN JUSTE",
+    "num_carte_professionnel": "+22998523654",
+    "numero_ifu": "23301124455",
+    "date_delivrance": "2021-01-01",
+    "mode_recouvrement": "MOMO",
+     "profile_type": "real_estate"
+}
+
+
+# Mettre à jour un profil (lessor, tenant, real_estate)
+POST http://localhost:8000/api/v1/profile_action/update_profile
+    Same payload plus the object id
+
+
+# Récupérer la liste de tous les profils
+GET http://localhost:8000/api/v1/profile_action/get_profile
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM0ODk4MzIwLCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ4MjYzMjB9.vBAFnuXAQpsGn43e3IXmvNwlSM5XAGGo_daxElGQkKo
+
+
+# Créer un immeuble ou maison
+# l'intitulé n'est pas obligatoire, le système peut autonomme
+# "realestate_id" ou proprietaire_id (dépendamment du profil qui enregistre)
+POST http://localhost:8000/api/v1/immeuble_action/create_immeuble
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1MjMyOTE2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzUxNjA5MTZ9.uADnvnO_Jv3Rw2Kl07fJsfusBkfWguKdINzzWAQFQg8
+
+
+{
+    "intitule": "LES HIBISCUS",
+    "description": "RAS",
+    "adresse": "Agla, agongbomey",
+    "jour_emission_facture": 5,
+    "jour_valeur_facture": 5,
+    "ville": "COTONOU",
+    "quartier": "Agla",
+    "pays": "BJ",
+    "longitude": 0,
+    "latitude": 0,
+    "realestate_id":1
+}
+
+# Mettre à jour un immeuble ou maison
+POST http://localhost:8000/api/v1/immeuble_action/update_immeuble
+    Same payload plus the object id
+
+# Récupérer la liste des immeubles
+GET http://localhost:8000/api/v1/immeuble_action/get_immeuble
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1MjMyOTE2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzUxNjA5MTZ9.uADnvnO_Jv3Rw2Kl07fJsfusBkfWguKdINzzWAQFQg8
+
+
+# Récupérer les type de dépendences possible pour un appartement
+POST http://localhost:8000/api/v1/dependency_action/get_dependancies
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM0ODE1OTc4LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ3NDM5Nzh9.MMpECJAf8b8t88xtH4WtLm2Uvc7j2Wj3vJE-gOLieXw
+
+# Créer un appartement ou une chambre
+# l'intitulé n'est pas obligatoire, le système peut autonommer
+# level: définit le niveau de l'étage, 0 par défaut
+POST http://localhost:8000/api/v1/logement_action/create_logement
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1MjMyOTE2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzUxNjA5MTZ9.uADnvnO_Jv3Rw2Kl07fJsfusBkfWguKdINzzWAQFQg8
+
+{
+    "intitule": "0-A",
+    "level": 0,
+    "autre_description": "RAS",
+    "statut": "LIBRE",
+    "immeuble_id": 4,
+    "structures":[
+        {
+            "typeDependence_id":1,
+            "nbre": 1,
+            "superficie": 18
+        },
+        {
+            "typeDependence_id":2,
+            "nbre": 2,
+            "superficie": 10
+        },
+        {
+            "typeDependence_id":5,
+            "nbre": 1,
+            "superficie": 3
+        },
+        {
+            "typeDependence_id":3,
+            "nbre": 1,
+            "superficie": 6
+        }
+    ]
+}
+
+# Mettre à jour un appartement ou une chambre
+POST http://localhost:8000/api/v1/logement_action/update_logement
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1MjMyOTE2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzUxNjA5MTZ9.uADnvnO_Jv3Rw2Kl07fJsfusBkfWguKdINzzWAQFQg8
+    Same payload plus the object id
+
+# Cloner un appartement ou une chambre(pour ne pas avoir à le même type plusieurs fois)
+# level: définit le niveau de l'étage, 0 par défaut
+POST http://localhost:8000/api/v1/logement_action/cloner_logement
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1MjMyOTE2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzUxNjA5MTZ9.uADnvnO_Jv3Rw2Kl07fJsfusBkfWguKdINzzWAQFQg8
+
+{
+    "appartement_id": 1,
+    "immeuble_id": 1,
+    "level": 0,
+    "nbre": 2
+}
+
+# Récupérer les appartement
+GET http://localhost:8000/api/v1/logement_action/get_logement
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1MjMyOTE2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzUxNjA5MTZ9.uADnvnO_Jv3Rw2Kl07fJsfusBkfWguKdINzzWAQFQg8
+
+# Récupérer les mandats d'une agence immobilière
+GET http://localhost:8000/api/v1/mandat_action/get_mandat
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM0ODk4MzIwLCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ4MjYzMjB9.vBAFnuXAQpsGn43e3IXmvNwlSM5XAGGo_daxElGQkKo
+
+# Créer un mandat sur un immeuble pour une agence immobilière
+POST http://localhost:8000/api/v1/mandat_action/create_mandat
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM0ODk4MzIwLCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ4MjYzMjB9.vBAFnuXAQpsGn43e3IXmvNwlSM5XAGGo_daxElGQkKo
+
+{
+    "reference_mandat": "02ds45fs5",
+    "date_debut": "2021-10-01",
+    "duree": 24,
+    "date_echeance": "2021-12-31",
+    "tacite_reconduction": true,
+    "taux_commission": 20,
+    "immeuble_id": 1,
+    "societe_id": 1,
+    "owner_name": "LAWSON",
+    "owner_firstname": "EMANNUELLA",
+    "owner_name_phone_number": "+22987415263"
+}
+
+
+# Créer un mandat sur un immeuble pour une agence immobilière
+POST http://localhost:8000/api/v1/mandat_action/update_mandat
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM0ODk4MzIwLCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ4MjYzMjB9.vBAFnuXAQpsGn43e3IXmvNwlSM5XAGGo_daxElGQkKo
+    Same payload plus the object id
+
+# Créer un immeuble ou maison
+# l'intitulé n'est pas obligatoire, le système peut autonomme
+# "realestate_id" ou proprietaire_id (dépendamment du profil qui enregistre)
+POST http://localhost:8000/api/v1/realestate_action/add_user
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1NTczMjU2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzU1MDEyNTZ9.mhXmA7jRZawJXI2vwy6hGx6yi7F67B6BWPflP-tDGos
+
+
+{
+    "realestate_id": 5,
+    "email": "rinvher@yahoo.fr"
+}

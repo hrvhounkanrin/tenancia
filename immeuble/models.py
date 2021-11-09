@@ -20,7 +20,7 @@ class Immeuble(models.Model):
         null=True,
     )
     proprietaire = models.ForeignKey(
-        "proprietaire.Proprietaire", on_delete=models.CASCADE, null=False
+        "proprietaire.Proprietaire", on_delete=models.CASCADE, null=True
     )
 
     jour_emission_facture = models.IntegerField(default=5)
@@ -34,6 +34,13 @@ class Immeuble(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     nb_etage = models.IntegerField(default=0)
+    realestate = models.ForeignKey(
+        'societe.RealEstate',
+        null=True,
+        on_delete=models.SET_NULL,
+        editable=True,
+        related_name="realestate_managed",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,

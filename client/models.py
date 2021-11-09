@@ -18,7 +18,7 @@ class Client(models.Model):
         on_delete=models.CASCADE,
         null=True,
     )
-    banque = models.IntegerField(null=True)
+    banque_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     allow_sharing = models.BooleanField(default=False) # autoriser le partage des quittance pour tier payeur

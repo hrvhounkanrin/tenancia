@@ -67,6 +67,9 @@ class RealEstateUsers(models.Model):
         on_delete=models.SET_NULL,
         null=True,
     )
+    is_active = models.BooleanField(default=False)
+    invitation_token = models.CharField(max_length=64, null=False, default=uuid.uuid1())
+    token_exp_date = models.DateTimeField(null=True)
     profil = models.CharField(max_length=64, choices=USER_PROFIL, default=USER)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -78,18 +81,35 @@ class RealEstateUsers(models.Model):
 
 class Mandat(models.Model):
     """Mandat model."""
-
+    ANNULE = "ANNULE"
+    EN_COURS = "EN COURS"
+    RESILIE = "RESILIE"
+    TERME = "TERME"
+    STATUT_MANDAT = (
+        (ANNULE, "ANNULE"),
+        (EN_COURS, "EN COURS"),
+        (RESILIE, "RESILIE"),
+        (TERME, "TERME"),
+    )
     reference_mandat = models.CharField(max_length=150, null=True)
     date_debut = models.DateField(null=False)
     duree = models.IntegerField(null=False, default=12)
-    date_echeance = models.DateField()
+    date_echeance = models.DateField(null=True)
     tacite_reconduction = models.BooleanField(default=False)
+    statut = models.CharField(
+        max_length=64, choices=STATUT_MANDAT, default=EN_COURS
+    )
     taux_commission = models.IntegerField(default=10, null=False)
     mandant_physique = models.FileField(upload_to="documents/", null=True)
     immeuble = models.ForeignKey(
         "immeuble.Immeuble", null=True, on_delete=models.SET_NULL
     )
     societe = models.ForeignKey("RealEstate", null=True, on_delete=models.SET_NULL)
+    immeuble = models.ForeignKey("immeuble.Immeuble", null=True, on_delete=models.SET_NULL)
+    owner_name = models.CharField(max_length=50, null=False, default='')
+    owner_firstname = models.CharField(max_length=50, null=True)
+    owner_phone_number = models.CharField(max_length=50, null=False, default='')
+    owner_email = models.EmailField(null=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
@@ -106,3 +126,7 @@ class Mandat(models.Model):
         editable=False,
         related_name="mandat_updated_user",
     )
+
+    def __unicode__(self):
+        """Mandat representation."""
+        return f"Mandat: {self.reference_mandat} de {self.owner_name} {self.owner_firstname}"

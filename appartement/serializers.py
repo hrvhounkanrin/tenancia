@@ -120,14 +120,33 @@ class AppartementSerializers(serializers.ModelSerializer):
         return appartement.immeuble.intitule
 
     def get_proprietaire(self, appartement):
-        return "{} {}".format(appartement.immeuble.proprietaire.user.first_name,
-                              appartement.immeuble.proprietaire.user.last_name)
+        if appartement.immeuble.proprietaire \
+                is None and appartement.immeuble.realestate \
+                is None:
+            return None
+        if appartement.immeuble.proprietaire:
+            return "{} {}".format(appartement.immeuble.proprietaire.user.first_name,
+                                  appartement.immeuble.proprietaire.user.last_name)
+        return appartement.immeuble.realestate.raison_social
 
     def get_proprietaire_phone_number(self, appartement):
-        return appartement.immeuble.proprietaire.phone_number
+        if appartement.immeuble.proprietaire \
+                is None and appartement.immeuble.realestate \
+                is None:
+            return None
+        if appartement.immeuble.proprietaire:
+            return appartement.immeuble.proprietaire.phone_number
+        return appartement.immeuble.realestate.num_telephone
 
     def get_proprietaire_mail(self, appartement):
-        return appartement.immeuble.proprietaire.user.email
+        if appartement.immeuble.proprietaire \
+                is None and appartement.immeuble.realestate \
+                is None:
+            return None
+
+        if appartement.immeuble.proprietaire:
+            return appartement.immeuble.proprietaire.user.email
+        return appartement.immeuble.realestate.num_telephone
 
     def __autoname(self, immeuble, level):
         last_intitule = Appartement.objects.filter(immeuble=immeuble, level=level)

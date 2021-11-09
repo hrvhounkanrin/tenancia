@@ -133,12 +133,7 @@ class CustomUserAction(ActionAPIView):
             user.save()
             logger.info(f"User account activation successfuly: {user.email}")
             payload = jwt_payload_handler(user)
-            """
-                return Response({
-                    'token': jwt_encode_handler(payload),
-                    'user': user
-                })
-            """
+
             # Should be redirected to the frontend login page instead.
             return {
                 "success": True,
@@ -159,8 +154,6 @@ class CustomUserAction(ActionAPIView):
 
 
 class ProfileAction(ActionAPIView):
-
-
     def __get_profile(self, user_id):
         User = get_user_model()
         try:
@@ -203,7 +196,7 @@ class ProfileAction(ActionAPIView):
         profile_type = profile_type[0] if type(profile_type) == list else profile_type
         print(f"profile_type: {profile_type}")
         if profile_type is None or profile_type not in ['lessor', 'tenant', 'real_estate']:
-            return {"success": False, "payload": {"message": "Il manque le type de profil"}}
+            return {"success": False, "payload": {"message": "Il manque le type de profil(lessor, tenant, real_estate)"}}
 
         serializer_context = {
             "request": request,

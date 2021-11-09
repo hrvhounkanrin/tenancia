@@ -12,7 +12,7 @@ from appartement.serializers import (
     TypeDependenceSerializers,
 )
 from tools.viewsets import ActionAPIView
-from customuser.permissions import IsLessor, IsTenant
+from customuser.permissions import IsLessor, IsRealEstate
 logger = logging.getLogger(__name__)
 
 
@@ -21,11 +21,11 @@ class AppartementViewSet(ActionAPIView):
 
     def __init__(self):
         self.permission_classes = {
-            "get_logement": [IsLessor],
-            "create_logement": [IsLessor],
-            "update_logement": [IsLessor],
-            "cloner_immeuble": [IsLessor],
-            "cloner_logement": [IsLessor],
+            "get_logement": [IsLessor, IsRealEstate],
+            "create_logement": [IsLessor, IsRealEstate],
+            "update_logement": [IsLessor, IsRealEstate],
+            "cloner_immeuble": [IsLessor, IsRealEstate],
+            "cloner_logement": [IsLessor, IsRealEstate],
         }
 
 
@@ -48,7 +48,7 @@ class AppartementViewSet(ActionAPIView):
             queryset = Appartement.objects.filter(created_by=self.request.user,
                                                   statut=params['statut_appartement'],
                                                   intitule__istartswith=params['query'])
-            print("searching appartment: {}".format(params['statut_appartement']))
+            logger.debug("searching appartment: {}".format(params['statut_appartement']))
             serializer = AppartementImmeubleSerializers(
                 queryset, context=serializer_context, many=True
             )

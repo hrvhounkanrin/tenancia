@@ -99,7 +99,6 @@ class ContratSerializers(serializers.ModelSerializer):
         if appartement_instance.statut != 'LIBRE':
             raise serializers.ValidationError("Impossible de mettre un contrat sur un appartement {}".format(appartement_instance.statut))
 
-        print(f"validated_data: {validated_data}")
         client_instance = validated_data.pop("Client", None)
 
         date_effet = validated_data["date_effet"]

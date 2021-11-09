@@ -36,6 +36,7 @@ class ClientSerializer(serializers.ModelSerializer):
             "user",
             "user_id",
             "phone_number",
+            "banque_id"
         )
 
     def create(self, validated_data):
