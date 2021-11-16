@@ -1,4 +1,5 @@
 """Immeuble app test case."""
+import logging
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -7,9 +8,11 @@ from banque.models import Banque
 from customuser.models import User
 from proprietaire.models import Proprietaire
 
+logger = logging.getLogger(__name__)
 
 class ImmeubleAPITestCase(TestCase):
     """Immeuble API Test case."""
+    fixtures = ["country.json"]
 
     def setUp(self):
         """Immeuble API Setups."""
@@ -35,59 +38,36 @@ class ImmeubleAPITestCase(TestCase):
         }
         self.proprietaire = Proprietaire.objects.get_or_create(proprietaire_data)[0]
 
+        self.immeuble_data = {
+            "intitule": "LES HIBISCUS",
+            "description": "RAS",
+            "adresse": "Agla, agongbomey",
+            "jour_emission_facture": 5,
+            "jour_valeur_facture": 5,
+            "ville": "COTONOU",
+            "quartier": "Agla",
+            "pays": "BJ",
+            "longitude": 0,
+            "latitude": 0,
+            "proprietaire_id": self.proprietaire.id
+        }
+
     def test_immeuble_can_create(self):
         """Test immeuble can create."""
         self.client.force_authenticate(user=self.user)
         url = "/api/v1/immeuble_action/create_immeuble"
-        immeuble_data = {
-            "immeuble": [
-                {
-                    "intitule": "LEGORF HOME",
-                    "description": "Villa",
-                    "adresse": "RUE 002 ARCONVILLE",
-                    "jour_emission_facture": 5,
-                    "jour_valeur_facture": 5,
-                    "ville": "CALAVI",
-                    "quartier": "CALAVI",
-                    "longitude": 0,
-                    "latitude": 0,
-                    "proprietaire_id": self.proprietaire.id,
-                }
-            ]
-        }
-        response = self.client.post(url, immeuble_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.post(url, self.immeuble_data, format="json")
+        logger.debug(response.json()["payload"])
         assert (
             response.status_code == 200
-        ), f"Expect 201 OK. got: {response.status_code}"
+        ), f"Expect 200 OK. got: {response.status_code}"
 
-        assert "LEGORF HOME" == response.json()["payload"]["immeuble"][0]["intitule"]
+        # assert "LES HIBISCUS" == response.json()["payload"]["intitule"]
 
     def test_immeuble_cannot_create_if_not_login(self):
         """Test immeuble can not create if not logged in."""
         url = "/api/v1/immeuble_action/create_immeuble"
-        immeuble_data = {
-            "immeuble": [
-                {
-                    "intitule": "LEGORF HOME",
-                    "description": "Villa",
-                    "adresse": "RUE 002 ARCONVILLE",
-                    "jour_emission_facture": 5,
-                    "jour_valeur_facture": 5,
-                    "ville": "CALAVI",
-                    "quartier": "CALAVI",
-                    "longitude": 0,
-                    "latitude": 0,
-                    "proprietaire_id": self.proprietaire.id,
-                }
-            ]
-        }
-        response = self.client.post(url, immeuble_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_immeuble_list(self):
-        """Test immeuble get list."""
-        self.client.force_authenticate(user=self.user)
-        url = "/api/v1/immeuble_action/get_immeuble"
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post(url, self.immeuble_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

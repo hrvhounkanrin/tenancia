@@ -1,6 +1,8 @@
+import logging
 import os
 import sys
 from setup import main as project_setup_main
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     project_setup_main()
@@ -14,7 +16,7 @@ if __name__ == "__main__":
         try:
             import django
 
-            print(f"runing django {django.VERSION}")
+            logger.debug(f"runing django {django.VERSION}")
         except ImportError:
             raise ImportError(
                 "Couldn't import Django. Are you sure it's installed and "

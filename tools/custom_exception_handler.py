@@ -64,10 +64,8 @@ def custom_exception_handler(exc, context):
     if response is not None:
         data = response.data
         response.data = {}
-        # print("data: {}".format(data))
         errors = []
         for field, value in data.items():
-            # print("field: {}".format(field))
             errors.append("{} : {}".format(field, " ".join(value)))
 
         response.data["errors"] = errors

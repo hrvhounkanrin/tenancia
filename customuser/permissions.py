@@ -31,12 +31,15 @@ class IsLessor(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if user is lessor."""
+        if request.user.is_anonymous:
+            return False
         lessor = Proprietaire.objects.filter(user__id=request.user.id).exists()
         return request.user and lessor
 
     def has_object_permission(self, request, view, obj):
         """lessor."""
-        return False
+        if request.user.is_anonymous:
+            return False
         return obj.created_by == request.user
 
 
@@ -45,11 +48,15 @@ class IsTenant(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if user is a client."""
+        if request.user.is_anonymous:
+            return False
         client = Client.objects.filter(user__id=request.user.id).exists()
         return request.user and client
 
     def has_object_permission(self, request, view, obj):
         """lessor."""
+        if request.user.is_anonymous:
+            return False
         return obj.created_by == request.user
 
 class IsRealEstate(permissions.BasePermission):
@@ -57,9 +64,13 @@ class IsRealEstate(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if user is a real estate owner."""
+        if request.user.is_anonymous:
+            return False
         real_estate = RealEstate.objects.filter(created_by=request.user).exists()
         return real_estate
 
     def has_object_permission(self, request, view, obj):
         """real estate."""
+        if request.user.is_anonymous:
+            return False
         return obj.created_by == request.user

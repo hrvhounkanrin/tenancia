@@ -1,40 +1,71 @@
 version: 2
 jobs:
-  build:
+  build-job:
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3
       - image: circleci/postgres:10.5
     environment:
       DATABASE_URL: postgres://postgres:@localhost/circle_test
       DJANGO_SECRET_KEY: test
       DJANGO_READ_DOT_ENV_FILE: True
-      DJANGO_SETTINGS_MODULE: config.settings.test
+      DJANGO_SETTINGS_MODULE: meslimmo.settings
     working_directory: ~/meslimmo
-
     steps:
-      # Step 1: obtain repo from GitHub
       - checkout
       - restore_cache:
-          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
-      # Step 2: create virtual env and install dependencies
+          key: v001-app-{{ .Branch }}-{{ checksum "requirements/local.txt" }}
       - run:
-          name: install dependencies
+          name: Install Python dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt
+            pip install -r requirements/local.txt
       - save_cache:
-          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          key: v001-app-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:
-            - "venv"
+            - 'venv'
       - run:
-          name: Create LOGS Directory (if not exists)
-          command: |
-            sudo mkdir -m777 -p ~/meslimmo/LOGS
-      # Step 3: run linter and tests
-      # flake8 --exclude=venv* --statistics
+          name: Add python project to path
+          command: 'echo "$(realpath .)/meslimmo" > venv/lib/python3.7/site-packages/app.pth'
       - run:
-          name: run tests
+          name: Run tests
           command: |
             . venv/bin/activate
-            pytest -v
+            python manage.py test
+  deploy-job:
+    docker:
+      # Important to note that we're using 2.7 here. This is because at the time of
+      # writing, Fabric doesn't work with Python 3
+      - image: circleci/python:2.7
+    working_directory: ~/meslimmo
+    steps:
+      - checkout
+      - run:
+          name: Deploy via Fabric
+          command: |
+            sudo pip install fabric==1.14.0
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              fab -f .circleci/deploy.py -i ~/.ssh/id_rsa production deploy
+            else
+              fab -f .circleci/deploy.py -i ~/.ssh/id_rsa staging deploy
+            fi
+
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build-job:
+          filters:
+            branches:
+              only:
+                - develop
+                - master
+      - deploy-job:
+          requires:
+            - build-job
+          filters:
+            branches:
+              only:
+                - develop
+                - masterapp

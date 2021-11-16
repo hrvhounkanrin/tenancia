@@ -44,22 +44,22 @@ class ActionAPIView(APIView):
         if isinstance(self.permission_classes, list):
             for permission in self.get_permissions():
                 if not permission.has_permission(request, self):
-                    logger.debug(f"{permission} is not in ")
+                    # logger.debug(f"{permission} is not in ")
                     self.permission_denied(
                         request,
                         message=getattr(permission, 'message', None)
                     )
         else:
             if action not in self.get_permissions().keys():
-                logger.debug(f"{action} not allowed: {self.get_permissions().keys()}")
+                # logger.debug(f"{action} not allowed: {self.get_permissions().keys()}")
                 self.permission_denied(
                     request, message='permission denied.'
                 )
             permission_list = [permission.has_permission(request, self)
                                for permission in self.get_permissions()[action]]
-            logger.debug(f"permission evaluation {permission_list} not allowed for {action}.")
+            # logger.debug(f"permission evaluation {permission_list} not allowed for {action}.")
             if not any(permission_list):
-                logger.debug(f"any permissoni for {action}")
+                # logger.debug(f"any permissoni for {action}")
                 self.permission_denied(
                     request, message="Permission denied."
                 )

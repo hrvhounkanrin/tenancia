@@ -1,18 +1,18 @@
 """Housing app tests."""
+import logging
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
-
 from appartement.models import TypeDependence
 from banque.models import Banque
 from customuser.models import User
 from immeuble.models import Immeuble
 from proprietaire.models import Proprietaire
-
+logger = logging.getLogger(__name__)
 
 class AppartementAPITestCase(TestCase):
     """Housing app tests case."""
-
+    fixtures = ['typedependence.json']
     def setUp(self):
         """Housing API test case."""
         self.client = APIClient()
@@ -90,7 +90,7 @@ class AppartementAPITestCase(TestCase):
             ],
         }
         response = self.client.post(url, housing_data, format="json")
-
+        logger.debug(f"response: {response}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert (
             response.status_code == 200

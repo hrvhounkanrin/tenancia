@@ -1,4 +1,5 @@
 """Customuser API test case."""
+import logging
 import inspect
 import json
 
@@ -9,6 +10,7 @@ from rest_framework.test import APIClient
 
 from .models import User
 
+logger = logging.getLogger(__name__)
 
 class CustomuserAPITestCase(TestCase):
     """Proprietaire API TestCase."""
@@ -28,10 +30,11 @@ class CustomuserAPITestCase(TestCase):
             "zip": "",
         }
 
+
     def test_user_can_register(self):
         """Test user can register."""
         url = reverse("restapi:root:customuser:users-list")
-        print(f"Running {inspect.stack()[0][3]} at url {url}")
+        logger.debug(f"Running {inspect.stack()[0][3]} at url {url}")
 
         response = self.client.post(url, self.user_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -43,7 +46,7 @@ class CustomuserAPITestCase(TestCase):
     def test_user_can_login(self):
         """Test user can login."""
         url = reverse("restapi:root:customuser:auth-login")
-        print(f"Running {inspect.stack()[0][3]} at url {url}")
+        logger.debug(f"Running {inspect.stack()[0][3]} at url {url}")
         user, created = User.objects.get_or_create(
             first_name="HOUNKANRIN", last_name="Hervé", email="hrvhounkanrin@gmail.com"
         )

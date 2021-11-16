@@ -23,13 +23,17 @@ python manage.py makemigrations --no-input
 echo "Apply database migrations"
 python manage.py migrate --no-input
 python manage.py update_countries_plus
-# python manage.py loaddata autoname.json
-# python manage.py loaddata banque.json
-# python manage.py loaddata typedependence.json
-# python manage.py loaddata accessoireloyer.json
-# python manage.py loaddata user.json
-# python manage.py loaddata client.json
-# python manage.py loaddata proprietaire.json
+python manage.py load_autoname
+python manage.py load_banks
+python manage.py load_type_dependencies
+python manage.py load_accessoires
+if ["$DEBUG"==1]
+then
+  python manage.py loaddata user.json
+  python manage.py loaddata client.json
+  python manage.py loaddata proprietaire.json
+fi
+
 
 # celery -b rabbitmq -A meslimmo.celery worker --loglevel=debug
 # Start server

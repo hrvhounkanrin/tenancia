@@ -36,7 +36,6 @@ def sending_email(receiver, subject, template_name, key):
 
     except Exception as exception:
         logger.debug(exception)
-        print(exception)
 
 
 class Email:

@@ -28,26 +28,26 @@ class ProprietaireAPITestCase(TestCase):
             "libbanque": "BANK OF ARFICA",
         }
         self.banque = Banque.objects.get_or_create(banque_data)[0]
+        self.proprietaire_data = {
+            "mode_paiement": "VIREMENT BANCAIRE",
+            "numcompte": "012154512054",
+            "banque_id": self.banque.id,
+            "pays_residence": "BJ",
+            "phone_number": "+22996120534",
+            "user_id": 2,
+            "profile_type": "lessor"
+        }
 
     def test_proprietaire_can_create(self):
         """Test proprietaire can create."""
-        # url = reverse("invoicing_action/get_invoicing", kwargs={"id": id})
-        # client.get(url)
         self.client.force_authenticate(user=self.user)
-        url = "/api/v1/proprietaire_action/create_proprio"
-        proprietaire_data = {
-            "mode_paiement": "VIREMENT BANCAIRE",
-            "numcompte": "201515454887",
-            "banque_id": self.banque.id,
-            "pays_residence": "BJ",
-        }
-
-        response = self.client.post(url, proprietaire_data, format="json")
+        url = "/api/v1/profile_action/create_profile"
+        response = self.client.post(url, self.proprietaire_data, format="json")
         assert response.status_code == 200, "Expect 200 OK. got: {}".format(
             response.status_code
         )
-        assert response.json()["payload"]["numcompte"] == "201515454887"
-        response = self.client.post(url, proprietaire_data, format="json")
+        assert response.json()["payload"]["lessor"]["numcompte"] == "012154512054"
+        response = self.client.post(url, self.proprietaire_data, format="json")
         assert (
             response.status_code == 400
         ), f"Expect 400 OK. got: {response.status_code}"
@@ -55,13 +55,7 @@ class ProprietaireAPITestCase(TestCase):
     def test_proprietaire_cannot_create_if_not_login(self):
         """Test proprietaire can not create if not logged in."""
         url = "/api/v1/proprietaire_action/create_proprio"
-        proprietaire_data = {
-            "mode_paiement": "VIREMENT BANCAIRE",
-            "numcompte": "201515454887",
-            "banque_id": self.banque.id,
-            "pays_residence": "BJ",
-        }
-        response = self.client.post(url, proprietaire_data, format="json")
+        response = self.client.post(url, self.proprietaire_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_proprietaire_list(self):

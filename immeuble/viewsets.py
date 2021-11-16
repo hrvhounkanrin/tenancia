@@ -74,7 +74,6 @@ class ImmeubleAction(ActionAPIView):
             return {"success": True, "payload": serialized_proprio.data}
 
         data = request.data
-        print(data)
         if data.get('intitule', None) is None or data.get('intitule', None) == '':
             autoname = AutoName.objects.random()
             data["intitule"] = autoname.libelle
@@ -156,7 +155,6 @@ class ImmeubleAction(ActionAPIView):
 
     def reverse_geocoding(self, func_request, params={}, *args,**kwargs):
         api_key = 'AIzaSyBAkNKNluUXWFnVbxi-81lrdojzLx5MOyY'
-        print(params)
         url = "https://maps.googleapis.com/maps/api/geocode/json?latlng={},{}&key={}".format(params.get('lat', None), params.get('lng', None), api_key)
         resp = requests.get(url=url)
         data = resp.json()

@@ -79,7 +79,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.is_active = False
         user.save()
-        logger.info(f"User signup successfuly: {validated_data}")
+        # logger.debug(f"User signup successfuly: {validated_data}")
         email_sender = Email()
         token_generator = TokenGenerator()
 
