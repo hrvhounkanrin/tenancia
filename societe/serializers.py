@@ -56,7 +56,7 @@ class SocieteSerializer(serializers.ModelSerializer):
         nb_real_estate = RealEstate.objects.filter(created_by=user.id).count()
         if nb_real_estate > 0:
             raise serializers.ValidationError(
-                "Vous avez déjà configuré une agence immobilière"
+                "Vous ne pouvez pas configuré plus d'une agence immobilière."
             )
 
         societe = RealEstate.objects.create(

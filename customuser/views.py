@@ -1,7 +1,3 @@
-import os
-from django.http import QueryDict
-import json
-from rest_framework import parsers
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import logout as django_logout
@@ -58,12 +54,6 @@ def jwt_response_payload_handler(token, user=None, request=None):
         # 'token_validty':timedelta(seconds=settings.TOKEN_EXPIRED_AFTER_SECONDS) - time_elapsed
     }
 
-
-
-
-
-
-
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -77,7 +67,6 @@ class UserViewSet(ModelViewSet):
         if self.action in ["list", "destroy"]:
             self.permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
-
 
 class CustomObtainJSONWebToken(ObtainJSONWebToken):
     def post(self, request):
@@ -153,7 +142,6 @@ class PasswordResetView(GenericAPIView):
             status=status.HTTP_200_OK,
         )
 
-
 class PasswordResetConfirmView(GenericAPIView):
     """
     Password reset e-mail link is confirmed, therefore
@@ -181,7 +169,6 @@ class PasswordResetConfirmView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"detail": _("Password has been reset with the new password.")})
-
 
 class PasswordChangeView(GenericAPIView):
     """
@@ -213,7 +200,6 @@ class PasswordChangeView(GenericAPIView):
                 )
             }
         )
-
 
 class LogoutView(APIView):
     """
@@ -250,7 +236,6 @@ class LogoutView(APIView):
         return Response(
             {"detail": _("Successfully logged out.")}, status=status.HTTP_200_OK
         )
-
 
 class ActivateAccount(GenericViewSet):
     permission_classes = (AllowAny,)

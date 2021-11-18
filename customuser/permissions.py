@@ -1,10 +1,12 @@
 """Managing permission."""
+import logging
 from rest_framework import permissions
 
 from client.models import Client
 from proprietaire.models import Proprietaire
 from societe.models import RealEstate
 
+logger = logging.getLogger(__name__)
 
 class IsLoggedInUserOrAdmin(permissions.BasePermission):
     """Is logged in user or admin."""

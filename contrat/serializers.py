@@ -131,9 +131,8 @@ class ContratSerializers(serializers.ModelSerializer):
         contrat.save()
         appartement_instance.statut = 'RESERVE'
         appartement_instance.save(update_fields=['statut'])
-        # sms = Sms()
+        """
         sms_client = Sms()
-        # print(sms_client)
         sms_client.contrat_emis_sms.delay(
             {
                 "first_name": contrat.client.user.first_name,
@@ -143,6 +142,7 @@ class ContratSerializers(serializers.ModelSerializer):
                 "date_effet": contrat.date_effet,
             }
         )
+        """
         return contrat
 
     def update(self, instance, validated_data):

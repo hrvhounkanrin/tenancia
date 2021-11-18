@@ -19,7 +19,7 @@ class ImmeubleAction(ActionAPIView):
     def __init__(self):
         self.permission_classes = {
             "get_immeuble": [IsLessor, IsRealEstate],
-            "create_immeuble": [IsLessor, IsRealEstate],
+            "create_immeuble": [IsRealEstate],
             "update_immeuble": [IsLessor, IsRealEstate],
             "cloner_immeuble": [IsLessor, IsRealEstate],
             "reverse_geocoding": [IsAuthenticated, IsRealEstate],

@@ -51,27 +51,19 @@ class ActionAPIView(APIView):
                     )
         else:
             if action not in self.get_permissions().keys():
-                # logger.debug(f"{action} not allowed: {self.get_permissions().keys()}")
+                logger.debug(f"{action} not allowed: {self.get_permissions().keys()}")
                 self.permission_denied(
                     request, message='permission denied.'
                 )
             permission_list = [permission.has_permission(request, self)
                                for permission in self.get_permissions()[action]]
-            # logger.debug(f"permission evaluation {permission_list} not allowed for {action}.")
+            logger.debug(f"permission evaluation {permission_list} not allowed for {action}.")
             if not any(permission_list):
-                # logger.debug(f"any permissoni for {action}")
+                logger.debug(f"any permissoni for {action}")
                 self.permission_denied(
                     request, message="Permission denied."
                 )
-            """
-            for permission in self.get_permissions()[action]:
 
-                if not permission.has_permission(request, self):
-                    logger.debug(f"{action} not allowed: {permission}")
-                    self.permission_denied(
-                        request, message=getattr(permission, 'message', None)
-                    )
-            """
     def initial(self, request, *args, **kwargs):
         """
         Runs anything that needs to occur prior to calling the method handler.
@@ -87,7 +79,6 @@ class ActionAPIView(APIView):
         request.version, request.versioning_scheme = version, scheme
 
         # Ensure that the incoming request is permitted
-        print(f"kwargs.get('action', None):{kwargs.get('action', None)}")
         self.perform_authentication(request)
         self.check_permissions(request, kwargs.get('action', None))
         self.check_throttles(request)
@@ -103,9 +94,6 @@ class ActionAPIView(APIView):
         response_status = 200
         try:
             lv_action = self.__getattribute__(self._last_action)
-            # print(callable(getattr(self, 'exchange_token', None)))
-            # print('self._last_action: {}'.format(type(self.__getattribute__(self._last_action))))
-            # print('self._last_action decorator: {}'.format(get_decorators(lv_action)))
         except AttributeError:
             lv_action = self.action_does_not_exist
             response_status = 404

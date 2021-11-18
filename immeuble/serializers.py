@@ -61,8 +61,10 @@ class ImmeubleSerializers(serializers.ModelSerializer):
         # noinspection PyPackageRequirements
         user_count = RealEstateUsers.objects.filter(user=self.context["request"].user,
                                             societe=realEstate).count()
+
         if realEstate and user_count <= 0:
             raise serializers.ValidationError("Not authorized")
+
         return Immeuble.objects.create(proprietaire=proprietaire,
                                        realestate=realEstate, **validated_data)
 

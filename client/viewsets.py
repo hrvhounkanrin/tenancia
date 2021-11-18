@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect
 from client.models import Client
 from tools.viewsets import ActionAPIView
 from .serializers import ClientSerializer
-from customuser.permissions import IsLessor, IsTenant
+from customuser.permissions import IsLessor, IsTenant, IsRealEstate
 from django.db.models import Q
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class ClientAction(ActionAPIView):
         "get_client":  [permissions.IsAuthenticated, IsLessor],
         "create_client": [permissions.IsAuthenticated],
         "update_client": [permissions.IsAuthenticated, IsTenant],
-        "retrieve_client": [IsLessor]
+        "retrieve_client": [IsLessor, IsRealEstate]
         }
 
     def get_client(self, request, params={}, *args, **kwargs):

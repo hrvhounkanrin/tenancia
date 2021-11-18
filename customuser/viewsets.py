@@ -147,11 +147,7 @@ class CustomUserAction(ActionAPIView):
                 "payload": "Une erreur est survenue. Merci de reessayer.",
             }
 
-
-
-
 """Get connected user profiles"""
-
 
 class ProfileAction(ActionAPIView):
     def __get_profile(self, user_id):

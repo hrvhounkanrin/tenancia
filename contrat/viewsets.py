@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from quittance.models import Quittance
 from quittance.serializers import  QuittanceSerializers
-from customuser.permissions import IsLessor, IsTenant
+from customuser.permissions import IsLessor, IsTenant, IsRealEstate
 from tools.viewsets import ActionAPIView
 
 from .models import Accesoireloyer, Contrat, ContratAccessoiresloyer
@@ -109,10 +109,10 @@ class ContratAction(ActionAPIView):
 
     def __init__(self):
         self.permission_classes = {
-            "get_lessor_contrat": [IsLessor],
+            "get_lessor_contrat": [IsLessor, IsRealEstate],
             "get_tenant_contrat": [IsTenant],
-            "create_contrat": [IsLessor],
-            "update_contrat": [IsLessor],
+            "create_contrat": [IsLessor, IsRealEstate],
+            "update_contrat": [IsLessor, IsRealEstate],
             "contrat_agreement": [IsTenant],
         }
 
@@ -198,6 +198,7 @@ class ContratAction(ActionAPIView):
                 saved_contrat, context=serializer_context, many=True
             )
             return {"success": True, "payload": serialized_contrat.data}
+        logger.info(f"Start saving contrat: {request.data}")
         serializer = ContratSerializers(data=request.data, context=serializer_context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
