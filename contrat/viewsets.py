@@ -209,23 +209,12 @@ class ContratAction(ActionAPIView):
         serializer_context = {
             "request": request,
         }
-        if isinstance(request.data.get("contrat", None), list):
-            contrats = request.data.pop("contrat")
-            contrat_objects = []
-            for contrat in contrats:
-                serializer = ContratSerializers(
-                    data=contrat, context=serializer_context
-                )
-                serializer.is_valid(raise_exception=True)
-                contrat_objects.append(serializer)
-            saved_contrat = [model.save() for model in contrat_objects]
-            serialized_contrat = ContratSerializers(
-                saved_contrat, context=serializer_context, many=True
-            )
-            return {"success": True, "contrat": serialized_contrat.data}
-        serializer = ContratSerializers(data=request.data, context=serializer_context)
+        instance = get_object_or_404(Contrat, pk=params.get("id", None))
+        serializer = ContratSerializers(
+            instance, data=request.data, context=serializer_context
+        )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(modified_by=request.user)
         return {"success": True, "contrat": serializer.data}
 
     def contrat_agreement(self, request, params={}, **kwargs):

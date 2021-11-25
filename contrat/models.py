@@ -72,7 +72,8 @@ class Contrat(models.Model):
     mandat = models.ForeignKey("societe.Mandat", null=True, on_delete=models.SET_NULL)
     prochaine_echeance = models.DateField(null=True)
 
-    jour_emission = models.IntegerField(null=False, default=5)
+    jour_emission = models.IntegerField(null=False, default=1)
+    jour_valeur = models.IntegerField(null=False, default=5)
     client_accord = models.BooleanField(default=False)
     date_accord_client = models.DateField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -105,7 +106,7 @@ class ContratAccessoiresloyer(models.Model):
         on_delete=models.SET_NULL,
         null=True,
     )
-    montant = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    montant = models.DecimalField(max_digits=9, decimal_places=0, default=0)
     is_peridic = models.BooleanField(default=False)
     devise = models.CharField(max_length=256, null=False, default="XOF")
     statut = models.CharField(max_length=256, null=False, default="NON REGLE")

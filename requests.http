@@ -223,3 +223,58 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c
     "realestate_id": 5,
     "email": "rinvher@yahoo.fr"
 }
+
+# Créer un contrat
+http://localhost:8000/api/v1/contrat_action/create_contrat
+content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM1NTczMjU2LCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzU1MDEyNTZ9.mhXmA7jRZawJXI2vwy6hGx6yi7F67B6BWPflP-tDGos
+
+
+{
+	"date_signature": "2021-11-01",
+	"reference_bail": "05205454",
+	"jour_emission": 1,
+	"date_effet": "2021-11-01",
+	"periodicite": 12,
+	"duree": 12,
+	"montant_bail": 50000,
+	"nb_avance": 3,
+	"nb_prepaye": 3,
+	"observation": "RAS",
+	"tacite_reconduction": 1,
+	"accessoires": [
+		{
+			"id": 1,
+			"montant": 50000,
+			"is_peridic": true
+		},
+		{
+			"id": 2,
+			"montant": 50000,
+			"is_peridic": true
+		},
+		{
+			"id": 3,
+			"montant": 50000,
+			"is_peridic": true
+		}
+ ],
+	"client_id": 5,
+	"appartement_id": 4
+}
+
+# Update contrat
+POST http://localhost:8000/api/v1/contrat_action/update_contrat
+content-type: application/json
+Authorization: Bearer <>
+ same payload as create_contrat plus id
+
+# Get lessor or real_estate contrat
+GET http://localhost:8000/api/v1/contrat_action/get_lessor_contrat
+content-type: application/json
+Authorization: Bearer <>
+
+# Get tenant contrat
+GET http://localhost:8000/api/v1/contrat_action/get_tenant_contrat
+content-type: application/json
+Authorization: Bearer <>

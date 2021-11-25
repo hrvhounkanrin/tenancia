@@ -47,12 +47,20 @@ class QuittanceSerializers(serializers.ModelSerializer):
         })
 
     def get_lessor(self, quittance):
-        lessor = quittance.contrat.appartement.immeuble.proprietaire
+        if quittance.contrat.appartement.immeuble.proprietaire:
+            lessor = quittance.contrat.appartement.immeuble.proprietaire
+            return dict({
+                "first_name": lessor.user.first_name,
+                "last_name": lessor.user.last_name,
+                "phone_number": lessor.phone_number,
+                "email": lessor.user.email,
+            })
+        lessor = quittance.contrat.appartement.immeuble.realestate
         return dict({
-            "first_name": lessor.user.first_name,
-            "last_name": lessor.user.last_name,
-            "phone_number": lessor.phone_number,
-            "email": lessor.user.email,
+            "first_name": '',
+            "last_name": lessor.raison_social,
+            "phone_number": lessor.num_telephone,
+            "email": '',
         })
 
     def get_tenant(self, quittance):

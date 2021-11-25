@@ -50,8 +50,8 @@ class Quittance(models.Model):
         editable=False,
         related_name="quittance_updated_user",
     )
-    lessor_user_id = models.IntegerField(null=True)
-    real_estate_user_id = models.IntegerField(null=True)
+    lessor = models.IntegerField(null=True)
+    real_estate = models.IntegerField(null=True)
     tenant_user_id = models.IntegerField(null=True)
 
     def __str__(self):

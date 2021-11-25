@@ -162,12 +162,15 @@ class PasswordChangeSerializer(serializers.Serializer):
         Change the password and send Password Change Email
         """
         self.set_password_form.save()
+        # TODO: Send password changed email
+        """
         if not self.logout_on_password_change:
             from django.contrib.auth import update_session_auth_hash
 
             update_session_auth_hash(self.request, self.user)
             email_sender = Email()
             email_sender.password_change_email(self.user)
+        """
 
 
 class PasswordResetSerializer(serializers.Serializer):

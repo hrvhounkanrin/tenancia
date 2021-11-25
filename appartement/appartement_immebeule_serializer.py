@@ -70,6 +70,8 @@ class AppartementImmeubleSerializers(serializers.ModelSerializer):
         return appartement.immeuble.ref_immeuble
 
     def get_proprietaire(self, appartement):
+        if appartement.immeuble.realestate:
+            return "{}".format(appartement.immeuble.realestate.raison_social)
         return "{} {} ({})".format(appartement.immeuble.proprietaire.user.first_name,
                                    appartement.immeuble.proprietaire.user.last_name,
                                    appartement.immeuble.proprietaire.phone_number)

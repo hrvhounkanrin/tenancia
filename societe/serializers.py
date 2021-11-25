@@ -24,6 +24,7 @@ class SocieteSerializer(serializers.ModelSerializer):
             "num_telephone",
             "adresse",
             "num_carte_professionnel",
+            "mode_recouvrement",
             "numero_ifu",
             "date_delivrance",
             "logo",

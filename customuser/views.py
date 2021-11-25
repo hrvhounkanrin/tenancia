@@ -190,7 +190,7 @@ class PasswordChangeView(GenericAPIView):
         :param request:
         :return: New password has been saved and e-mail or error message
         """
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(instance=self.request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(

@@ -11,6 +11,7 @@ class Immeuble(models.Model):
     """Immeuble model."""
 
     intitule = models.CharField(max_length=50)
+    quartier = models.CharField(max_length=128, null=True)
     description = models.CharField(
         max_length=512,
         null=True,

@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from rest_framework.utils.model_meta import get_field_info
@@ -48,7 +49,6 @@ class ContratSerializers(serializers.ModelSerializer):
         write_only=True,
     )
     reference_bail = serializers.CharField(read_only=True)
-
     class Meta:
         """Contrat serializer meta."""
 
@@ -60,6 +60,7 @@ class ContratSerializers(serializers.ModelSerializer):
             "client_accord",
             "date_accord_client",
             "jour_emission",
+            "jour_valeur",
             "prochaine_echeance",
             "date_effet",
             "periodicite",
@@ -154,8 +155,28 @@ class ContratSerializers(serializers.ModelSerializer):
                 field.set(value)
             else:
                 setattr(instance, attr, value)
-        instance["modified_by"] = self.context["request"].user
+        instance.modified_by = self.context["request"].user
         instance.save()
+        if "accessoires" in self.initial_data:
+            ContratAccessoiresloyer.objects.filter(contrat__id=instance.id).delete()
+            accessoires = self.initial_data.get("accessoires")
+            for accessoire in accessoires:
+                accessoire_id = accessoire.pop("id", None)
+                try:
+                    accessoire_instance = Accesoireloyer.objects.get(id=accessoire_id)
+                except ObjectDoesNotExist:
+                    raise serializers.ValidationError(
+                        "Il y a un accessoire loyer qui n'existe pas."
+                    )
+                ContratAccessoiresloyer(
+                    contrat=instance,
+                    accesoireloyer=accessoire_instance,
+                    modified_by=self.context["request"].user,
+                    montant=accessoire.get('montant', None),
+                    devise=accessoire.get('devise', None),
+                    is_peridic=accessoire.get('is_peridic', None)
+                ).save()
+
         return instance
 
 
@@ -213,7 +234,8 @@ class AgreementSerializer(serializers.Serializer):
                     nature=acc.accesoireloyer.libelle,
                     contrat=contrat,
                     montant=acc.montant,
-                    lessor_user_id=appartement_instance.immeuble.proprietaire_id,
+                    lessor=appartement_instance.immeuble.proprietaire_id,
+                    real_estate=appartement_instance.immeuble.realestate.id,
                     tenant_user_id=instance.client_id
                 )
                 quittances.append(quittance)
@@ -229,7 +251,8 @@ class AgreementSerializer(serializers.Serializer):
                     nature="AVANCE SUR LOYER",
                     contrat=contrat,
                     montant=instance.montant_bail,
-                    lessor_user_id=appartement_instance.immeuble.proprietaire_id,
+                    lessor=appartement_instance.immeuble.proprietaire_id,
+                    real_estate=appartement_instance.immeuble.realestate.id,
                     tenant_user_id=instance.client_id
 
                 )
@@ -246,7 +269,8 @@ class AgreementSerializer(serializers.Serializer):
                     nature="QUITTANCE DE LOYER PREPAYE",
                     contrat=contrat,
                     montant=instance.montant_bail,
-                    lessor_user_id=appartement_instance.immeuble.proprietaire_id,
+                    lessor=appartement_instance.immeuble.proprietaire_id,
+                    real_estate=appartement_instance.immeuble.realestate.id,
                     tenant_user_id=instance.client_id
                 )
                 quittances.append(quittance)
@@ -274,125 +298,6 @@ class AgreementSerializer(serializers.Serializer):
             }
             # sms_client.contrat_valide_client_sms.delay(quittance_data)
         return instance
-
-"""
-class AgreementSerializer(serializers.ModelSerializer):
-    contrat_id = serializers.PrimaryKeyRelatedField(
-        source="Contrat",
-        queryset=Contrat.objects.all(),
-        write_only=True,
-    )
-    contrat = ContratSerializers(
-        read_only=True,
-    )
-    client_accord = serializers.BooleanField(write_only=True)
-    quittances = serializers.SerializerMethodField()
-
-    def get_quittances(self, contrat_id):
-        return  contrat_id
-
-    @transaction.atomic
-    def create(self, validated_data):
-        raise NotImplementedError("`create()` must be implemented.")
-
-    @transaction.atomic
-    def update(self, instance, validated_data):
-
-        if instance.client.user_id != self.context["request"].user.id:
-            raise serializers.ValidationError(
-                "Vous n'avez pas l'autorisation pour valider ce contrat."
-            )
-
-        if instance.client_accord:
-            raise serializers.ValidationError("Ce contrat a été déjà accepté.")
-
-        instance.client_accord = validated_data["client_accord"]
-        instance.modified_by = self.context["request"].user
-        instance.date_accord_client = datetime.today()
-        if validated_data["client_accord"]:
-            instance.statut = "CONTRAT ACCEPTE"
-            instance.observation = "CONTRAT ACCEPTE PAR LE CLIENT"
-        else:
-            instance.observation = "CONTRAT REFUSE PAR LE CLIENT"
-
-        instance.save(update_fields=['statut', 'observation', 'client_accord', 'modified_by', 'date_accord_client'])
-        # Un contrat accepté est un contrat dont l'appartment devient occuper
-        appartement_instance = instance.appartement
-        appartement_instance.statut = 'OCCUPE'
-        appartement_instance.save(update_fields=['statut'])
-
-        montant_global = 0
-        if validated_data["client_accord"]:
-            contrat = instance
-            # récupération des frais accessoires sur le contrat
-            accessoires = ContratAccessoiresloyer.objects.filter(contrat=contrat)
-            quittances = []
-            # création des quittances de frais accessoires
-            for acc in accessoires:
-                quittance = Quittance(
-                    reference=truncated_uuid4(),
-                    date_emission=date.today(),
-                    date_valeur=contrat.date_effet,
-                    debut_periode=contrat.date_effet,
-                    fin_periode=contrat.date_effet,
-                    nature=acc.accesoireloyer.libelle,
-                    contrat=contrat,
-                    montant=acc.montant,
-                )
-                quittances.append(quittance)
-                # montant_global = montant_global + acc.montant
-            # création des quittance d'avance sur loyer
-            for i in range(instance.nb_avance):
-                quittance = Quittance(
-                    reference=truncated_uuid4(),
-                    date_emission=date.today(),
-                    date_valeur=contrat.date_effet,
-                    debut_periode=contrat.date_effet,
-                    fin_periode=contrat.date_effet,
-                    nature="AVANCE SUR LOYER",
-                    contrat=contrat,
-                    montant=instance.montant_bail,
-                )
-                quittances.append(quittance)
-                montant_global = montant_global + acc.montant
-            # création des quittance de prépayés
-            for i in range(instance.nb_prepaye):
-                quittance = Quittance(
-                    reference=truncated_uuid4(),
-                    date_emission=date.today(),
-                    date_valeur=contrat.date_effet,
-                    debut_periode=contrat.date_effet,
-                    fin_periode=contrat.date_effet,
-                    nature="QUITTANCE DE LOYER PREPAYE",
-                    contrat=contrat,
-                    montant=instance.montant_bail,
-                )
-                quittances.append(quittance)
-
-            [model.save() for model in quittances]
-        # alert sms validation
-        contrat_data = {
-            "first_name": instance.created_by.first_name,
-            "reference": instance.reference_bail,
-            "created_at": instance.created_at,
-            "client_accord": instance.client_accord,
-            "phone_number": instance.created_by.phone_number,
-            "client_name": f"{instance.client.user.first_name} {instance.client.user.last_name}",
-        }
-        sms_client = Sms()
-        # sms_client.contrat_valide_sms.delay
-        montant_global = sum([quittance.montant for quittance in quittances])
-        if instance.client_accord:
-            quittance_data = {
-                "first_name": instance.client.user.first_name,
-                "reference": instance.reference_bail,
-                "montant_global": montant_global,
-                "phone_number": instance.client.user.phone_number,
-                "client_accord": instance.client_accord,
-            }
-            # sms_client.contrat_valide_client_sms.delay(quittance_data)
-        return instance
-"""
 
 class ContratAccessoiresloyerSerializers(serializers.ModelSerializer):
     """ContratAccessoireloyer serializer."""
@@ -413,8 +318,8 @@ class ContratAccessoiresloyerSerializers(serializers.ModelSerializer):
             "accesoireloyer",
             "accesoireloyer_id",
             "montant",
-            "devise",
             "statut",
             "devise",
             "description",
+            "is_peridic"
         )
