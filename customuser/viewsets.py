@@ -280,7 +280,7 @@ class ProfileAction(ActionAPIView):
         if serializer.is_valid():
             serializer.save()
             return {"success": True, "payload": serializer.data}
-        return {"success": False, "msg": "An error occured."}
+        return {"success": False, "payload": "An error occured."}
 
 
 

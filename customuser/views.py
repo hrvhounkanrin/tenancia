@@ -26,6 +26,7 @@ from proprietaire.serializers import ProprietaireSerializers
 from client.serializers import ClientSerializer
 from societe.serializers import SocieteSerializer
 from .permissions import IsAdminUser, IsLoggedInUserOrAdmin
+from tools.viewsets import ActionAPIView
 from .serializers import (
     PasswordChangeSerializer,
     PasswordResetConfirmSerializer,
@@ -170,7 +171,7 @@ class PasswordResetConfirmView(GenericAPIView):
         serializer.save()
         return Response({"detail": _("Password has been reset with the new password.")})
 
-class PasswordChangeView(GenericAPIView):
+class PasswordChangeView(ActionAPIView):
     """
     Accepts the following POST parameters: new_password1, new_password2
     Returns the success/fail message.
@@ -193,6 +194,7 @@ class PasswordChangeView(GenericAPIView):
         serializer = self.get_serializer(instance=self.request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return {"success": True, "payload": serializer.data}
         return Response(
             {
                 "detail": _(
@@ -200,6 +202,16 @@ class PasswordChangeView(GenericAPIView):
                 )
             }
         )
+    def change_password(self, request, params={}, *args, **kwargs):
+        serializer_context = {
+            "request": request,
+        }
+        serializer = PasswordChangeSerializer(
+            data=request.data, context=serializer_context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "payload": "New passworhas been saved and e-mail " "has been sent.."}
 
 class LogoutView(APIView):
     """
@@ -291,3 +303,6 @@ class ActivateAccount(GenericViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+class UserAccountAction(ActionAPIView):
+    pass

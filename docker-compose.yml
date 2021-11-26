@@ -44,8 +44,7 @@ services:
   web:
     build: .
     volumes:
-      - ./:/usr/src/app/
-      - ./media/:/tenancia_media
+      - /tenancia_media/:/usr/src/app/media/
     entrypoint: ./entrypoint.sh
     command: gunicorn meslimmo.wsgi:application --bind 0.0.0.0:8000 --workers 3
     ports:
@@ -61,4 +60,5 @@ networks:
   tenancia-nt:
     driver: bridge
 volumes:
-  tenancia_db:
+   tenancia_db:
+  

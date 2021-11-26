@@ -95,7 +95,6 @@ class UserSerializer(serializers.ModelSerializer):
         email_sender.sign_up_email.delay(mail_data)
         return user
 
-
 class PasswordChangeSerializer(serializers.Serializer):
     """
     Utility used during password change process
@@ -172,7 +171,6 @@ class PasswordChangeSerializer(serializers.Serializer):
             email_sender.password_change_email(self.user)
         """
 
-
 class PasswordResetSerializer(serializers.Serializer):
     """
     Serializer for requesting a password reset e-mail.
@@ -214,7 +212,6 @@ class PasswordResetSerializer(serializers.Serializer):
 
         opts.update(self.get_email_options())
         self.reset_form.save(**opts)
-
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
     """
@@ -270,14 +267,12 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         """
         return self.set_password_form.save()
 
-
 class SocialSerializer(serializers.Serializer):
     """
     Serializer which accepts an OAuth2 access token.
     """
 
     access_token = serializers.CharField(allow_blank=False, trim_whitespace=True)
-
 
 class JSONWebTokenSerializer(jwt_serializers.JSONWebTokenSerializer):
     """
