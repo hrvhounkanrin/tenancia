@@ -18,7 +18,10 @@ from social_django.utils import psa
 from client.models import Client
 from client.serializers import ClientSerializer
 from customuser.models import User
-from customuser.serializers import SocialSerializer, UserSerializer, ProfilePhotoSerializer
+from customuser.serializers import (SocialSerializer,
+                                    UserSerializer,
+                                    ProfilePhotoSerializer,
+                                    PasswordChangeSerializer)
 from proprietaire.models import Proprietaire
 from proprietaire.serializers import ProprietaireSerializers
 from societe.models import RealEstate
@@ -36,7 +39,27 @@ jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 class CustomUserAction(ActionAPIView):
     def __init__(self):
-        self.permission_classes = [permissions.AllowAny]
+        self.permission_classes = {
+            "change_password": [permissions.IsAuthenticated],
+            "activate_account": [permissions.AllowAny],
+            "exchange_token": [permissions.AllowAny],
+            "googleauth": [permissions.AllowAny],
+        }
+    def change_password(self, request, params={}, *args, **kwargs):
+        """
+        Save new password and send password change e-mail
+        :param request:
+        :return: New password has been saved and e-mail or error message
+        """
+        serializer_context = {
+            "request": request,
+        }
+        serializer = PasswordChangeSerializer(
+            data=request.data, context=serializer_context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "payload": "New password has been saved and e-mail has been sent.."}
 
     @psa()
     def exchange_token(self, request, params={}, *args, **kwargs):

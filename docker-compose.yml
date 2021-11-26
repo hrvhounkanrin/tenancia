@@ -45,6 +45,7 @@ services:
     build: .
     volumes:
       - ./:/usr/src/app/
+      - ./media/:/tenancia_media
     entrypoint: ./entrypoint.sh
     command: gunicorn meslimmo.wsgi:application --bind 0.0.0.0:8000 --workers 3
     ports:
