@@ -11,6 +11,29 @@ from immeuble.models import Immeuble
 from .models import Mandat, RealEstate, RealEstateUsers
 logger = logging.getLogger(__name__)
 
+class FilterRelatedMixin(object):
+    def __init__(self, *args, **kwargs):
+        super(FilterRelatedMixin, self).__init__(*args, **kwargs)
+        for name, field in self.fields.iteritems():
+            if isinstance(field, serializers.RelatedField):
+                method_name = 'filter_%s' % name
+                try:
+                    func = getattr(self, method_name)
+                except AttributeError:
+                    pass
+                else:
+                    field.queryset = func(field.queryset)
+"""
+class SocialPageSerializer(FilterRelatedMixin, serializers.ModelSerializer):
+    account = serializers.PrimaryKeyRelatedField()
+
+    class Meta:
+        model = models.SocialPage
+
+    def filter_account(self, queryset):
+        request = self.context['request']
+        return queryset.filter(user=request.user)
+"""
 class SocieteSerializer(serializers.ModelSerializer):
     """RealEstate model serializer."""
     logo_url = serializers.SerializerMethodField('get_logo_url')

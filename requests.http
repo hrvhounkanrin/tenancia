@@ -205,7 +205,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c
 }
 
 
-# Créer un mandat sur un immeuble pour une agence immobilière
+# update un mandat sur un immeuble pour une agence immobilière
 POST http://localhost:8000/api/v1/mandat_action/update_mandat
 content-type: application/json
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwiZXhwIjoxNjM0ODk4MzIwLCJlbWFpbCI6ImhydmhvdW5rYW5yaW5AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ4MjYzMjB9.vBAFnuXAQpsGn43e3IXmvNwlSM5XAGGo_daxElGQkKo

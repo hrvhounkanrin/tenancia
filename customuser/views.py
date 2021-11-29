@@ -1,7 +1,5 @@
 from datetime import datetime
 from django.conf import settings
-from django.contrib.auth import logout as django_logout
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext as _
 from django.utils.translation import ugettext_lazy as _
@@ -13,7 +11,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView, status
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.views import ObtainJSONWebToken
 
@@ -26,9 +23,7 @@ from proprietaire.serializers import ProprietaireSerializers
 from client.serializers import ClientSerializer
 from societe.serializers import SocieteSerializer
 from .permissions import IsAdminUser, IsLoggedInUserOrAdmin
-from tools.viewsets import ActionAPIView
 from .serializers import (
-    PasswordChangeSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetSerializer,
     UserSerializer,
@@ -68,6 +63,7 @@ class UserViewSet(ModelViewSet):
         if self.action in ["list", "destroy"]:
             self.permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
+
 
 class CustomObtainJSONWebToken(ObtainJSONWebToken):
     def post(self, request):
@@ -171,83 +167,6 @@ class PasswordResetConfirmView(GenericAPIView):
         serializer.save()
         return Response({"detail": _("Password has been reset with the new password.")})
 
-class PasswordChangeView(ActionAPIView):
-    """
-    Accepts the following POST parameters: new_password1, new_password2
-    Returns the success/fail message.
-    """
-
-    serializer_class = PasswordChangeSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-    authentication_classes = [JSONWebTokenAuthentication]
-
-    @sensitive_post_parameters_m
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    def post(self, request):
-        """
-        Save new password and send password change e-mail
-        :param request:
-        :return: New password has been saved and e-mail or error message
-        """
-        serializer = self.get_serializer(instance=self.request.user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return {"success": True, "payload": serializer.data}
-        return Response(
-            {
-                "detail": _(
-                    "New password " "has been saved and e-mail " "has been sent.."
-                )
-            }
-        )
-    def change_password(self, request, params={}, *args, **kwargs):
-        serializer_context = {
-            "request": request,
-        }
-        serializer = PasswordChangeSerializer(
-            data=request.data, context=serializer_context
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return {"success": True, "payload": "New passworhas been saved and e-mail " "has been sent.."}
-
-class LogoutView(APIView):
-    """
-    Calls Django logout method and delete the Token object
-    assigned to the current User object.
-
-    Accepts/Returns nothing.
-    """
-
-    permission_classes = (permissions.IsAuthenticated,)
-    authentication_classes = [JSONWebTokenAuthentication]
-
-    def post(self, request):
-        """
-        post method to logout
-        :param request:
-        :return:
-        """
-        return self.logout(request)
-
-    def logout(self, request):
-        """
-        logout the user
-        :param request:
-        :return:
-        """
-        try:
-            request.user.auth_token.delete()
-        except (AttributeError, ObjectDoesNotExist):
-            pass
-
-        django_logout(request)
-
-        return Response(
-            {"detail": _("Successfully logged out.")}, status=status.HTTP_200_OK
-        )
 
 class ActivateAccount(GenericViewSet):
     permission_classes = (AllowAny,)
@@ -279,13 +198,6 @@ class ActivateAccount(GenericViewSet):
             user.is_active = True
             user.save()
             payload = jwt_payload_handler(user)
-            """
-                return Response({
-                    'token': jwt_encode_handler(payload),
-                    'user': user
-                })
-            """
-            # Should be redirected to the frontend login page instead.
             return Response(
                 {
                     "success": True,
@@ -294,7 +206,6 @@ class ActivateAccount(GenericViewSet):
                     "user": UserSerializer(user, context={"request": request}).data,
                 }
             )
-
         else:
             return Response(
                 {
@@ -303,6 +214,3 @@ class ActivateAccount(GenericViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-class UserAccountAction(ActionAPIView):
-    pass

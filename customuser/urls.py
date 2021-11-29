@@ -6,8 +6,6 @@ from rest_framework import routers
 from .views import (
     ActivateAccount,
     CustomObtainJSONWebToken,
-    LogoutView,
-    PasswordChangeView,
     PasswordResetConfirmView,
     PasswordResetView,
     UserViewSet,
@@ -36,12 +34,6 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(),
         name="rest_password_reset_confirm",
     ),
-    path(
-        "accounts/password/change/",
-        PasswordChangeView.as_view(),
-        name="rest_password_change",
-    ),
-    path("accounts/logout/", LogoutView.as_view(), name="rest_logout"),
     path(
         "accounts/activate",
         ActivateAccount.as_view({"get": "activate_account"}),

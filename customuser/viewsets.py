@@ -173,6 +173,17 @@ class CustomUserAction(ActionAPIView):
 """Get connected user profiles"""
 
 class ProfileAction(ActionAPIView):
+
+    def __init__(self):
+        self.permission_classes = {
+            "create_user": [permissions.AllowAny],
+            "update_user": [permissions.IsAuthenticated],
+            "change_password": [permissions.IsAuthenticated],
+            "get_profile": [permissions.IsAuthenticated],
+            "create_profile": [permissions.IsAuthenticated],
+            "update_profile": [permissions.IsAuthenticated]
+        }
+
     def __get_profile(self, user_id):
         User = get_user_model()
         try:
@@ -205,6 +216,40 @@ class ProfileAction(ActionAPIView):
         else:
             return {"success": False, "msg": "An error occured."}
 
+    def create_user(self, request, params={}, *args, **kwargs):
+        """
+        Create user.
+
+        :param request:
+        :param params:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
+        serializer = UserSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "payload": serializer.data}
+
+    def update_user(self, request, params, *args, **kwargs):
+        request.data['email'] = request.user.email
+        serializer = ProfilePhotoSerializer(data=request.data, instance=request.user)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "payload": serializer.data}
+
+    def change_password(self, request, params={}, *args, **kwargs):
+        serializer_context = {
+            "request": request,
+        }
+        serializer = PasswordChangeSerializer(
+            data=request.data, context=serializer_context
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return {"success": True, "payload": "New passworhas been saved and e-mail " "has been sent.."}
+
     def get_profile(self, request, params={}, *args, **kwargs):
         """Get all user profile."""
         return self.__get_profile(request.user.id)
@@ -213,7 +258,6 @@ class ProfileAction(ActionAPIView):
         data = request.data
         profile_type = data.pop('profile_type', None)
         profile_type = profile_type[0] if type(profile_type) == list else profile_type
-        print(f"profile_type: {profile_type}")
         if profile_type is None or profile_type not in ['lessor', 'tenant', 'real_estate']:
             return {"success": False, "payload": {"message": "Il manque le type de profil(lessor, tenant, real_estate)"}}
 
@@ -275,12 +319,7 @@ class ProfileAction(ActionAPIView):
 
         return self.__get_profile(data["user_id"])
 
-    def define_profile(self, request, params, *args, **kwargs):
-        serializer = ProfilePhotoSerializer(data=request.data, instance=request.user)
-        if serializer.is_valid():
-            serializer.save()
-            return {"success": True, "payload": serializer.data}
-        return {"success": False, "payload": "An error occured."}
+
 
 
 

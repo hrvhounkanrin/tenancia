@@ -40,7 +40,18 @@ hashids = Hashids(alphabet='abcdefghijklmnopqrstuvwxyz'[::-1])
 class ProfilePhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ["photo"]
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "country",
+            "phone_number",
+            "address",
+            "country",
+            "city",
+            'photo'
+        ]
 
     def save(self, *args, **kwargs):
 
@@ -92,7 +103,7 @@ class UserSerializer(serializers.ModelSerializer):
             "domain": settings.BASE_API_URL,
             "front_url": os.environ.get("FRONTEND"),
         }
-        email_sender.sign_up_email.delay(mail_data)
+        #email_sender.sign_up_email.delay(mail_data)
         return user
 
 class PasswordChangeSerializer(serializers.Serializer):
