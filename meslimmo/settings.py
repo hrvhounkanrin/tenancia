@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "sz)!59k=#curo2j+bjlpzkx)pg3!mv7_hky!*z(h+n0iujt#fn"
+SECRET_KEY = ""
 
 env = environ.Env(
     # set casting, default value
@@ -311,7 +311,7 @@ EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_ECHO_TO_STDOUT = False
 SENDGRID_API_KEY = (
-    "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"
+    ""
 )
 DEFAULT_FROM_EMAIL = "Tenancia"
 
@@ -344,15 +344,11 @@ SOCIAL_AUTH_PIPELINE = (
 )
 REST_USE_JWT = True
 
-# http://getblimp.github.io/django-rest-framework-jwt/
-# JWT settings in setting.py file
 JWT_AUTH = {
     "JWT_ENCODE_HANDLER": "rest_framework_jwt.utils.jwt_encode_handler",
     "JWT_DECODE_HANDLER": "rest_framework_jwt.utils.jwt_decode_handler",
     "JWT_PAYLOAD_HANDLER": "rest_framework_jwt.utils.jwt_payload_handler",
-    # Specify a custom function to generate the token payload
     "JWT_PAYLOAD_GET_USER_ID_HANDLER": "rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler",
-    #'JWT_RESPONSE_PAYLOAD_HANDLER': 'customuser.views.jwt_response_payload_handler',
     "JWT_SECRET_KEY": SECRET_KEY,
     "JWT_GET_USER_SECRET_KEY": None,
     "JWT_PUBLIC_KEY": None,
@@ -360,30 +356,19 @@ JWT_AUTH = {
     "JWT_ALGORITHM": "HS256",
     "JWT_VERIFY": True,
     "JWT_VERIFY_EXPIRATION": True,
-    # You can turn off expiration time verification by setting
-    # JWT_VERIFY_EXPIRATION to False. Without expiration verification,
-    # JWTs will last forever meaning a leaked token could be used by an attacker indefinitely'JWT_LEEWAY': 0,
     "JWT_EXPIRATION_DELTA": datetime.timedelta(hours=20),
-    #  This will be added to datetime.utcnow() to set the expiration time.
-    # Default is datetime.timedelta(seconds=300)(5 minutes).
     "JWT_AUDIENCE": None,
     "JWT_ISSUER": None,
     "JWT_ALLOW_REFRESH": True,
     "JWT_REFRESH_EXPIRATION_DELTA": datetime.timedelta(days=7),
-    #  This is how much time after the original token that future tokens can be refreshed from.
-    # Default is datetime.timedelta(days=7) (7 days).
     "JWT_AUTH_HEADER_PREFIX": "Bearer",
     "JWT_AUTH_COOKIE": None,
 }
 BASE_API_URL = os.environ.get("BASE_API_URL")
 BASE_FRONT_URL = os.environ.get("FRONTEND")
-ALLOWED_HOSTS = ["http://localhost:8080", "localhost", "tenancia.com", "104.248.34.117"]
+ALLOWED_HOSTS = []
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWED_ORIGINS = [
-    "http://tenancia.com",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-]
+CORS_ALLOWED_ORIGINS = []
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
@@ -393,14 +378,8 @@ CORS_ALLOW_METHODS = [
     "PUT",
 ]
 APPEND_SLASH = False
-RABBITMQ_HOST = "rabbitmq"
-CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5672//"
-# CELERY_BROKER_URL = 'amqp://tenancia:myrabbitpass@rabbitmq'
-TWILIO_ACCOUNT_SID = "AC841b0c01be5608ad900f5fcd452a6172"
-TWILIO_AUTH_TOKEN = "e08b2c59fe5a6c4c674e2fdacefd3963"
-FERNET_KEY = "e08b2c59fe5a6c4c674e2fdacefd3963"
-# CELERY_BROKER_URL = 'amqp://rabbitmq'
-# CELERY_BROKER_URL = 'amqp://guest@localhost'
-# CELERY_BROKER_URL = "amqp://tenancia:tenancia@localhost:5672/"
-# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '515214403352-dd3itjg2aequg8387650rr1b8aefpovf.apps.googleusercontent.com'
-# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'N8k7xSNPfjn4rJf5fvyVOAs7'
+RABBITMQ_HOST = ""
+CELERY_BROKER_URL = ""
+TWILIO_ACCOUNT_SID = ""
+TWILIO_AUTH_TOKEN = ""
+FERNET_KEY = ""
